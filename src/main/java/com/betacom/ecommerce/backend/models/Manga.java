@@ -36,8 +36,6 @@ public class Manga {
 			name = "numero_copie")
 	private Integer numeroCopie;
 	
-	@Column(nullable = false,
-			name = "case_editrici")
 	@ManyToOne
     @JoinColumn(name = "id_casa_editrice", nullable = false)
 	private CaseEditrici casaEditrice;

@@ -28,26 +28,14 @@ public class Ordini {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_account")
-	@Column(
-			name = "account",
-			nullable = false
-			)
 	private Accounts account;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_pagamento")
-	@Column(
-			name = "pagamento",
-			nullable = false
-			)
 	private Pagamenti pagamento;
 
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_spedizione")
-	@Column(
-			name = "spedizione",
-			nullable = false
-			)
 	private Spedizioni spedizione;
 	
 	@Column(
@@ -58,17 +46,9 @@ public class Ordini {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_stato")
-	@Column(
-			name = "stato_oridine",
-			nullable = false
-			)
 	private StatiOrdine stato;
 	
 	@OneToMany
 	@JoinColumn(name = "id_ordine")
-	@Column(
-			name = "oggetti",
-			nullable = false
-			)
 	private List<RigheOrdine> oggetti;
 }
