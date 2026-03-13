@@ -8,6 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -24,13 +25,14 @@ public class Carrelli {
 	private Integer id;
 	
 	@OneToOne(
-			mappedBy = "utenti",
-			cascade = CascadeType.REMOVE
+			cascade = CascadeType.REMOVE,
+			fetch = FetchType.EAGER			
 			)
+	@JoinColumn(name = "id_account")
 	private Accounts account;
 	
 	@OneToMany(
-			mappedBy = "utenti",
+			mappedBy = "",
 			fetch = FetchType.EAGER
 			)
 	private List<Manga> manga;

@@ -26,10 +26,7 @@ public class RigheOrdine {
 			)
 	private Integer id_ordine;
 
-	@Column(
-			name = "id_ordine",
-			nullable = false
-			)
+
 	@OneToOne
 	@JoinColumn(name = "id_manga")
 	private Manga manga;

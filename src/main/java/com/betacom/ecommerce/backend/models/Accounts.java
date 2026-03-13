@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,8 +45,8 @@ public class Accounts {
 	@JoinColumn(name = "id_anagrafica")
 	private List<Anagrafiche> anagrafiche;
 	
-	@ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_carrello")
+	@OneToOne(fetch = FetchType.EAGER,
+			mappedBy = "account")
 	private Carrelli carrello;
 	
 	
