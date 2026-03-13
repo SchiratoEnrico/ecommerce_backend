@@ -20,7 +20,8 @@ public class Pagamenti {
 	private Integer id;
 	
 	@Column (length = 100,
-			nullable = false)
+			nullable = false,
+			name = "tipo_pagamento")
 	private String tipoPagamento;
 	
 }
