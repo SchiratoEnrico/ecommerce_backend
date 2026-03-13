@@ -27,7 +27,7 @@ public class Carrelli {
 			mappedBy = "utenti",
 			cascade = CascadeType.REMOVE
 			)
-	private Utenti utente;
+	private Accounts account;
 	
 	@OneToMany(
 			mappedBy = "utenti",
