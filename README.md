@@ -24,3 +24,4 @@ Nei dto input utilizziamo stringhe e classi wrapper. Evitiamo di avere LocalDAte
 
 Al momento occupiamoci di create, update, listAll, findById, delete. Filtri ci occuperemo poi
 
+  RICORDA DI RICONTROLLARE RELAZIONI (no OneToOne su ID)
