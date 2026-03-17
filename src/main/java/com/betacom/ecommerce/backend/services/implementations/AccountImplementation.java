@@ -109,8 +109,6 @@ public class AccountImplementation implements IAccountServices{
 		                    .email(a.getEmail())
 		                    .ruolo(a.getRuolo())
 		               	 .carrello((a.getCarrello() == null) ? null : CarrelliDTO.builder()
-		                         .id(a.getCarrello().getId())
-		                         //da aggiungere i campi di carrello
 		                         .build())
 		                 .anagrafiche(buildAnagraficheDTO(a.getAnagrafiche()))
 		                 .build()
