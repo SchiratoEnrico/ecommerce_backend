@@ -50,6 +50,6 @@ public class Anagrafiche {
 	private String via;
 	
 	@Column (nullable = false)
-	private boolean predefinito;
+	private Boolean predefinito;
 	
 }
