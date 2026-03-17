@@ -50,5 +50,5 @@ public class Ordini {
 	
 	@OneToMany
 	@JoinColumn(name = "id_ordine")
-	private List<RigheOrdine> oggetti;
+	private List<RigheOrdine> righeOrdine;
 }
