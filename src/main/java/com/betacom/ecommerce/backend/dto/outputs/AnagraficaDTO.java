@@ -1,8 +1,5 @@
 package com.betacom.ecommerce.backend.dto.outputs;
 
-import java.util.List;
-
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,18 +7,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
 @Setter
-@AllArgsConstructor
+@Getter
 @Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class AccountDTO {
+public class AnagraficaDTO {
 
 	private Integer id;
-	private String username;
-	private String email;
-	private String ruolo;
-	private List<AnagraficaDTO> anagrafiche;
-    private CarrelloDTO carrello;
+	private String nome;
+	private String cognome;
+	private String stato;
+	private String citta;
+	private String provincia;
+	private Integer cap;
+	private String via;
+	private Boolean predefinito;
 }

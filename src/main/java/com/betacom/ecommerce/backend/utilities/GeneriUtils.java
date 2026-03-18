@@ -1,16 +1,16 @@
 package com.betacom.ecommerce.backend.utilities;
 
-import com.betacom.ecommerce.backend.dto.inputs.GeneriRequest;
-import com.betacom.ecommerce.backend.dto.outputs.GeneriDTO;
+import com.betacom.ecommerce.backend.dto.inputs.GenereRequest;
+import com.betacom.ecommerce.backend.dto.outputs.GenereDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
-import com.betacom.ecommerce.backend.models.Generi;
+import com.betacom.ecommerce.backend.models.Genere;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GeneriUtils {
 
-	public static void validateRequest(GeneriRequest req, boolean create) {
+	public static void validateRequest(GenereRequest req, boolean create) {
 		
 		log.debug("checking genere parameters");
 	    if (req == null) {
@@ -29,7 +29,7 @@ public class GeneriUtils {
 	    }
 	}
 	
-	public static Generi buildGenere(Generi toReturn, GeneriRequest req, Boolean mode) {
+	public static Genere buildGenere(Genere toReturn, GenereRequest req, Boolean mode) {
 		if(mode) {
 			toReturn.setDescrizione(req.getDescrizione());
 		}else {
@@ -40,8 +40,8 @@ public class GeneriUtils {
 		return toReturn;
 	}
 	
-	public static GeneriDTO buildGenDTO(Generi g) {
-		return GeneriDTO.builder()
+	public static GenereDTO buildGenDTO(Genere g) {
+		return GenereDTO.builder()
 				.id(g.getId())
 				.descrizione(g.getDescrizione())
 //				.manga(g.getManga()

@@ -30,6 +30,6 @@ public class MangaDTO {
 	
 	//questi sono id
 	//private CaseEditrici casaEditrice;
-	private List<GeneriDTO> generi;
-	private List<AutoriDTO> autori;
+	private List<GenereDTO> generi;
+	private List<AutoreDTO> autori;
 }

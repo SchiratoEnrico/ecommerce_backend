@@ -1,17 +1,17 @@
 package com.betacom.ecommerce.backend.utilities;
 
-import com.betacom.ecommerce.backend.dto.inputs.AutoriRequest;
-import com.betacom.ecommerce.backend.dto.outputs.AutoriDTO;
+import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
+import com.betacom.ecommerce.backend.dto.outputs.AutoreDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
-import com.betacom.ecommerce.backend.models.Autori;
+import com.betacom.ecommerce.backend.models.Autore;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public  class AutoriUtils {
 	
-	public static AutoriDTO buildAutDTO(Autori a) {
-		return AutoriDTO.builder()
+	public static AutoreDTO buildAutDTO(Autore a) {
+		return AutoreDTO.builder()
 				.nome(a.getNome())
 				.cognome(a.getCognome())
 				.dataNascita(a.getDataNascita())
@@ -24,7 +24,7 @@ public  class AutoriUtils {
 				.build();
 	}
 	
-	public static void validateRequest(AutoriRequest req, boolean create) throws MangaException {
+	public static void validateRequest(AutoreRequest req, boolean create) throws MangaException {
 
 		log.debug("checking autore parameters");
 	    if (req == null) {
@@ -67,7 +67,7 @@ public  class AutoriUtils {
 	    }
 	}	
 
-	public static Autori buildAutore(Autori toReturn, AutoriRequest req, Boolean mode) {
+	public static Autore buildAutore(Autore toReturn, AutoreRequest req, Boolean mode) {
 		
 		if(mode) {
 			toReturn.setNome(req.getNome());

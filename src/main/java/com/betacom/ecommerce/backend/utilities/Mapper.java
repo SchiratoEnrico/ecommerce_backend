@@ -4,17 +4,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
-import com.betacom.ecommerce.backend.dto.outputs.AnagraficheDTO;
-import com.betacom.ecommerce.backend.dto.outputs.CarrelliDTO;
-import com.betacom.ecommerce.backend.dto.outputs.CaseEditriciDTO;
+import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
+import com.betacom.ecommerce.backend.dto.outputs.CarrelloDTO;
+import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
-import com.betacom.ecommerce.backend.dto.outputs.SpedizioniDTO;
-import com.betacom.ecommerce.backend.models.Accounts;
-import com.betacom.ecommerce.backend.models.Anagrafiche;
-import com.betacom.ecommerce.backend.models.Carrelli;
-import com.betacom.ecommerce.backend.models.CaseEditrici;
+import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
+import com.betacom.ecommerce.backend.models.Account;
+import com.betacom.ecommerce.backend.models.Anagrafica;
+import com.betacom.ecommerce.backend.models.Carrello;
+import com.betacom.ecommerce.backend.models.CasaEditrice;
 import com.betacom.ecommerce.backend.models.Manga;
-import com.betacom.ecommerce.backend.models.Spedizioni;
+import com.betacom.ecommerce.backend.models.TipoSpedizione;
 
 public class Mapper {
 	
@@ -22,28 +22,29 @@ public class Mapper {
 		return null;
 	}
 	
-	public static AccountDTO buildAccountDTO(Accounts a) {
+	public static AccountDTO buildAccountDTO(Account a) {
 		return AccountDTO.builder()
 				.id(a.getId())
 				.username(a.getUsername())
 				.email(a.getEmail())
 				.ruolo(a.getRuolo())
-				.anagrafiche(buildAnagraficheDTO(a.getAnagrafiche()))
-				.carrello()
+				.anagrafiche(buildAnagraficaDTO(a.getAnagrafiche()))
+				.carrello(buildCarrelloDTO(a.getCarrello()))
 				.build();
 	}
 	
-	public static CarrelliDTO buildCarrelliDTO(Carrelli c) {
-		return CarrelliDTO.builder()
+	public static CarrelloDTO buildCarrelloDTO(Carrello c) {
+		return CarrelloDTO.builder()
 				.id(c.getId())
 				.account(buildAccountDTO(c.getAccount()))
 				.manga(buildMangaDTO(c.getManga()))
 				.build();
 	}
 	
-	public static List<CarrelliDTO> buildCarrelliDTO(List<Carrelli> lC){
+	public static List<CarrelloDTO> buildCarrelloDTO(List<Carrello> lC){
 		return lC.stream()
-				.map(c -> CarrelliDTO.builder()
+				.map(c -> 
+						CarrelloDTO.builder()
 						.id(c.getId())
 						.account(buildAccountDTO(c.getAccount()))
 						.manga(buildMangaDTO(c.getManga()))
@@ -52,9 +53,9 @@ public class Mapper {
 				.collect(Collectors.toList());
 	}
 	
-	public static List<AnagraficheDTO> buildAnagraficheDTO(List<Anagrafiche> lA) {
+	public static List<AnagraficaDTO> buildAnagraficaDTO(List<Anagrafica> lA) {
 		return lA.stream()
-				.map(a -> AnagraficheDTO.builder()
+				.map(a -> AnagraficaDTO.builder()
 						.id(a.getId())
 						.nome(a.getNome())
 						.cognome(a.getCognome())
@@ -69,9 +70,9 @@ public class Mapper {
 				.collect(Collectors.toList());
 	}
 
-	public static List<CaseEditriciDTO> buildCaseEditriciDTO(List<CaseEditrici> lC) {
+	public static List<CasaEditriceDTO> buildCaseEditriciDTO(List<CasaEditrice> lC) {
 		return lC.stream()
-				.map(c -> CaseEditriciDTO.builder()
+				.map(c -> CasaEditriceDTO.builder()
 						.descrizione(c.getDescrizione())
 						.email(c.getEmail())
 						.id(c.getId())
@@ -81,8 +82,8 @@ public class Mapper {
 						).collect(Collectors.toList());
 	}
 	
-	public static CaseEditriciDTO buildCaseEditriciDTO(CaseEditrici c) {
-		return CaseEditriciDTO.builder()
+	public static CasaEditriceDTO buildCaseEditriciDTO(CasaEditrice c) {
+		return CasaEditriceDTO.builder()
 				.descrizione(c.getDescrizione())
 				.email(c.getEmail())
 				.id(c.getId())
@@ -91,17 +92,17 @@ public class Mapper {
 				.build();
 	}
 	
-	public static List<SpedizioniDTO> buildSpedizioniDTO(List<Spedizioni> lS){
+	public static List<TipoSpedizioneDTO> buildSpedizioniDTO(List<TipoSpedizione> lS){
 		return lS.stream()
-				.map(s -> SpedizioniDTO.builder()
+				.map(s -> TipoSpedizioneDTO.builder()
 						.id(s.getId())
 						.tipoSpedizione(s.getTipoSpedizione())
 						.build()
 						).collect(Collectors.toList());
 	}
 	
-	public static SpedizioniDTO buildSpedizioniDTO(Spedizioni s) {
-		return SpedizioniDTO.builder()
+	public static TipoSpedizioneDTO buildSpedizioniDTO(TipoSpedizione s) {
+		return TipoSpedizioneDTO.builder()
 				.id(s.getId())
 				.tipoSpedizione(s.getTipoSpedizione())
 				.build();

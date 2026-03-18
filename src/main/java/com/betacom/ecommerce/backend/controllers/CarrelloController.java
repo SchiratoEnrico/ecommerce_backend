@@ -1,86 +1,94 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
-import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
+import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
 import com.betacom.ecommerce.backend.response.Response;
-import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
+import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequestMapping("/rest/manga")
 @RequiredArgsConstructor
-public class MangaController {
-	
-	private final IMangaServices mangaS;
+@RestController
+@RequestMapping("/rest/carrello")
+public class CarrelloController {
+
+	private final ICarrelloServices carS;
 	private final IMessagesServices msgS;
 	
 	@PostMapping("/create")
-	public ResponseEntity<Response> create(@RequestBody (required = true) MangaRequest req){
+	public ResponseEntity<Response> create(@RequestBody(required=true) CarrelloRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			mangaS.create(req);
+			carS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
-			status = HttpStatus.CONFLICT;
+			status = HttpStatus.BAD_REQUEST;
 		}
-		
 		return ResponseEntity.status(status).body(r);
 	}
 	
-	@PutMapping("/update")
-	public ResponseEntity<Response> update(@RequestBody (required = true) MangaRequest req){
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Response> delete(@PathVariable(required = true)  Integer id){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			mangaS.update(req);
-			r.setMsg(msgS.get("rest_updated"));
+			carS.delete(id);
+			r.setMsg(msgS.get("rest_deleted"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
-			status = HttpStatus.CONFLICT;
+			status = HttpStatus.BAD_REQUEST;
 		}
-		
-		return ResponseEntity.status(status).body(r);
+		return ResponseEntity.status(status).body(r);		
 	}
 	
+	/**
+	 * TODO: Da implementare
+	 * filtro sui manga contenuti?
+	 */
 	@GetMapping("/list")
-	public ResponseEntity<Object> list(){
+	public ResponseEntity<Object> list(
+			@RequestParam(required=false) List<String> manga
+			){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r =  mangaS.list();
-		}catch (Exception e) {
-			r = e.getMessage();
+			r= carS.list(manga);
+		} catch (Exception e) {
+			r=e.getMessage();
 			status = HttpStatus.BAD_REQUEST;
-		}	
-		
+		}
 		return ResponseEntity.status(status).body(r);
 	}
 	
-	@GetMapping ("/findByIsbn")
-	public ResponseEntity<Object> findById(@RequestParam (required = true) String id){
+	/**
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("/findById")
+	public ResponseEntity<Object> findById (@RequestParam (required = true)  Integer id){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r =  mangaS.findByIsbn(id);
-		}catch (Exception e) {
-			r = e.getMessage();
-			status = HttpStatus.BAD_REQUEST;
-		}	
-		
+			r= carS.findById(id);
+		} catch (Exception e) {
+			r=e.getMessage();
+			status = HttpStatus.BAD_REQUEST; 
+		}
 		return ResponseEntity.status(status).body(r);
 	}
 }

@@ -8,11 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
-import com.betacom.ecommerce.backend.dto.outputs.AnagraficheDTO;
-import com.betacom.ecommerce.backend.dto.outputs.CarrelliDTO;
+import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
+import com.betacom.ecommerce.backend.dto.outputs.CarrelloDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
-import com.betacom.ecommerce.backend.models.Accounts;
-import com.betacom.ecommerce.backend.models.Anagrafiche;
+import com.betacom.ecommerce.backend.models.Account;
+import com.betacom.ecommerce.backend.models.Anagrafica;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 
@@ -47,7 +47,7 @@ public class AccountImplementation implements IAccountServices{
 	    if (repAcc.findByEmail(req.getEmail().trim()).isPresent())
 	        throw new MangaException("exists_ema");
 		
-	    Accounts acc = new Accounts();
+	    Account acc = new Account();
 		acc.setUsername(req.getUsername().trim().toUpperCase());
 		acc.setEmail(req.getEmail().trim().toLowerCase());
 		acc.setRuolo(req.getRuolo().trim().toUpperCase());	
@@ -59,7 +59,7 @@ public class AccountImplementation implements IAccountServices{
 	@Transactional (rollbackFor = Exception.class)
 	public void delete(Integer id) throws MangaException {
 		log.debug("Delete Account, id: {}", id);
-        Accounts acc = repAcc.findById(id)
+        Account acc = repAcc.findById(id)
                 .orElseThrow(() -> new MangaException("null_acc"));
         repAcc.delete(acc);	
 	}
@@ -69,11 +69,11 @@ public class AccountImplementation implements IAccountServices{
 	public void update(AccountRequest req) throws MangaException {
 		log.debug("Update Account, id: {}", req);
 		
-		Accounts acc = repAcc.findById(req.getId())
+		Account acc = repAcc.findById(req.getId())
 				.orElseThrow(() -> new MangaException("null_acc"));
 		
 	    if (req.getUsername() != null && !req.getUsername().isBlank()) {
-	        Optional<Accounts> byUsername = repAcc.findByUsername(req.getUsername().trim());	        
+	        Optional<Account> byUsername = repAcc.findByUsername(req.getUsername().trim());	        
 	        
 	        if (byUsername.isPresent() && !byUsername.get().getId().equals(req.getId()))
 	            throw new MangaException("exists_usr");
@@ -82,7 +82,7 @@ public class AccountImplementation implements IAccountServices{
 	    }
 		
 	    if (req.getEmail() != null && !req.getEmail().isBlank()) {
-	        Optional<Accounts> byEmail = repAcc.findByEmail(req.getEmail().trim());
+	        Optional<Account> byEmail = repAcc.findByEmail(req.getEmail().trim());
 	        
 	        if (byEmail.isPresent() && !byEmail.get().getId().equals(req.getId()))
 	            throw new MangaException("exists_ema");
@@ -100,7 +100,7 @@ public class AccountImplementation implements IAccountServices{
 	public List<AccountDTO> list() {
 		log.debug("findAll() Account");
 		
-		 List<Accounts> lA = repAcc.findAll();
+		 List<Account> lA = repAcc.findAll();
 
 		    return lA.stream()
 		            .map(a -> AccountDTO.builder()
@@ -108,7 +108,7 @@ public class AccountImplementation implements IAccountServices{
 		                    .username(a.getUsername())
 		                    .email(a.getEmail())
 		                    .ruolo(a.getRuolo())
-		               	 .carrello((a.getCarrello() == null) ? null : CarrelliDTO.builder()
+		               	 .carrello((a.getCarrello() == null) ? null : CarrelloDTO.builder()
 		                         .build())
 		                 .anagrafiche(buildAnagraficheDTO(a.getAnagrafiche()))
 		                 .build()
@@ -119,7 +119,7 @@ public class AccountImplementation implements IAccountServices{
 	public AccountDTO findById(Integer id) throws MangaException {
 		log.debug("findById Account");
 		
-		Accounts acc = repAcc.findById(id)
+		Account acc = repAcc.findById(id)
 				.orElseThrow(() -> new MangaException("!exists_acc"));
 		
 		
@@ -128,7 +128,7 @@ public class AccountImplementation implements IAccountServices{
                 .username(acc.getUsername())
                 .email(acc.getEmail())
                 .ruolo(acc.getRuolo())
-                .carrello((acc.getCarrello() == null) ? null : CarrelliDTO.builder()
+                .carrello((acc.getCarrello() == null) ? null : CarrelloDTO.builder()
                 		.id(acc.getCarrello().getId())
                 		//da aggiungere i campi di carrello
                 		.build())
@@ -137,12 +137,12 @@ public class AccountImplementation implements IAccountServices{
 	
 	}
 	
-	private List<AnagraficheDTO> buildAnagraficheDTO(List<Anagrafiche> anagrafiche) {
+	private List<AnagraficaDTO> buildAnagraficheDTO(List<Anagrafica> anagrafiche) {
 		
 		if (anagrafiche == null || anagrafiche.isEmpty())
 			return null;
 		return anagrafiche.stream()
-					.map(an -> AnagraficheDTO.builder()
+					.map(an -> AnagraficaDTO.builder()
 					     .id(an.getId())
 					     .nome(an.getNome())
 					     .cognome(an.getCognome())

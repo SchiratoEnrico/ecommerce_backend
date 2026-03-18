@@ -4,13 +4,13 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.betacom.ecommerce.backend.models.Accounts;
+import com.betacom.ecommerce.backend.models.Account;
 
 
-public interface IAccountRepository extends JpaRepository<Accounts, Integer>{
+public interface IAccountRepository extends JpaRepository<Account, Integer>{
 
-	public Optional<Accounts> findByUsername(String username);
-	public Optional<Accounts> findByEmail(String email);
+	public Optional<Account> findByUsername(String username);
+	public Optional<Account> findByEmail(String email);
 	
 
 }

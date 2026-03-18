@@ -44,7 +44,7 @@ public class Manga {
 	
 	@ManyToOne
     @JoinColumn(name = "id_casa_editrice", nullable = false)
-	private CaseEditrici casaEditrice;
+	private CasaEditrice casaEditrice;
 	
 
 	@ManyToMany
@@ -53,7 +53,7 @@ public class Manga {
 	        joinColumns = @JoinColumn(name = "isbn_manga"),
 	        inverseJoinColumns = @JoinColumn(name = "id_autore")
 	    )
-	private List<Autori> autori;
+	private List<Autore> autori;
 	
 	
 	@ManyToMany
@@ -62,5 +62,5 @@ public class Manga {
         joinColumns = @JoinColumn(name = "isbn_manga"),
         inverseJoinColumns = @JoinColumn(name = "id_genere")
     )
-	private List<Generi> generi;
+	private List<Genere> generi;
 }

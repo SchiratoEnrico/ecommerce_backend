@@ -1,90 +1,79 @@
 
-    alter table anagrafiche 
-       drop 
-       foreign key FKoc2ya8cyewupshbwv2fuwqutx;
+    set client_min_messages = WARNING;
 
-    alter table carrelli 
-       drop 
-       foreign key FK8bwmqjwt5v85bcicyrb2cp03y;
+    alter table if exists anagrafiche 
+       drop constraint if exists FKoc2ya8cyewupshbwv2fuwqutx;
 
-    alter table carrelli_manga 
-       drop 
-       foreign key FKkhw77gip7pc9w9cu7chrk621q;
+    alter table if exists carrelli 
+       drop constraint if exists FK8bwmqjwt5v85bcicyrb2cp03y;
 
-    alter table carrelli_manga 
-       drop 
-       foreign key FK5rb9g7l8o4on0ublb7pwu4r8p;
+    alter table if exists carrelli_manga 
+       drop constraint if exists FKhdfg6asf8dumikjj0mjmhccch;
 
-    alter table manga 
-       drop 
-       foreign key FKk0v2gv11etiuocmnsp8rkm1lb;
+    alter table if exists carrelli_manga 
+       drop constraint if exists FK9pygjpe0kpcgvfy4m8qnr914p;
 
-    alter table manga_autori 
-       drop 
-       foreign key FK8sm8r52ml93185a8y5aqcusyg;
+    alter table if exists manga 
+       drop constraint if exists FKk0v2gv11etiuocmnsp8rkm1lb;
 
-    alter table manga_autori 
-       drop 
-       foreign key FKbrfhd0saru9t2rikafxn8y2lh;
+    alter table if exists manga_autori 
+       drop constraint if exists FK8sm8r52ml93185a8y5aqcusyg;
 
-    alter table manga_generi 
-       drop 
-       foreign key FK6nu1inap7k0aerp8gaq7aojh6;
+    alter table if exists manga_autori 
+       drop constraint if exists FKbrfhd0saru9t2rikafxn8y2lh;
 
-    alter table manga_generi 
-       drop 
-       foreign key FKlwtko0bh46dyuukj5g5d6f27l;
+    alter table if exists manga_generi 
+       drop constraint if exists FK6nu1inap7k0aerp8gaq7aojh6;
 
-    alter table ordini 
-       drop 
-       foreign key FKeahnhannuwy5mebvhxy8lqe8b;
+    alter table if exists manga_generi 
+       drop constraint if exists FKlwtko0bh46dyuukj5g5d6f27l;
 
-    alter table ordini 
-       drop 
-       foreign key FK76mc7hr7sthilhjy1rerhshmg;
+    alter table if exists ordini 
+       drop constraint if exists FKeahnhannuwy5mebvhxy8lqe8b;
 
-    alter table ordini 
-       drop 
-       foreign key FKgp5h6gfg8c52s54gtsoyc2894;
+    alter table if exists ordini 
+       drop constraint if exists FK76mc7hr7sthilhjy1rerhshmg;
 
-    alter table ordini 
-       drop 
-       foreign key FKo9jvgplgfwdyw1w66gxj8i3iq;
+    alter table if exists ordini 
+       drop constraint if exists FKgp5h6gfg8c52s54gtsoyc2894;
 
-    alter table righeordine 
-       drop 
-       foreign key FKqofnxqjgpy7und7xfak25es7v;
+    alter table if exists ordini 
+       drop constraint if exists FKo9jvgplgfwdyw1w66gxj8i3iq;
 
-    alter table righeordine 
-       drop 
-       foreign key FKa30cbtoatkcx6verd9yoyguse;
+    alter table if exists righeordine 
+       drop constraint if exists FKqofnxqjgpy7und7xfak25es7v;
 
-    drop table if exists accounts;
+    alter table if exists righeordine 
+       drop constraint if exists FKa30cbtoatkcx6verd9yoyguse;
 
-    drop table if exists anagrafiche;
+    drop table if exists accounts cascade;
 
-    drop table if exists autori;
+    drop table if exists anagrafiche cascade;
 
-    drop table if exists carrelli;
+    drop table if exists autori cascade;
 
-    drop table if exists carrelli_manga;
+    drop table if exists carrelli cascade;
 
-    drop table if exists case_editrici;
+    drop table if exists carrelli_manga cascade;
 
-    drop table if exists generi;
+    drop table if exists case_editrici cascade;
 
-    drop table if exists manga;
+    drop table if exists generi cascade;
 
-    drop table if exists manga_autori;
+    drop table if exists manga cascade;
 
-    drop table if exists manga_generi;
+    drop table if exists manga_autori cascade;
 
-    drop table if exists ordini;
+    drop table if exists manga_generi cascade;
 
-    drop table if exists pagamenti;
+    drop table if exists ordini cascade;
 
-    drop table if exists righeordine;
+    drop table if exists pagamenti cascade;
 
-    drop table if exists spedizioni;
+    drop table if exists righeordine cascade;
 
-    drop table if exists stati_ordine;
+    drop table if exists spedizioni cascade;
+
+    drop table if exists stati_ordine cascade;
+
+    drop table if exists system_messages cascade;

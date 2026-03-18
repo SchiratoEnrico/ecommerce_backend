@@ -8,11 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
-import com.betacom.ecommerce.backend.models.Autori;
-import com.betacom.ecommerce.backend.models.Generi;
+import com.betacom.ecommerce.backend.models.Autore;
+import com.betacom.ecommerce.backend.models.CasaEditrice;
+import com.betacom.ecommerce.backend.models.Genere;
 import com.betacom.ecommerce.backend.models.Manga;
-import com.betacom.ecommerce.backend.repositories.IAutoriRepository;
-import com.betacom.ecommerce.backend.repositories.IGeneriRepository;
+import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
+import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
+import com.betacom.ecommerce.backend.repositories.IGenereRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
 import com.betacom.ecommerce.backend.utilities.MangaUtils;
@@ -26,9 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 public class MangaImplementation implements IMangaServices{
 	
 	private final IMangaRepository mangaRepo;
-	private final IAutoriRepository autRepo;
-	private final IGeneriRepository genRepo;
-	private final ICaseEditriciRepository casRepo;
+	private final IAutoreRepository autRepo;
+	private final IGenereRepository genRepo;
+	private final ICasaEditriceRepository casRepo;
 	
 	@Override
 	@Transactional
@@ -43,13 +45,13 @@ public class MangaImplementation implements IMangaServices{
 		
 		Manga m = MangaUtils.buildManga(new Manga(), req, true);
 		
-		List<Autori> lA = autRepo.findAllById(req.getAutori());
+		List<Autore> lA = autRepo.findAllById(req.getAutori());
 		m.setAutori(lA);
 		
 		if(lA.size()<req.getAutori().size())
 			throw new MangaException("!exists_aut");
 		
-		List<Generi> lG = genRepo.findAllById(req.getGeneri());
+		List<Genere> lG = genRepo.findAllById(req.getGeneri());
 		m.setGeneri(lG);
 		
 		if(lG.size()<req.getGeneri().size())

@@ -11,27 +11,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
-import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
 import com.betacom.ecommerce.backend.response.Response;
-import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
+import com.betacom.ecommerce.backend.services.interfaces.IAutoreServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequestMapping("/rest/manga")
 @RequiredArgsConstructor
-public class MangaController {
+@RestController
+@RequestMapping("/rest/autore")
+public class AutoreController {
 	
-	private final IMangaServices mangaS;
+	private final IAutoreServices autS;
 	private final IMessagesServices msgS;
 	
 	@PostMapping("/create")
-	public ResponseEntity<Response> create(@RequestBody (required = true) MangaRequest req){
+	public ResponseEntity<Response> create(@RequestBody (required = true) AutoreRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			mangaS.create(req);
+			autS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
@@ -42,11 +41,11 @@ public class MangaController {
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<Response> update(@RequestBody (required = true) MangaRequest req){
+	public ResponseEntity<Response> update(@RequestBody (required = true) AutoreRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			mangaS.update(req);
+			autS.update(req);
 			r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
@@ -61,7 +60,7 @@ public class MangaController {
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r =  mangaS.list();
+			r =  autS.list();
 		}catch (Exception e) {
 			r = e.getMessage();
 			status = HttpStatus.BAD_REQUEST;
@@ -70,12 +69,12 @@ public class MangaController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
-	@GetMapping ("/findByIsbn")
-	public ResponseEntity<Object> findById(@RequestParam (required = true) String id){
+	@GetMapping ("/findById")
+	public ResponseEntity<Object> findById(@RequestParam (required = true) Integer id){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r =  mangaS.findByIsbn(id);
+			r =  autS.findById(id);
 		}catch (Exception e) {
 			r = e.getMessage();
 			status = HttpStatus.BAD_REQUEST;
