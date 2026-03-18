@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Entity
 @Table(name="carrelli")
-public class Carrelli {
+public class Carrello {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -29,7 +29,7 @@ public class Carrelli {
 			fetch = FetchType.EAGER			
 			)
 	@JoinColumn(name = "id_account")
-	private Accounts account;
+	private Account account;
 	
 	@OneToMany(
 			mappedBy = "",
