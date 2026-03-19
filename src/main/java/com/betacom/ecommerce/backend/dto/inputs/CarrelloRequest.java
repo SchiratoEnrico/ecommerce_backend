@@ -9,4 +9,5 @@ import lombok.ToString;
 @ToString
 public class CarrelloRequest {
 	private Integer id;
+	private Integer id_account;
 }

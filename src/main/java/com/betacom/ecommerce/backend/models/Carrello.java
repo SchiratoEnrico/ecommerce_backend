@@ -2,7 +2,6 @@ package com.betacom.ecommerce.backend.models;
 
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,11 +23,14 @@ public class Carrello {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	@OneToOne
-	@JoinColumn(
-			name="id_account",
-			referencedColumnName = "id"
+
+	@OneToOne(
+			fetch = FetchType.EAGER		
 			)
+	@JoinColumn(
+			name = "id_account",
+			referencedColumnName = "id"
+	)
 	private Account account;
 	
 	@OneToMany(

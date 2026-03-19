@@ -61,13 +61,11 @@ public class CarrelloController {
 	 * filtro sui manga contenuti?
 	 */
 	@GetMapping("/list")
-	public ResponseEntity<Object> list(
-			@RequestParam(required=false) List<String> manga
-			){
+	public ResponseEntity<Object> list(){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r= carS.list(manga);
+			r= carS.list();
 		} catch (Exception e) {
 			r=e.getMessage();
 			status = HttpStatus.BAD_REQUEST;

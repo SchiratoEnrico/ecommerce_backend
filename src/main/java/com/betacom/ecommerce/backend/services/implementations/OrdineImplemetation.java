@@ -69,7 +69,7 @@ public class OrdineImplemetation implements IOrdineServices{
 		if (tipoPag != null) {
 			TipoPagamento pag = pagR.findByTipoPagamento(tipoPag).orElseThrow(() ->
 					new MangaException("null_pag"));
-				o.setPagamento(pag);			
+				o.setTipoPagamento(pag);			
 		} else {
 			throw new MangaException("null_pag");
 		}
@@ -79,7 +79,7 @@ public class OrdineImplemetation implements IOrdineServices{
 		if (tipoSpe != null) {
 			TipoSpedizione spe = speR.findByTipoSpedizione(tipoSpe).orElseThrow(() ->
 					new MangaException("null_spe"));
-				o.setSpedizione(spe);
+				o.setTipoSpedizione(spe);
 		} else {
 			throw new MangaException("null_spe");
 		}
@@ -130,7 +130,7 @@ public class OrdineImplemetation implements IOrdineServices{
 		if (tipoPag != null) {
 			Optional<TipoPagamento> pag = pagR.findByTipoPagamento(tipoPag);
 			if (!pag.isEmpty()) {
-				o.setPagamento(pag.get());
+				o.setTipoPagamento(pag.get());
 			}		
 		} 
 		
@@ -139,7 +139,7 @@ public class OrdineImplemetation implements IOrdineServices{
 		if (tipoSpe != null) {
 			Optional<TipoSpedizione> spe = speR.findByTipoSpedizione(tipoSpe);
 			if (!tipoSpe.isEmpty()) {
-				o.setSpedizione(spe.get());
+				o.setTipoSpedizione(spe.get());
 			}
 		}
 

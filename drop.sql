@@ -7,12 +7,6 @@
     alter table if exists carrelli 
        drop constraint if exists FK8bwmqjwt5v85bcicyrb2cp03y;
 
-    alter table if exists carrelli_manga 
-       drop constraint if exists FKhdfg6asf8dumikjj0mjmhccch;
-
-    alter table if exists carrelli_manga 
-       drop constraint if exists FK9pygjpe0kpcgvfy4m8qnr914p;
-
     alter table if exists manga 
        drop constraint if exists FKk0v2gv11etiuocmnsp8rkm1lb;
 
@@ -53,8 +47,6 @@
     drop table if exists autori cascade;
 
     drop table if exists carrelli cascade;
-
-    drop table if exists carrelli_manga cascade;
 
     drop table if exists case_editrici cascade;
 

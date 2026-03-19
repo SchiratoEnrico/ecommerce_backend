@@ -19,7 +19,7 @@ public class AnagraficaRequest {
 	private String stato;
 	private String citta;
 	private String provincia;
-	private Integer cap;
+	private String cap;
 	private String via;
 	private Boolean predefinito;
 }

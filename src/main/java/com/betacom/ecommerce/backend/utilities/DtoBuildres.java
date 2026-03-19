@@ -113,9 +113,7 @@ public class DtoBuildres {
 							)
 							.toList()
 							)
-				.carrello(expand?
-						buildCarrelloDTO(a.getCarrello(), false) :
-						idOnly(a.getCarrello()))
+				.carrelloId(a.getCarrello()==null ? null : a.getCarrello().getId())
 				.email(a.getEmail())
 				.ruolo(a.getRuolo())
 				.username(a.getUsername())
@@ -156,12 +154,6 @@ public class DtoBuildres {
 		return CarrelloDTO.builder()
 				.id(c.getId())
 				.account(expand? buildAccountDTO(c.getAccount(), false) : idOnly(c.getAccount()))
-				.manga(c.getManga().stream()
-						.map(m -> expand?
-								buildMangaDTO(m, false) :
-								idOnly(m)
-								)
-						.toList())
 				.build();
 	}
 
@@ -217,8 +209,8 @@ public class DtoBuildres {
 		return OrdineDTO.builder()
 			.id(o.getId())
 			.account(expand? buildAccountDTO(o.getAccount(), false) : idOnly(o.getAccount()))
-			.spedizione(expand? buildTipoSpedizioneDTO(o.getSpedizione(), false) : idOnly(o.getSpedizione()))
-			.pagamento(expand? buildTipoPagamentoDTO(o.getPagamento(), false) :  idOnly(o.getPagamento()))
+			.spedizione(expand? buildTipoSpedizioneDTO(o.getTipoSpedizione(), false) : idOnly(o.getTipoSpedizione()))
+			.pagamento(expand? buildTipoPagamentoDTO(o.getTipoPagamento(), false) :  idOnly(o.getTipoPagamento()))
 			.data(o.getData())
 			.stato(expand? buildStatoOrdineDTO(o.getStato(), false) : idOnly(o.getStato()))
 			.righeOrdine(o.getRigheOrdine().stream()
@@ -244,7 +236,7 @@ public class DtoBuildres {
 	public static RigaOrdineDTO buildRigaOrdineDTO(RigaOrdine r, Boolean expand) {
 		return RigaOrdineDTO.builder()
 				.id(r.getId())
-				.idOrdine(r.getIdOrdine())
+				.idOrdine(r.getOrdine().getId())
 				.manga(expand? buildMangaDTO(r.getManga(), false): idOnly(r.getManga()))
 				.numeroCopie(r.getNumeroCopie())
 				.build();

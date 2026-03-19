@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +30,7 @@ public class AccountImplementation implements IAccountServices{
 	
 	@Override
 	@Transactional (rollbackFor = Exception.class)
-	public void create(AccountRequest req) throws MangaException {
-		log.debug("create macchina {}", req);
-		
+	public void create(AccountRequest req) throws MangaException {		
 		if(req.getUsername()==null || req.getUsername().isBlank()) 
 			throw new MangaException("null_usr");
 		
@@ -101,19 +100,18 @@ public class AccountImplementation implements IAccountServices{
 		log.debug("findAll() Account");
 		
 		 List<Account> lA = repAcc.findAll();
-
-		    return lA.stream()
-		            .map(a -> AccountDTO.builder()
-		                    .id(a.getId())
-		                    .username(a.getUsername())
-		                    .email(a.getEmail())
-		                    .ruolo(a.getRuolo())
-		               	 .carrello((a.getCarrello() == null) ? null : CarrelloDTO.builder()
-		                         .build())
-		                 .anagrafiche(buildAnagraficheDTO(a.getAnagrafiche()))
-		                 .build()
-		            ).toList();
-		       }
+		 
+		 return lA.stream()
+				 .map(a -> AccountDTO.builder()
+						 .id(a.getId())
+						 .anagrafiche(buildAnagraficheDTO(a.getAnagrafiche()))
+						 .carrelloId(a.getCarrello()==null ? null : a.getCarrello().getId())
+						 .email(a.getEmail())
+						 .ruolo(a.getRuolo())
+						 .build()
+						 )
+				 .collect(Collectors.toList());
+	}
 	
 	@Override
 	public AccountDTO findById(Integer id) throws MangaException {
@@ -128,10 +126,7 @@ public class AccountImplementation implements IAccountServices{
                 .username(acc.getUsername())
                 .email(acc.getEmail())
                 .ruolo(acc.getRuolo())
-                .carrello((acc.getCarrello() == null) ? null : CarrelloDTO.builder()
-                		.id(acc.getCarrello().getId())
-                		//da aggiungere i campi di carrello
-                		.build())
+                .carrelloId(acc.getCarrello()==null ? null : acc.getCarrello().getId())
                 .anagrafiche(buildAnagraficheDTO(acc.getAnagrafiche()))
                 .build();
 	

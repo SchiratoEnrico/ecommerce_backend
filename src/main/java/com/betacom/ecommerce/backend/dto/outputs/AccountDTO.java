@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.dto.outputs;
 
 import java.util.List;
 
+import com.betacom.ecommerce.backend.models.Carrello;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,5 +24,5 @@ public class AccountDTO {
 	private String email;
 	private String ruolo;
 	private List<AnagraficaDTO> anagrafiche;
-    private CarrelloDTO carrello;
+    private Integer carrelloId;
 }

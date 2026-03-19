@@ -53,7 +53,7 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		}
 		
 		RigaOrdine r = new RigaOrdine();
-		r.setIdOrdine(o.getId());
+		r.setOrdine(o);
 		r.setManga(m);
 		r.setNumeroCopie(req.getNumeroCopie());
 		
@@ -71,7 +71,7 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		if (myId != null) {
 			Ordine o = ordeR.findById(myId).orElseThrow(()->
 							new MangaException("!exists_ord"));
-			r.setIdOrdine(myId);
+			r.setOrdine(o);
 		}
 		
 		String myISBN = Utils.normalize(req.getManga());

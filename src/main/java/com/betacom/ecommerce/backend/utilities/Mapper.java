@@ -23,13 +23,13 @@ public class Mapper {
 	}
 	
 	public static AccountDTO buildAccountDTO(Account a) {
-		return AccountDTO.builder()
+		return a==null ? null : AccountDTO.builder()
 				.id(a.getId())
 				.username(a.getUsername())
 				.email(a.getEmail())
 				.ruolo(a.getRuolo())
 				.anagrafiche(buildAnagraficaDTO(a.getAnagrafiche()))
-				.carrello(buildCarrelloDTO(a.getCarrello()))
+				.carrelloId(a.getCarrello()==null ? null : a.getCarrello().getId())
 				.build();
 	}
 	
@@ -37,7 +37,6 @@ public class Mapper {
 		return CarrelloDTO.builder()
 				.id(c.getId())
 				.account(buildAccountDTO(c.getAccount()))
-				.manga(buildMangaDTO(c.getManga()))
 				.build();
 	}
 	
@@ -47,7 +46,6 @@ public class Mapper {
 						CarrelloDTO.builder()
 						.id(c.getId())
 						.account(buildAccountDTO(c.getAccount()))
-						.manga(buildMangaDTO(c.getManga()))
 						.build()
 						)
 				.collect(Collectors.toList());
@@ -73,6 +71,7 @@ public class Mapper {
 	public static List<CasaEditriceDTO> buildCaseEditriciDTO(List<CasaEditrice> lC) {
 		return lC.stream()
 				.map(c -> CasaEditriceDTO.builder()
+						.nome(c.getNome())
 						.descrizione(c.getDescrizione())
 						.email(c.getEmail())
 						.id(c.getId())
