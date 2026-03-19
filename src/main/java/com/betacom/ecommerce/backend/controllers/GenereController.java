@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -81,5 +82,21 @@ public class GenereController {
 		}	
 		
 		return ResponseEntity.status(status).body(r);
+	}
+	
+	@DeleteMapping("/delete")
+	public ResponseEntity<Response> delete(@RequestParam(required = true) Integer id){
+	    Response r = new Response();
+	    HttpStatus status = HttpStatus.OK;
+
+	    try {
+	        genS.delete(id);
+	        r.setMsg(msgS.get("rest_deleted"));
+	    } catch (Exception e) {
+	        r.setMsg(e.getMessage());
+	        status = HttpStatus.CONFLICT;
+	    }
+
+	    return ResponseEntity.status(status).body(r);
 	}
 }

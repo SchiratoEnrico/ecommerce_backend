@@ -22,7 +22,7 @@ public class MessagesImplementation implements IMessagesServices{
 		try {
 			msg = repM.findByCode(code).get().getMessaggio();
 		} catch (Exception e) {
-			return "Caricamento messaggio fallito, forse non lo hai nel database";
+			return code;
 		}	
 		return msg;
 	}

@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.dto.outputs;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,14 +23,14 @@ public class MangaDTO {
 	
 	private LocalDate dataPubblicazione;
 	
-	private Double prezzo;
+	private BigDecimal prezzo;
 	
 	private String immagine;
 	
 	private Integer numeroCopie;
 	
 	//questi sono id
-	//private CaseEditrici casaEditrice;
+	private CasaEditriceDTO casaEditrice;
 	private List<GenereDTO> generi;
 	private List<AutoreDTO> autori;
 }

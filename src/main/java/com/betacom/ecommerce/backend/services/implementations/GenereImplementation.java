@@ -10,6 +10,7 @@ import com.betacom.ecommerce.backend.dto.outputs.GenereDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Genere;
 import com.betacom.ecommerce.backend.repositories.IGenereRepository;
+import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IGenereServices;
 import com.betacom.ecommerce.backend.utilities.GeneriUtils;
 
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GenereImplementation implements IGenereServices{
 
 	private final IGenereRepository genRepo;
+	private final IMangaRepository mangaRepo;
 	
 	@Override
 	@Transactional
@@ -68,9 +70,24 @@ public class GenereImplementation implements IGenereServices{
 	}
 
 	@Override
+	@Transactional(rollbackFor = MangaException.class)
 	public void delete(Integer id) throws MangaException {
-		// TODO Auto-generated method stub
-		
+
+	    log.debug("begin delete genere id {}", id);
+
+	    // controllo esistenza autore
+	    Genere aut = genRepo.findById(id)
+	            .orElseThrow(() -> new MangaException("!exists_gen"));
+
+	    // controllo se è collegato a manga
+	    if (mangaRepo.existsByAutoriId(id)) {
+	        log.debug("genere {} is linked to manga", id);
+	        throw new MangaException("linked_man");
+	    }
+
+	    genRepo.delete(aut);
+
+	    log.debug("genere deleted successfully");
 	}
 
 	@Override

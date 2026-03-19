@@ -11,6 +11,7 @@ import com.betacom.ecommerce.backend.dto.outputs.AutoreDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Autore;
 import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
+import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAutoreServices;
 import com.betacom.ecommerce.backend.utilities.AutoriUtils;
 import com.betacom.ecommerce.backend.utilities.Utils;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AutoreImplementation implements IAutoreServices{
 
 	private final IAutoreRepository autRepo;
+	private final IMangaRepository mangaRepo;
 	
 	@Override
 	@Transactional
@@ -36,7 +38,7 @@ public class AutoreImplementation implements IAutoreServices{
 		//check unicità autore
 	    if (checkDuplicateAutore(req.getNome(),
 	    		req.getCognome(),
-	    		Utils.stringToDate(req.getDataNascita()),
+	    		Utils.stringToDate(req.getDataNascita()), 
 	    		null)) {
 	    	log.debug("autore already present");
 	        throw new MangaException("exists_aut");   
@@ -77,9 +79,24 @@ public class AutoreImplementation implements IAutoreServices{
 	}
 
 	@Override
+	@Transactional(rollbackFor = MangaException.class)
 	public void delete(Integer id) throws MangaException {
-		// TODO Auto-generated method stub
-		
+
+	    log.debug("begin delete autore id {}", id);
+
+	    // controllo esistenza autore
+	    Autore aut = autRepo.findById(id)
+	            .orElseThrow(() -> new MangaException("!exists_aut"));
+
+	    // controllo se è collegato a manga
+	    if (mangaRepo.existsByAutoriId(id)) {
+	        log.debug("autore {} is linked to manga", id);
+	        throw new MangaException("linked_man");
+	    }
+
+	    autRepo.delete(aut);
+
+	    log.debug("autore deleted successfully");
 	}
 
 	@Override

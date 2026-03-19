@@ -8,4 +8,7 @@ import com.betacom.ecommerce.backend.models.Manga;
 @Repository
 public interface IMangaRepository extends JpaRepository<Manga, String>{
 
+	boolean existsByAutoriId(Integer idAutore);
+	
+	boolean existsByGeneriId(Integer idGenere);
 }
