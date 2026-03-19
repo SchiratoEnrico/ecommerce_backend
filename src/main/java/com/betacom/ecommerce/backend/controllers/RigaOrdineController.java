@@ -70,7 +70,7 @@ public class RigaOrdineController {
     }
 
 	@GetMapping ("/list")
-	private ResponseEntity<Object> list(){
+	public ResponseEntity<Object> list(){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
