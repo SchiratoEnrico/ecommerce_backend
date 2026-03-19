@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "pagamenti")
+@Table(name = "tipi_pagamento")
 public class TipoPagamento {
 
 	@Id

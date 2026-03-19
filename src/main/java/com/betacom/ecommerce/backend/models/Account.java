@@ -19,9 +19,9 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "accounts")
+@ToString(exclude = {"anagrafiche", "carrello"})
 public class Account {
 
 	@Id
@@ -42,12 +42,13 @@ public class Account {
 	private String ruolo;
 	
 	@OneToMany(fetch = FetchType.EAGER,
-			cascade = CascadeType.ALL) 
-	@JoinColumn(name = "id_anagrafica")
+			cascade = CascadeType.ALL
+			) 
+	@JoinColumn(name = "id_account")
 	private List<Anagrafica> anagrafiche;
 	
-	@OneToOne(fetch = FetchType.EAGER,
-			mappedBy = "account",
-	        cascade = CascadeType.ALL)
+	@OneToOne(
+			mappedBy = "account"
+			)
 	private Carrello carrello;
 }

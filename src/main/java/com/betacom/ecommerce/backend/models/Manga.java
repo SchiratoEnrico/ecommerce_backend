@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.models;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,7 +20,7 @@ import lombok.ToString;
 @Table(name = "manga")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"casaEditrice", "autori", "generi"})
 public class Manga {
 	
 	@Id
@@ -33,7 +34,7 @@ public class Manga {
 	private LocalDate dataPubblicazione;
 	
 	@Column(nullable = false)
-	private Double prezzo;
+	private BigDecimal prezzo;
 	
 	@Column(nullable = false)
 	private String immagine;

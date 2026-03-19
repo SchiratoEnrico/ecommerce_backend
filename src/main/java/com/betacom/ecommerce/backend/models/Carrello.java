@@ -24,16 +24,16 @@ public class Carrello {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	@OneToOne(
-			cascade = CascadeType.REMOVE,
-			fetch = FetchType.EAGER			
+	@OneToOne
+	@JoinColumn(
+			name="id_account",
+			referencedColumnName = "id"
 			)
-	@JoinColumn(name = "id_account")
 	private Account account;
 	
 	@OneToMany(
-			mappedBy = "",
+			mappedBy = "carrello",
 			fetch = FetchType.EAGER
 			)
-	private List<Manga> manga;
+	private List<RigaCarrello> righeCarrello;
 }

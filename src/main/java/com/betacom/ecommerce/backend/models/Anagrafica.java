@@ -43,7 +43,7 @@ public class Anagrafica {
 	
 	@Column (length = 100,
 			nullable = false)
-	private Integer cap;
+	private String cap;
 	
 	@Column (length = 100,
 			nullable = false)

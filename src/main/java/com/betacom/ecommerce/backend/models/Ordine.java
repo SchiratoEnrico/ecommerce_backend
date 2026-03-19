@@ -27,16 +27,16 @@ public class Ordine {
 	private Integer id;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_account")
+    @JoinColumn(name = "id_account", nullable = false)
 	private Account account;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_pagamento")
-	private TipoPagamento pagamento;
+    @JoinColumn(name = "id_tipo_pagamento", nullable = false)
+	private TipoPagamento tipoPagamento;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_spedizione")
-	private TipoSpedizione spedizione;
+    @JoinColumn(name = "id_tipo_spedizione", nullable = false)
+	private TipoSpedizione tipoSpedizione;
 	
 	@Column(
 			name = "data",
@@ -45,7 +45,7 @@ public class Ordine {
 	private LocalDate data;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_stato")
+    @JoinColumn(name = "id_stato", nullable = false)
 	private StatoOrdine stato;
 	
 	@OneToMany

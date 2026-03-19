@@ -17,7 +17,7 @@ import lombok.ToString;
 @Table(name = "generi")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"manga"})
 public class Genere {
 
 	@Id
@@ -27,6 +27,8 @@ public class Genere {
 	@Column(nullable = false)
 	private String descrizione;
 	
-    @ManyToMany(mappedBy = "generi")
+    @ManyToMany(
+    		mappedBy = "generi"
+    		)
 	private List<Manga> manga;
 }

@@ -11,11 +11,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
 @Entity
 @Table(name="case_editrici")
+@ToString(exclude = {"manga"})
 public class CasaEditrice {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +36,8 @@ public class CasaEditrice {
 	@Column (nullable=false)
 	private String email;
 	
-	@OneToMany(mappedBy = "casaEditrice")
+	@OneToMany(
+			mappedBy = "casaEditrice"
+			)
     private List<Manga> manga;
 }
