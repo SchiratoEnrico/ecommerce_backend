@@ -104,7 +104,7 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 	@Override
 	public RigaOrdineDTO findById(Integer id) throws MangaException {
 		RigaOrdine r = righR.findById(id).orElseThrow(()->
-							new MangaException("!exists_man"));
+							new MangaException("!exists_row"));
 		return DtoBuildres.buildRigaOrdineDTO(r, true);
 	}
 }

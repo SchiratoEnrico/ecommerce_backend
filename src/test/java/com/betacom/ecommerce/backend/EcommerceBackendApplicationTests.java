@@ -7,19 +7,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.betacom.ecommerce.backend.controllers.CarrelloControllerTest;
 import com.betacom.ecommerce.backend.controllers.CasaEditriceControllerTest;
+import com.betacom.ecommerce.backend.controllers.OrdineControllerTest;
+import com.betacom.ecommerce.backend.controllers.RigaOrdineControllerTest;
+import com.betacom.ecommerce.backend.controllers.StatoOrdineControllerTest;
 import com.betacom.ecommerce.backend.controllers.TipoSpedizioneControllerTest;
 
 @Suite
 @SelectClasses({
-	CarrelloControllerTest.class,
-	CasaEditriceControllerTest.class,
-	TipoSpedizioneControllerTest.class
+	StatoOrdineControllerTest.class,
+	RigaOrdineControllerTest.class,
+	OrdineControllerTest.class
 })
-@SpringBootTest
-class EcommerceBackendApplicationTests {
+//@SpringBootTest NON VA SE METTI @Suite(@Suite is JUnit platform-level, @SpringBootTest should be on individual test classes)
 
+class EcommerceBackendApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

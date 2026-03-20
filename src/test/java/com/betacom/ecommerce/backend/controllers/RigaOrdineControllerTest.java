@@ -1,3 +1,4 @@
+
 package com.betacom.ecommerce.backend.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -5,14 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
@@ -23,51 +24,17 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@Transactional // 🔥 rollback after test → no DB pollution
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RigaOrdineControllerTest {
 
 	@Autowired
 	private RigaOrdineController rowC;
-	
 	@Autowired
 	private IMessagesServices msgS;
-
-	/*
-	 * Da controllare e inserire:
-	 * 
-	 * Ordine: {
-  "id": 0,
-  "account": "string",
-  "pagamento": "string",
-  "spedizione": "string",
-  "data": "string",
-  "stato": "string",
-  "righeOrdineRequest": [
-    "string"
-  ]
-}
-
-INSERT INTO ordini (id, id_account, id_pagamento, id_spedizione, data)
-VALUES('rest_deleted', 'Elemento eliminato con successo');
-
-		Account  = {
-  "id": 0,
-  "username": "string",
-  "email": "string",
-  "ruolo": "string"
-}
-
-		Spedizione = {
-  "id": 0,
-  "tipoSpedizione": "string"
-}
-
-	 * 
-	 * 
-	 */
 	
 	@Test
-	@Order(2)
+	//@Order(2)
 	public void testCertificatoController() {
 		createTest();
 		updateTest();
@@ -76,14 +43,22 @@ VALUES('rest_deleted', 'Elemento eliminato con successo');
 		deleteTest();
 	}
 	
-	private RigaOrdineRequest getProva() {
-		return RigaOrdineRequest.builder()
-				.id(1)
-				.idOrdine(1)
-				.manga("STRING")
-				.numeroCopie(1)
-				.build();
-	}
+    private RigaOrdineRequest getProva() {
+        return RigaOrdineRequest.builder()
+                .idOrdine(1)
+                .manga("ISBN002")
+                .numeroCopie(1)
+                .build();
+    }
+    
+    private void printList() {
+		ResponseEntity<?> resp = rowC.list();
+		List<?> body = (List<?>) resp.getBody();
+		
+		if (body.size() > 0) {
+			body.forEach((rigaOrdineDTO -> log.debug(rigaOrdineDTO.toString())));
+		}
+    }
 	
 	public void listTest() {
 		log.debug("Start RigaOrdineControllerTest.listTest()");
@@ -143,7 +118,9 @@ VALUES('rest_deleted', 'Elemento eliminato con successo');
 		// errore: ISBN null
 		req = getProva();
 		req.setManga(null);
-		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest {}", req);
+		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest\n\t\t\t{}", req);
+		printList();
+		resp = rowC.create(req);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		r = (Response)resp.getBody();
 		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_man"));
@@ -152,6 +129,7 @@ VALUES('rest_deleted', 'Elemento eliminato con successo');
 		req = getProva();
 		req.setManga("LALALALAL");
 		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest {}", req);
+		resp = rowC.create(req);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		r = (Response)resp.getBody();
 		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_man"));
@@ -159,9 +137,10 @@ VALUES('rest_deleted', 'Elemento eliminato con successo');
 
 	public void updateTest() {
 		// Normal workflow
-		log.debug("Start RigaOrdineRequest.updateTest()");
 		RigaOrdineRequest req = getProva();
-		req.setIdOrdine(1);
+		req.setId(1);
+		log.debug("Start RigaOrdineRequest.updateTest(), req: {}", req);
+
 		ResponseEntity<Response> resp = rowC.update(req);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
@@ -178,6 +157,7 @@ VALUES('rest_deleted', 'Elemento eliminato con successo');
 
 		// errore: id Ordine non valido
 		req = new RigaOrdineRequest();
+		req.setId(1);
 		req.setIdOrdine(100);
 		resp = rowC.update(req);
 		log.debug("Start RigaOrdineRequest.updateTest(): error expected, RigaOrdineRequest duplicato");
@@ -187,6 +167,7 @@ VALUES('rest_deleted', 'Elemento eliminato con successo');
 
 		// errore: isbn non valido
 		req = new RigaOrdineRequest();
+		req.setId(1);
 		req.setManga("WEWEWEW");
 		resp = rowC.update(req);
 		log.debug("Start RigaOrdineRequest.updateTest(): error expected, RigaOrdineRequest {}", req);

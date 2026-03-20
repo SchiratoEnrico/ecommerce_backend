@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.StatoOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
@@ -23,7 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class StatoOrdineControllerTest {
 
 	@Autowired
@@ -33,7 +37,7 @@ public class StatoOrdineControllerTest {
 	private IMessagesServices msgS;
 
 	@Test
-	@Order(1)
+	//@Order(1)
 	public void testCertificatoController() {
 		createTest();
 		updateTest();
@@ -100,7 +104,7 @@ public class StatoOrdineControllerTest {
 
 		// errore: duplicate statoOrdine
 		req = new StatoOrdineRequest();
-		req.setStatoOrdine("spedito");
+		req.setStatoOrdine("CREATED");
 		resp = statC.create(req);
 		log.debug("Start StatoOrdineControllerTest.createTest(): error expected, statoOrdineReq duplicato");
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
@@ -148,7 +152,7 @@ public class StatoOrdineControllerTest {
 		r = (Response)resp.getBody();
 		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_sta"));
 	}
-	
+
 	public void deleteTest() {
 		// errore: id non trovato in db/non valido
 		Integer id = 99;
@@ -159,7 +163,7 @@ public class StatoOrdineControllerTest {
 		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_sta"));
 		
 		// Normal workflow
-		id = 1;
+		id = 2;
 		log.debug("Start StatoOrdineControllerTest.deleteTest(), id: {}", id);
 		resp = statC.delete(id);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());

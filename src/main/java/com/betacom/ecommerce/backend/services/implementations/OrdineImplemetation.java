@@ -50,21 +50,13 @@ public class OrdineImplemetation implements IOrdineServices{
 		//Account
 		if (req.getAccount() == null) {
 			throw new MangaException("null_acc");
-		} 
-		if (!req.getAccount().isEmpty())  {
-			throw new MangaException("null_acc");
 		}
 		
-		try {
-			Integer accId = Integer.parseInt(req.getAccount());
-			Account acc = accR.findById(accId).orElseThrow(() ->
-				new MangaException("null_acc"));
-			o.setAccount(acc);
-		} catch (NumberFormatException e) {
-			throw new MangaException("null_acc");
-		}
+		Account acc = accR.findById(req.getAccount()).orElseThrow(() ->
+				new MangaException("!exists_acc"));
+		o.setAccount(acc);
 			
-		// Pagamento
+		// Pagamento (da fare come id?)
 		String tipoPag = Utils.normalize(req.getPagamento());
 		if (tipoPag != null) {
 			TipoPagamento pag = pagR.findByTipoPagamento(tipoPag).orElseThrow(() ->
@@ -113,10 +105,9 @@ public class OrdineImplemetation implements IOrdineServices{
 		Ordine o = ordeR.findById(req.getId()).orElseThrow(() ->
 					new MangaException("!exists_ord"));
 		//Account
-		if (req.getAccount() != null && !req.getAccount().isEmpty()) {
+		if (req.getAccount() != null) {
 			try {
-				Integer accId = Integer.parseInt(req.getAccount());
-				Optional<Account> acc = accR.findById(accId);
+				Optional<Account> acc = accR.findById(req.getAccount());
 				if (!acc.isEmpty()) {
 					o.setAccount(acc.get());
 				}
