@@ -16,5 +16,5 @@ import lombok.ToString;
 public class CarrelloDTO {
 	private Integer id;
 	private AccountDTO account;
-	private List<MangaDTO> manga;
+	private List<RigaCarrelloDTO> righeCarrello;
 }
