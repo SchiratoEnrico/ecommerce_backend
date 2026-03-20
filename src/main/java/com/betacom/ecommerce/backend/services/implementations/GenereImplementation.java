@@ -32,8 +32,8 @@ public class GenereImplementation implements IGenereServices{
 		
 		GeneriUtils.validateRequest(req, true);
 		log.debug("Genere validated...");
-		
-		//check unicità autore
+		log.debug(req.getDescrizione());
+		//check unicità genere
 	    if (checkDuplicateGenere(req.getDescrizione(), null)) {
 	    	log.debug("genere already present");
 	        throw new MangaException("exists_gen");   
@@ -56,13 +56,15 @@ public class GenereImplementation implements IGenereServices{
 		Genere gen = genRepo.findById(req.getId())
 				.orElseThrow(()-> new MangaException("!exists_gen"));
 		
+		//check per vedere che il genere aggiornato non sia duplicato
+		if(checkDuplicateGenere(req.getDescrizione(), req.getId()))
+			throw new MangaException("exists_gen");
+		
 		GeneriUtils.buildGenere(gen, req, false);
 		
 		log.debug("builded genere");
 		
-		//check per vedere che il genere aggiornato non sia duplicato
-		if(checkDuplicateGenere(gen.getDescrizione(), gen.getId()))
-			throw new MangaException("exists_gen");
+		
 		
 		genRepo.save(gen);
 		

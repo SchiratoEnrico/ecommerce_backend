@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,10 +18,12 @@ import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/rest/manga")
 @RequiredArgsConstructor
+@Slf4j
 public class MangaController {
 	
 	private final IMangaServices mangaS;
@@ -33,7 +36,7 @@ public class MangaController {
 		try {
 			mangaS.create(req);
 			r.setMsg(msgS.get("rest_created"));
-		} catch (Exception e) {
+		} catch (Exception e) { 
 			r.setMsg(e.getMessage());
 			status = HttpStatus.CONFLICT;
 		}
@@ -82,5 +85,21 @@ public class MangaController {
 		}	
 		
 		return ResponseEntity.status(status).body(r);
+	}
+	
+	@DeleteMapping("/delete")
+	public ResponseEntity<Response> delete(@RequestParam(required = true) String id){
+	    Response r = new Response();
+	    HttpStatus status = HttpStatus.OK;
+
+	    try {
+	        mangaS.delete(id);
+	        r.setMsg(msgS.get("rest_deleted"));
+	    } catch (Exception e) {
+	        r.setMsg(e.getMessage());
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+
+	    return ResponseEntity.status(status).body(r);
 	}
 }
