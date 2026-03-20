@@ -90,6 +90,11 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		log.debug("removing RigheOrdine with id {}", id);
 		RigaOrdine r = righR.findById(id).orElseThrow(() ->
 						new MangaException("!exists_row"));
+		
+		Ordine o = r.getOrdine();
+		o.getRigheOrdine().remove(r);
+
+		ordeR.saveAndFlush(o);
 		righR.delete(r);
 	}
 
