@@ -4,22 +4,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.springframework.boot.test.context.SpringBootTest;
-
+import com.betacom.ecommerce.backend.controllers.AccountControllerTest;
+import com.betacom.ecommerce.backend.controllers.AnagraficaControllerTest;
 import com.betacom.ecommerce.backend.controllers.CarrelloControllerTest;
-import com.betacom.ecommerce.backend.controllers.CasaEditriceControllerTest;
-import com.betacom.ecommerce.backend.controllers.OrdineControllerTest;
-import com.betacom.ecommerce.backend.controllers.RigaOrdineControllerTest;
-import com.betacom.ecommerce.backend.controllers.StatoOrdineControllerTest;
-import com.betacom.ecommerce.backend.controllers.TipoSpedizioneControllerTest;
+import com.betacom.ecommerce.backend.controllers.TipoPagamentoControllerTest;
+
 
 @Suite
 @SelectClasses({
-	StatoOrdineControllerTest.class,
-	RigaOrdineControllerTest.class,
-	OrdineControllerTest.class
-})
-//@SpringBootTest NON VA SE METTI @Suite(@Suite is JUnit platform-level, @SpringBootTest should be on individual test classes)
 
+	AccountControllerTest.class,
+	AnagraficaControllerTest.class,
+//	CarrelloControllerTest.class,
+	TipoPagamentoControllerTest.class
+})
+
+
+@SpringBootTest
 class EcommerceBackendApplicationTests {
 	@Test
 	void contextLoads() {

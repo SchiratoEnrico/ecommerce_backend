@@ -1,24 +1,39 @@
 
-INSERT INTO system_messages (code, messaggio) VALUES('rest_deleted', 'Elemento eliminato con successo');
-INSERT INTO system_messages (code, messaggio) VALUES('rest_updated', 'Elemento aggiornato con successo');
-INSERT INTO system_messages (code, messaggio) VALUES('rest_created', 'Elemento creato con successo');
-INSERT INTO system_messages (code, messaggio) VALUES('!exists_sta', 'Stato d ordine non esistente');
-INSERT INTO system_messages (code, messaggio) VALUES('null_sta', 'Stato d ordine assente');
-INSERT INTO system_messages (code, messaggio) VALUES('exists_sta', 'Stato d ordine già esistente');
-INSERT INTO system_messages (code, messaggio) VALUES('!exists_row', 'Riga d ordine non esistente');
-INSERT INTO system_messages (code, messaggio) VALUES('null_row', 'Riga d ordine assente');
-INSERT INTO system_messages (code, messaggio) VALUES('exists_row', 'Riga d ordine già esistente');
-INSERT INTO system_messages (code, messaggio) VALUES('null_ord', 'Riga d ordine assente');
-INSERT INTO system_messages (code, messaggio) VALUES('!exists_ord', 'Riga d ordine già esistente');
-INSERT INTO system_messages (code, messaggio) VALUES('!valid_tar', 'Targa non valida');
-
+insert into system_messages (code, messaggio) values ('null_usr', 'Username assente');
+insert into system_messages (code, messaggio) values ('null_pdw', 'Password assente');
+insert into system_messages (code, messaggio) values ('null_ema', 'Email assente');
+insert into system_messages (code, messaggio) values ('null_ruo', 'Ruolo assente');
+insert into system_messages (code, messaggio) values ('null_acc', 'Account assente');
+insert into system_messages (code, messaggio) values ('null_nom', 'Nome assente');
+insert into system_messages (code, messaggio) values ('null_cog', 'Cognome assente');
+insert into system_messages (code, messaggio) values ('null_sta', 'Stato assente');
+insert into system_messages (code, messaggio) values ('null_cit', 'Citta assente');
+insert into system_messages (code, messaggio) values ('null_pro', 'Provincia assente');
+insert into system_messages (code, messaggio) values ('null_cap', 'Cap assente');
+insert into system_messages (code, messaggio) values ('null_via', 'Via assente');
+insert into system_messages (code, messaggio) values ('null_ana', 'Anagrafica assente');
+insert into system_messages (code, messaggio) values ('null_pag', 'Tipo pagamento assente');
+insert into system_messages (code, messaggio) values ('null_pre', 'Predefinito assente');
+insert into system_messages (code, messaggio) values ('!exists_acc', 'Account non esistente');
+insert into system_messages (code, messaggio) values ('!exists_ana', 'Informazione anagrafica non esistente');
+insert into system_messages (code, messaggio) values ('!exists_pag', 'Tipo pagamento non esistente');
+insert into system_messages (code, messaggio) values ('exists_usr', 'Username già presente');
+insert into system_messages (code, messaggio) values ('exists_ema', 'Email già presente');
+insert into system_messages (code, messaggio) values ('rest_created', 'Elemento creato con successo');
+insert into system_messages (code, messaggio) values ('rest_deleted', 'Elemento eliminato con successo');
+insert into system_messages (code, messaggio) values ('rest_updated', 'Elemento aggiornato con successo');
+insert into system_messages (code, messaggio) values ('pwd_short', 'Password troppo corta');
+insert into system_messages (code, messaggio) values ('pwd_upper', 'Password non contiene caratteri maiuscoli');
+insert into system_messages (code, messaggio) values ('pwd_lower', 'Password non contiene caratteri minuscoli');
+insert into system_messages (code, messaggio) values ('pwd_digit', 'Password non contiene caratteri numerici');
+insert into system_messages (code, messaggio) values ('pwd_special', 'Password non contiene caratteri speciali');
 
 -- =========================
 -- BASE TABLES (NO FK)
 -- =========================
 
-INSERT INTO accounts (email, username, ruolo)
-VALUES ('user@test.com', 'user1', 'USER');
+insert into accounts (username, password, email, ruolo) values ('MarioRossi', 'Password1!', 'mario.rossi@email.com', 'USER');
+insert into accounts (username, password, email, ruolo) values ('AdminUser', 'Password1!', 'admin@email.com', 'ADMIN');
 
 INSERT INTO stati_ordine (stato_ordine)
 VALUES ('CREATED');
