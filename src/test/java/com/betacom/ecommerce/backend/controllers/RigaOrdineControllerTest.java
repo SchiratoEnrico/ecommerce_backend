@@ -6,14 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
@@ -34,8 +32,7 @@ public class RigaOrdineControllerTest {
 	private IMessagesServices msgS;
 	
 	@Test
-	//@Order(2)
-	public void testCertificatoController() {
+	public void testRigaOrdineController() {
 		createTest();
 		updateTest();
 		listTest();

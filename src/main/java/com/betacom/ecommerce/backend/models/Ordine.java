@@ -3,6 +3,7 @@ package com.betacom.ecommerce.backend.models;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,7 +49,13 @@ public class Ordine {
     @JoinColumn(name = "id_stato", nullable = false)
 	private StatoOrdine stato;
 	
-	@OneToMany
-	@JoinColumn(name = "id_ordine")
+	@OneToMany(
+			fetch = FetchType.EAGER
+//			cascade = CascadeType.REMOVE,
+//		    orphanRemoval = true
+			)
+	@JoinColumn(
+			name = "id_ordine"
+			)
 	private List<RigaOrdine> righeOrdine;
 }
