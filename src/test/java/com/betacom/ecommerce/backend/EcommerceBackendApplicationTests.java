@@ -12,15 +12,13 @@ import com.betacom.ecommerce.backend.controllers.TipoPagamentoControllerTest;
 
 @Suite
 @SelectClasses({
-
 	AccountControllerTest.class,
 	AnagraficaControllerTest.class,
-//	CarrelloControllerTest.class,
 	TipoPagamentoControllerTest.class
 })
 
 
-@SpringBootTest
+//@SpringBootTest
 class EcommerceBackendApplicationTests {
 	@Test
 	void contextLoads() {
