@@ -11,6 +11,8 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Anagrafica;
 import com.betacom.ecommerce.backend.repositories.IAnagraficaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAnagraficaServices;
+import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,45 +27,43 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	@Override
 	@Transactional (rollbackFor = Exception.class)
 	public void create(AnagraficaRequest req) throws MangaException {
-		log.debug("Create Account", req);
-		
-		if(req.getNome()==null || req.getNome().isBlank())
-			throw new MangaException("null_nom");
-		
-		if(req.getCognome()==null || req.getCognome().isBlank())
-			throw new MangaException("null_cog");
-			
-		if(req.getStato()==null || req.getStato().isBlank())
-			throw new MangaException("null_sta");
-		
-		if(req.getCitta()==null || req.getCitta().isBlank())
-			throw new MangaException("null_cit");
-		
-		if(req.getProvincia()==null || req.getProvincia().isBlank())
-			throw new MangaException("null_pro");
+	    log.debug("Create Account", req);
 
-		if(req.getCap()==null)
-			throw new MangaException("null_cap");
-		
-		if(req.getVia()==null || req.getVia().isBlank())
-			throw new MangaException("null_via");
-		
-		if(req.getPredefinito()==null)
-			throw new MangaException("null_pre");
-		
-	
-		Anagrafica an = new Anagrafica();
-	    an.setNome(req.getNome().trim().toUpperCase());
-	    an.setCognome(req.getCognome().trim().toUpperCase());
-	    an.setStato(req.getStato().trim().toUpperCase());
-	    an.setCitta(req.getCitta().trim().toUpperCase());
-	    an.setProvincia(req.getProvincia().trim().toUpperCase());
-	    an.setCap(req.getCap());
-	    an.setVia(req.getVia().trim().toUpperCase());
+	    if (Utils.isBlank(req.getNome()))
+	        throw new MangaException("null_nom");
+
+	    if (Utils.isBlank(req.getCognome()))
+	        throw new MangaException("null_cog");
+
+	    if (Utils.isBlank(req.getStato()))
+	        throw new MangaException("null_sta");
+
+	    if (Utils.isBlank(req.getCitta()))
+	        throw new MangaException("null_cit");
+
+	    if (Utils.isBlank(req.getProvincia()))
+	        throw new MangaException("null_pro");
+
+	    if (Utils.isBlank(req.getCap()))
+	        throw new MangaException("null_cap");
+
+	    if (Utils.isBlank(req.getVia()))
+	        throw new MangaException("null_via");
+
+	    if (req.getPredefinito() == null)
+	        throw new MangaException("null_pre");
+
+	    Anagrafica an = new Anagrafica();
+	    an.setNome(Utils.normalize(req.getNome()));
+	    an.setCognome(Utils.normalize(req.getCognome()));
+	    an.setStato(Utils.normalize(req.getStato()));
+	    an.setCitta(Utils.normalize(req.getCitta()));
+	    an.setProvincia(Utils.normalize(req.getProvincia()));
+	    an.setCap(Utils.normalize(req.getCap()));
+	    an.setVia(Utils.normalize(req.getVia()));
 	    an.setPredefinito(false);
 
 	    repAna.save(an);
-	
 	}
 
 	@Override
@@ -79,77 +79,55 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	@Override
 	@Transactional (rollbackFor = Exception.class)
 	public void update(AnagraficaRequest req) throws MangaException {
-		log.debug("Update Account: ", req);
-        
-		Anagrafica ana = repAna.findById(req.getId())
-				.orElseThrow(() -> new MangaException("null_ana"));
-		
-		if(req.getNome()!=null && !req.getNome().isBlank())
-			ana.setNome(req.getNome().trim().toUpperCase());
-		
-		if (req.getCognome() != null && !req.getCognome().isBlank())
-	        ana.setCognome(req.getCognome().trim().toUpperCase());
+	    log.debug("Update Account: ", req);
 
-	    if (req.getStato() != null && !req.getStato().isBlank())
-	        ana.setStato(req.getStato().trim().toUpperCase());
+	    Anagrafica ana = repAna.findById(req.getId())
+	            .orElseThrow(() -> new MangaException("null_ana"));
 
-	    if (req.getCitta() != null && !req.getCitta().isBlank())
-	        ana.setCitta(req.getCitta().trim().toUpperCase());
+	    if (!Utils.isBlank(req.getNome()))
+	        ana.setNome(Utils.normalize(req.getNome()));
 
-	    if (req.getProvincia() != null && !req.getProvincia().isBlank())
-	        ana.setProvincia(req.getProvincia().trim().toUpperCase());
+	    if (!Utils.isBlank(req.getCognome()))
+	        ana.setCognome(Utils.normalize(req.getCognome()));
+
+	    if (!Utils.isBlank(req.getStato()))
+	        ana.setStato(Utils.normalize(req.getStato()));
+
+	    if (!Utils.isBlank(req.getCitta()))
+	        ana.setCitta(Utils.normalize(req.getCitta()));
+
+	    if (!Utils.isBlank(req.getProvincia()))
+	        ana.setProvincia(Utils.normalize(req.getProvincia()));
 
 	    if (req.getCap() != null)
 	        ana.setCap(req.getCap());
 
-	    if (req.getVia() != null && !req.getVia().isBlank())
-	        ana.setVia(req.getVia().trim().toUpperCase());
+	    if (!Utils.isBlank(req.getVia()))
+	        ana.setVia(Utils.normalize(req.getVia()));
 
-	    if (req.getPredefinito() != null ? req.getPredefinito() : false)
+	    if (req.getPredefinito() != null)
 	        ana.setPredefinito(req.getPredefinito());
 	    
 	    repAna.save(ana);
-		
 	}
 
 	@Override
 	public List<AnagraficaDTO> list() {
-		log.debug("findAll() Anagrafica");
-		List<Anagrafica> lA = repAna.findAll();
-		
-		return lA.stream()
-				.map(a->AnagraficaDTO.builder()
-						.id(a.getId())
-						.nome(a.getNome())
-						.cognome(a.getCognome())
-						.stato(a.getStato())
-						.citta(a.getCitta())
-						.provincia(a.getProvincia())
-						.cap(a.getCap())
-						.via(a.getVia())
-						.predefinito(a.getPredefinito())
-						.build()
-				).toList();
-						
+	    log.debug("findAll() Anagrafica");
+
+	    return repAna.findAll().stream()
+	            .map(a -> DtoBuildres.buildAnagraficaDTO(a, true))
+	            .toList();
 	}
 
 	@Override
 	public AnagraficaDTO findById(Integer id) throws MangaException {
-		log.debug("findById() Anagrafica {}", id);
-		Anagrafica a = repAna.findById(id)
-				.orElseThrow(() -> new MangaException("!exists_ana"));
-		
-		return AnagraficaDTO.builder()
-				.id(a.getId())
-				.nome(a.getNome())
-				.cognome(a.getCognome())
-				.stato(a.getStato())
-				.citta(a.getCitta())
-				.provincia(a.getProvincia())
-				.cap(a.getCap())
-				.via(a.getVia())
-				.predefinito(a.getPredefinito())
-				.build();
-	}
+	    log.debug("findById() Anagrafica {}", id);
 
+	    Anagrafica a = repAna.findById(id)
+	            .orElseThrow(() -> new MangaException("!exists_ana"));
+
+	    return DtoBuildres.buildAnagraficaDTO(a, true);
+	}
+	
 }
