@@ -10,6 +10,7 @@ import com.betacom.ecommerce.backend.dto.inputs.CasaEditriceRequest;
 import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.models.CasaEditrice;
 import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
+import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ICasaEditriceServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.specification.CasaEditriceSpecifications;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class CasaEditriceImplementation implements ICasaEditriceServices{
 	private final ICasaEditriceRepository caseR;
 	private final IMessagesServices msgS;
+	private final IMangaRepository manR;
 	
 	@Transactional (rollbackFor = MangaException.class)
 	@Override
@@ -69,10 +71,10 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 		CasaEditrice cas = caseR.findById(id)
 				.orElseThrow(() -> new MangaException(msgS.get("case_ntfnd")));
 		
-		if(!cas.getManga().isEmpty())
-			throw new MangaException(msgS.get("manga_exist"));
+		if(caseR.existsByIdAndMangaIsNotEmpty(id))
+			throw new MangaException("Non puoi eliminare una casa editrice con dei manga ancora allegati");
 		
-		caseR.delete(cas);
+		caseR.delete(cas); 
 	}
 	
 	@Override
@@ -87,6 +89,7 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	}
 	
 	@Override
+	@Transactional
 	public CasaEditriceDTO findById(Integer id) throws Exception {
 		CasaEditrice cas = caseR.findById(id)
 				.orElseThrow(() -> new MangaException(msgS.get("case_ntfnd")+id));

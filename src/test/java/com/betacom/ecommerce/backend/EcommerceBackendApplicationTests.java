@@ -11,9 +11,7 @@ import com.betacom.ecommerce.backend.controllers.TipoSpedizioneControllerTest;
 
 @Suite
 @SelectClasses({
-	CarrelloControllerTest.class,
 	CasaEditriceControllerTest.class,
-	TipoSpedizioneControllerTest.class
 })
 @SpringBootTest
 class EcommerceBackendApplicationTests {

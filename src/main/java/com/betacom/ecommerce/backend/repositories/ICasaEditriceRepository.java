@@ -10,5 +10,5 @@ import com.betacom.ecommerce.backend.models.CasaEditrice;
 public interface ICasaEditriceRepository extends 
 JpaRepository<CasaEditrice, Integer>, 
 JpaSpecificationExecutor<CasaEditrice> {
-	
+	boolean existsByIdAndMangaIsNotEmpty(Integer id);
 }

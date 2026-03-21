@@ -10,5 +10,5 @@ import com.betacom.ecommerce.backend.models.RigaCarrello;
 public interface IRigaCarrelloRepository extends
 JpaRepository<RigaCarrello, Integer>,
 JpaSpecificationExecutor<RigaCarrello>{
-
+	boolean existsByMangaIsbn(String isbn);
 }

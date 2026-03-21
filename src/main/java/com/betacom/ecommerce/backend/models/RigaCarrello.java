@@ -15,9 +15,9 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "righe_carrello")
+@ToString(exclude = {"carrello", "manga"})
 public class RigaCarrello {
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)

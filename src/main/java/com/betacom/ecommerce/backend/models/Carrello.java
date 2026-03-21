@@ -13,11 +13,13 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
 @Entity
 @Table(name="carrelli")
+@ToString(exclude = {"account", "righeCarrello"})
 public class Carrello {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
