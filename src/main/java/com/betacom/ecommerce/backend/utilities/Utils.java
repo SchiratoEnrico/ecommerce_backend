@@ -26,4 +26,25 @@ public class Utils {
             throw new MangaException("!valid_dtn");
         }
 	}
+	
+	public static void validatePassword(String password) throws MangaException {
+	    if (password == null || password.isBlank())
+	        throw new MangaException("null_pwd");
+
+	    if (password.trim().length() < 6)
+	        throw new MangaException("pwd_short");
+
+	    if (!password.chars().anyMatch(c -> Character.isUpperCase(c)))
+	        throw new MangaException("pwd_upper");
+
+	    if (!password.chars().anyMatch(c -> Character.isLowerCase(c)))
+	        throw new MangaException("pwd_lower");
+
+	    if (!password.chars().anyMatch(c -> Character.isDigit(c)))
+	        throw new MangaException("pwd_digit");
+
+	    if (!password.chars().anyMatch(c -> "!@#$%^&*()-_=+[]{}|;:',.<>?/`~".indexOf(c) >= 0))
+	        throw new MangaException("pwd_special");
+	}
+	
 }

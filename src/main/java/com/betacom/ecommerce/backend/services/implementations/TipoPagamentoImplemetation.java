@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,8 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
 import com.betacom.ecommerce.backend.repositories.ITipoPagamentoRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ITipoPagamentoServices;
+import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +31,13 @@ public class TipoPagamentoImplemetation implements ITipoPagamentoServices{
 	
 		log.debug("Create Pagamento", req);
 		
-		if(req.getTipoPagamento()==null || req.getTipoPagamento().isBlank())
+		if(Utils.isBlank(req.getTipoPagamento()))
 			throw new MangaException("null_pag");
 		
 		TipoPagamento pag = new TipoPagamento();
-		pag.setTipoPagamento(req.getTipoPagamento().trim().toUpperCase());
+		pag.setTipoPagamento(Utils.normalize(req.getTipoPagamento()));
 		
-		 repPag.save(pag);
+		repPag.save(pag);
 	}
 
 	@Override
@@ -50,27 +53,27 @@ public class TipoPagamentoImplemetation implements ITipoPagamentoServices{
 	@Override
 	@Transactional (rollbackFor = Exception.class)
 	public void update(TipoPagamentoRequest req) throws MangaException {
+		
 		TipoPagamento pag = repPag.findById(req.getId())
 				.orElseThrow(() -> new MangaException("null_pag"));
-		if(req.getTipoPagamento()!=null && !req.getTipoPagamento().isBlank())
-			pag.setTipoPagamento(req.getTipoPagamento().trim());
+		
+		if(!Utils.isBlank(req.getTipoPagamento()))
+			pag.setTipoPagamento(Utils.normalize(req.getTipoPagamento()));
 		
 		repPag.save(pag);
 	}
 
 	@Override
 	public List<TipoPagamentoDTO> list() {
-		log.debug("findAll() Pagamenti");
-		List<TipoPagamento> lP = repPag.findAll();
-		return lP.stream()
-				.map(p->TipoPagamentoDTO.builder()
-						.id(p.getId())
-						.tipoPagamento(p.getTipoPagamento())
-						.build()
-				).toList();
-				
-	}
+	    log.debug("findAll() Pagamenti");
 
+	    List<TipoPagamento> lP = repPag.findAll();
+
+	    return lP.stream()
+	            .map(p -> DtoBuildres.buildTipoPagamentoDTO(p, true))
+	            .collect(Collectors.toList());
+	}
+	
 	@Override
 	public TipoPagamentoDTO findById(Integer id) throws MangaException {
 		log.debug("findById() Pagamento {}", id);
@@ -78,10 +81,8 @@ public class TipoPagamentoImplemetation implements ITipoPagamentoServices{
 		TipoPagamento pag = repPag.findById(id)
 				.orElseThrow(() -> new MangaException("!exists_pag"));
 		
-		return TipoPagamentoDTO.builder()
-				.id(pag.getId())
-				.tipoPagamento(pag.getTipoPagamento())
-				.build();
+		return DtoBuildres.buildTipoPagamentoDTO(pag, true);
+		
 				
 	}
 

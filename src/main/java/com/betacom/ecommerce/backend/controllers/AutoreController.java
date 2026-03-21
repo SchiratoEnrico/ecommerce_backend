@@ -35,7 +35,7 @@ public class AutoreController {
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
-			status = HttpStatus.CONFLICT;
+			status = HttpStatus.BAD_REQUEST;
 		}
 		
 		return ResponseEntity.status(status).body(r);

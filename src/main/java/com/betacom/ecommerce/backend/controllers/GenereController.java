@@ -50,7 +50,7 @@ public class GenereController {
 			r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
-			status = HttpStatus.CONFLICT;
+			status = HttpStatus.BAD_REQUEST;
 		}
 		
 		return ResponseEntity.status(status).body(r);
@@ -94,7 +94,7 @@ public class GenereController {
 	        r.setMsg(msgS.get("rest_deleted"));
 	    } catch (Exception e) {
 	        r.setMsg(e.getMessage());
-	        status = HttpStatus.CONFLICT;
+	        status = HttpStatus.BAD_REQUEST;
 	    }
 
 	    return ResponseEntity.status(status).body(r);

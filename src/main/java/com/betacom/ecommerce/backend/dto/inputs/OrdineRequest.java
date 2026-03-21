@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OrdineRequest {
 	private Integer id;
-	private String account;
+	private Integer account;
 	private String pagamento;
 	private String spedizione;
 	private String data;

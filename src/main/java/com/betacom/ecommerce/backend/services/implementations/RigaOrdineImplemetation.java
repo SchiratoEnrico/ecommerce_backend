@@ -90,6 +90,11 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		log.debug("removing RigheOrdine with id {}", id);
 		RigaOrdine r = righR.findById(id).orElseThrow(() ->
 						new MangaException("!exists_row"));
+		
+		Ordine o = r.getOrdine();
+		o.getRigheOrdine().remove(r);
+
+		ordeR.saveAndFlush(o);
 		righR.delete(r);
 	}
 
@@ -104,7 +109,7 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 	@Override
 	public RigaOrdineDTO findById(Integer id) throws MangaException {
 		RigaOrdine r = righR.findById(id).orElseThrow(()->
-							new MangaException("!exists_man"));
+							new MangaException("!exists_row"));
 		return DtoBuildres.buildRigaOrdineDTO(r, true);
 	}
 }

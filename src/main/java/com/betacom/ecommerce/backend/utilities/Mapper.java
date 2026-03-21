@@ -69,6 +69,7 @@ public class Mapper {
 		return CarrelloDTO.builder()
 				.id(c.getId())
 				.account(buildAccountDTO(c.getAccount()))
+				.righe(buildRigaCarrelloDTO(c.getRigheCarrello()))
 				.build();
 	}
 	

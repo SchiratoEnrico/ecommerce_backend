@@ -1,6 +1,8 @@
- package com.betacom.ecommerce.backend.utilities;
+package com.betacom.ecommerce.backend.utilities;
 
 import java.util.stream.Collectors;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
@@ -10,6 +12,7 @@ import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.dto.outputs.GenereDTO;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
 import com.betacom.ecommerce.backend.dto.outputs.OrdineDTO;
+import com.betacom.ecommerce.backend.dto.outputs.RigaCarrelloDTO;
 import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
@@ -22,6 +25,7 @@ import com.betacom.ecommerce.backend.models.CasaEditrice;
 import com.betacom.ecommerce.backend.models.Genere;
 import com.betacom.ecommerce.backend.models.Manga;
 import com.betacom.ecommerce.backend.models.Ordine;
+import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.models.RigaOrdine;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
@@ -92,6 +96,13 @@ public class DtoBuildres {
     			.id(r.getId())
     			.build();
 	}
+	private static RigaCarrelloDTO idOnly(RigaCarrello r) {
+	    return r == null ? 
+	    		null : 
+	    		RigaCarrelloDTO.builder()
+    			.id(r.getId())
+    			.build();
+	}
 
 	public static AccountDTO buildAccountDTO(Account a, Boolean expand) {
 		return AccountDTO.builder()
@@ -105,7 +116,7 @@ public class DtoBuildres {
 							)
 							.toList()
 							)
-				.carrelloId(a.getCarrello()==null ? null : a.getCarrello().getId())
+				.carrelloId(a.getCarrello().getId())
 				.email(a.getEmail())
 				.ruolo(a.getRuolo())
 				.username(a.getUsername())
@@ -141,7 +152,6 @@ public class DtoBuildres {
 						.toList())
 				.build();
 	}
-	
 	public static GenereDTO buildGenereDTO(Genere g, Boolean expand) {
 		return GenereDTO.builder()
 				.id(g.getId())
@@ -174,6 +184,7 @@ public class DtoBuildres {
 				.build();
 	}
 	
+	@Transactional(readOnly = true)
 	public static OrdineDTO buildOrdineDTO(Ordine o, Boolean expand) {
 		return OrdineDTO.builder()
 			.id(o.getId())
@@ -201,12 +212,13 @@ public class DtoBuildres {
 	}
 
 	
-	
+	@Transactional(readOnly = true)
 	public static RigaOrdineDTO buildRigaOrdineDTO(RigaOrdine r, Boolean expand) {
 		return RigaOrdineDTO.builder()
 				.id(r.getId())
 				.idOrdine(r.getOrdine().getId())
-				.manga(expand? buildMangaDTO(r.getManga(), false): idOnly(r.getManga()))
+				//.manga(expand? buildMangaDTO(r.getManga(), false): idOnly(r.getManga()))
+				.manga(r.getManga().getIsbn())
 				.numeroCopie(r.getNumeroCopie())
 				.build();
 	}

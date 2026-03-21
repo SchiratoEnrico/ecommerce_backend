@@ -19,10 +19,10 @@ public class MangaUtils {
 				.immagine(a.getImmagine()) 
 				.numeroCopie(a.getNumeroCopie())
 				.casaEditrice(Mapper.buildCaseEditriciDTO(a.getCasaEditrice()))
-				.generi(a.getGeneri().stream()
-						.map(g -> GeneriUtils.buildGenDTO(g)).toList())
-				.autori(a.getAutori().stream()
-						.map(aut -> AutoriUtils.buildAutDTO(aut)).toList())
+				.generi(a.getGeneri()==null ? null: a.getGeneri().stream()
+						.map(g -> DtoBuildres.buildGenereDTO(g, false)).toList())
+				.autori(a.getAutori()==null ? null: a.getAutori().stream() 
+						.map(aut -> DtoBuildres.buildAutoreDTO(aut, false)).toList())
 				.build();
 	}
 	
@@ -53,7 +53,7 @@ public class MangaUtils {
 			if(!Utils.isBlank(req.getTitolo()))
 				toReturn.setTitolo(req.getTitolo());
 			
-			if(req.getIsbn()!=null)
+			if(req.getPrezzo()!=null) 
 				toReturn.setPrezzo(req.getPrezzo());
 			
 			//da capire generi, casa editrice e autori cosa fare

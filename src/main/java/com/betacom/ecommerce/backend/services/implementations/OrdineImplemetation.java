@@ -50,25 +50,16 @@ public class OrdineImplemetation implements IOrdineServices{
 		//Account
 		if (req.getAccount() == null) {
 			throw new MangaException("null_acc");
-		} 
-		if (!req.getAccount().isEmpty())  {
-			throw new MangaException("null_acc");
 		}
-		
-		try {
-			Integer accId = Integer.parseInt(req.getAccount());
-			Account acc = accR.findById(accId).orElseThrow(() ->
-				new MangaException("null_acc"));
-			o.setAccount(acc);
-		} catch (NumberFormatException e) {
-			throw new MangaException("null_acc");
-		}
+		Account acc = accR.findById(req.getAccount()).orElseThrow(() ->
+				new MangaException("!exists_acc"));
+		o.setAccount(acc);
 			
-		// Pagamento
+		// Pagamento (da fare come id?)
 		String tipoPag = Utils.normalize(req.getPagamento());
 		if (tipoPag != null) {
 			TipoPagamento pag = pagR.findByTipoPagamento(tipoPag).orElseThrow(() ->
-					new MangaException("null_pag"));
+					new MangaException("!exists_pag"));
 				o.setTipoPagamento(pag);			
 		} else {
 			throw new MangaException("null_pag");
@@ -78,7 +69,7 @@ public class OrdineImplemetation implements IOrdineServices{
 		String tipoSpe = Utils.normalize(req.getSpedizione());
 		if (tipoSpe != null) {
 			TipoSpedizione spe = speR.findByTipoSpedizione(tipoSpe).orElseThrow(() ->
-					new MangaException("null_spe"));
+					new MangaException("!exists_spe"));
 				o.setTipoSpedizione(spe);
 		} else {
 			throw new MangaException("null_spe");
@@ -95,7 +86,7 @@ public class OrdineImplemetation implements IOrdineServices{
 		String stato = Utils.normalize(req.getStato());
 		if (stato != null) {
 			StatoOrdine stat = statR.findByStatoOrdine(stato).orElseThrow(() ->
-					new MangaException("null_spe"));
+					new MangaException("!exists_sta"));
 				o.setStato(stat);			
 		} else {
 			throw new MangaException("null_sta");
@@ -110,37 +101,35 @@ public class OrdineImplemetation implements IOrdineServices{
 	@Override
 	public void update(OrdineRequest req) throws MangaException {
 		log.debug("updating ordine {}", req);
+		
+		if (req.getId() == null) {
+			throw new MangaException("null_ord");
+		}
+		
 		Ordine o = ordeR.findById(req.getId()).orElseThrow(() ->
 					new MangaException("!exists_ord"));
 		//Account
-		if (req.getAccount() != null && !req.getAccount().isEmpty()) {
-			try {
-				Integer accId = Integer.parseInt(req.getAccount());
-				Optional<Account> acc = accR.findById(accId);
-				if (!acc.isEmpty()) {
-					o.setAccount(acc.get());
-				}
-			} catch (NumberFormatException e) {
-				throw new MangaException("null_ord");
-			}
+		if (req.getAccount() != null) {
+			Account acc = accR.findById(req.getAccount())
+					.orElseThrow(() -> new MangaException("!exists_acc"));
+			o.setAccount(acc);
 		}
 			
 		// Pagamento
 		String tipoPag = Utils.normalize(req.getPagamento());
 		if (tipoPag != null) {
-			Optional<TipoPagamento> pag = pagR.findByTipoPagamento(tipoPag);
-			if (!pag.isEmpty()) {
-				o.setTipoPagamento(pag.get());
-			}		
-		} 
+			TipoPagamento pag = pagR.findByTipoPagamento(tipoPag)
+					.orElseThrow(() -> new MangaException("!exists_pag"));
+			o.setTipoPagamento(pag);
+		}		 
 		
 		// Spedizioni
 		String tipoSpe = Utils.normalize(req.getSpedizione());
 		if (tipoSpe != null) {
-			Optional<TipoSpedizione> spe = speR.findByTipoSpedizione(tipoSpe);
-			if (!tipoSpe.isEmpty()) {
-				o.setTipoSpedizione(spe.get());
-			}
+			TipoSpedizione spe = speR.findByTipoSpedizione(tipoSpe)
+					.orElseThrow(() -> new MangaException("!exists_spe"));
+				o.setTipoSpedizione(spe);
+			
 		}
 
 		// data;
@@ -155,10 +144,9 @@ public class OrdineImplemetation implements IOrdineServices{
 		// stato;
 		String stato = Utils.normalize(req.getStato());
 		if (stato != null) {
-			Optional<StatoOrdine> stat = statR.findByStatoOrdine(stato);
-			if (!stat.isEmpty()){ 
-				o.setStato(stat.get());			
-			} 
+			StatoOrdine stat = statR.findByStatoOrdine(stato)
+					.orElseThrow(() -> new MangaException("!exists_sta"));
+			o.setStato(stat);			
 		}
 		ordeR.save(o);
 	}
@@ -167,6 +155,9 @@ public class OrdineImplemetation implements IOrdineServices{
 	@Override
 	public void delete(Integer id) throws MangaException {
 		log.debug("removing ordine con id {}", id);
+		if (id == null) {
+			throw new MangaException("null_ord");
+		}
 		Ordine o = ordeR.findById(id).orElseThrow(() ->
 					new MangaException("!exists_ord"));
 		List<RigaOrdine> lR = o.getRigheOrdine();
@@ -174,7 +165,6 @@ public class OrdineImplemetation implements IOrdineServices{
 		// rimozione automatica righe quando ordine viene eliminato
 		lR.stream()
 		  .forEach(r -> rowR.delete(r));
-
 		ordeR.delete(o);
 	}
 
@@ -192,6 +182,11 @@ public class OrdineImplemetation implements IOrdineServices{
 	@Override
 	public OrdineDTO findById(Integer id) throws MangaException {
 		log.debug("ordine findById({})", id);
+		
+		if (id == null) {
+			throw new MangaException("null_ord");
+		}
+
 		Ordine o = ordeR.findById(id).orElseThrow(() ->
 						new MangaException("!exists_ord"));
 		return DtoBuildres.buildOrdineDTO(o, true);

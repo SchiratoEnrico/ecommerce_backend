@@ -33,7 +33,7 @@ public class OrdineController {
         HttpStatus status = HttpStatus.OK;
         try {
             Integer id = ordS.create(req);
-            r.setMsg(msgS.get("rest_created")  + " con id: " + id);
+            r.setMsg(msgS.get("rest_created"));
         } catch (MangaException e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
@@ -70,7 +70,7 @@ public class OrdineController {
     }
 
 	@GetMapping ("/list")
-	private ResponseEntity<Object> list(){
+	public ResponseEntity<Object> list(){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
