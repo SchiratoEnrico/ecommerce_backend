@@ -99,13 +99,19 @@ public class CasaEditriceControllerTest {
 	@Test
 	@Order(6)
 	public void deleteCasaSuccess() {
-		log.debug("*** Test delete Casa Editrice - successo ***");
+		log.debug("*** Test delete Casa Editrice ***");
 		
+		log.debug("* Expected: fail due to manga attached not empty *");
 		ResponseEntity<Response> resp = casC.delete(1);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		log.debug("* Done *");
 		
+		log.debug("* Expected: success *");
+		resp = casC.delete(2);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
 		Assertions.assertThat(r.getMsg()).isEqualTo("rest_deleted");
+		log.debug("* Done *");
 	}
 	
 	@Test

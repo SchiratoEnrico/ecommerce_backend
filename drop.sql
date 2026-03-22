@@ -2,7 +2,7 @@
     set client_min_messages = WARNING;
 
     alter table if exists anagrafiche 
-       drop constraint if exists FKppcbv6im3teug10ygcq2nw6h4;
+       drop constraint if exists FKoc2ya8cyewupshbwv2fuwqutx;
 
     alter table if exists carrelli 
        drop constraint if exists FK8bwmqjwt5v85bcicyrb2cp03y;
@@ -26,25 +26,19 @@
        drop constraint if exists FKeahnhannuwy5mebvhxy8lqe8b;
 
     alter table if exists ordini 
+       drop constraint if exists FK76mc7hr7sthilhjy1rerhshmg;
+
+    alter table if exists ordini 
+       drop constraint if exists FKgp5h6gfg8c52s54gtsoyc2894;
+
+    alter table if exists ordini 
        drop constraint if exists FKo9jvgplgfwdyw1w66gxj8i3iq;
 
-    alter table if exists ordini 
-       drop constraint if exists FK6j0iarcfjdeljghsl5hu41ywk;
+    alter table if exists righeordine 
+       drop constraint if exists FKqofnxqjgpy7und7xfak25es7v;
 
-    alter table if exists ordini 
-       drop constraint if exists FKf7s1k810ss61tb8h9yan3kiax;
-
-    alter table if exists righe_carrello 
-       drop constraint if exists FKbkny6hvx39y1qpv8knmm4p1m6;
-
-    alter table if exists righe_carrello 
-       drop constraint if exists FK647fphayoh41pfui4qmym6mnv;
-
-    alter table if exists righe_ordine 
-       drop constraint if exists FKqylepa0isnmlaqhnny012eydn;
-
-    alter table if exists righe_ordine 
-       drop constraint if exists FK2ybnsnkyw4w9tfkxeojq1lr6h;
+    alter table if exists righeordine 
+       drop constraint if exists FKa30cbtoatkcx6verd9yoyguse;
 
     drop table if exists accounts cascade;
 
@@ -66,14 +60,12 @@
 
     drop table if exists ordini cascade;
 
-    drop table if exists righe_carrello cascade;
+    drop table if exists pagamenti cascade;
 
-    drop table if exists righe_ordine cascade;
+    drop table if exists righeordine cascade;
+
+    drop table if exists spedizioni cascade;
 
     drop table if exists stati_ordine cascade;
 
     drop table if exists system_messages cascade;
-
-    drop table if exists tipi_pagamento cascade;
-
-    drop table if exists tipi_spedizione cascade;

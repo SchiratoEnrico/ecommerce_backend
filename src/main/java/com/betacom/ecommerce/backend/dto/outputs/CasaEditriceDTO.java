@@ -19,5 +19,5 @@ public class CasaEditriceDTO {
 	private String descrizione;
 	private String indirizzo;
 	private String email;
-	private List<MangaDTO> manga;
+	private List<String> isbns;
 }

@@ -1,39 +1,36 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
+import com.betacom.ecommerce.backend.dto.inputs.RigaCarrelloRequest;
 import com.betacom.ecommerce.backend.response.Response;
-import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
 
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/rest/carrello")
-public class CarrelloController {
-
-	private final ICarrelloServices carS;
+@RequestMapping("/rest/riga_carrello")
+public class RigaCarrelloController {
+	private final IRigaCarrelloServices rcS;
 	private final IMessagesServices msgS;
 	
 	@PostMapping("/create")
-	public ResponseEntity<Response> create(@RequestBody(required=true) CarrelloRequest req){
+	public ResponseEntity<Response> create(@RequestBody(required=true) RigaCarrelloRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			carS.create(req);
+			rcS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
@@ -42,56 +39,16 @@ public class CarrelloController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
-	@PostMapping("/addRow")
-	public ResponseEntity<Response> addRow(
-			@RequestParam(required=true) Integer chartId,
-			@RequestParam(required=true) String isbn,
-			@RequestParam(required=true) Integer nCopie
-			){
+	@PostMapping("/update")
+	public ResponseEntity<Response> update(@RequestBody(required=true) RigaCarrelloRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			carS.addRow(chartId, isbn, nCopie);
-			r.setMsg(msgS.get("rest_updated"));
-		} catch (Exception e) {
-			r.setMsg(e.getMessage());
-			status = HttpStatus.BAD_REQUEST;
-		}
-		return ResponseEntity.status(status).body(r);
-	}
-	
-	@PostMapping("/updateRow")
-	public ResponseEntity<Response> updateRow(
-			@RequestParam(required=true) Integer chartId,
-			@RequestParam(required=true) Integer rowId,
-			@RequestParam(required=true) String isbn,
-			@RequestParam(required=true) Integer nCopie
-			){
-		Response r = new Response();
-		HttpStatus status = HttpStatus.OK;
-		try {
-			carS.updateRow(chartId, rowId, isbn, nCopie);
-			if(nCopie>0)
-				r.setMsg(msgS.get("rest_updated"));
-			else
+			rcS.update(req);
+			if(req.getNumeroCopie()!=null || req.getNumeroCopie()<=0)
 				r.setMsg(msgS.get("rest_deleted"));
-		} catch (Exception e) {
-			r.setMsg(e.getMessage());
-			status = HttpStatus.BAD_REQUEST;
-		}
-		return ResponseEntity.status(status).body(r);
-	}
-	
-	@DeleteMapping("/deleteRow")
-	public ResponseEntity<Response> deleteRow(
-			@RequestParam(required=true) Integer chartId,
-			@RequestParam(required=true) Integer rowId
-			){
-		Response r = new Response();
-		HttpStatus status = HttpStatus.OK;
-		try {
-			carS.deleteRow(chartId, rowId);
-			r.setMsg(msgS.get("rest_deleted"));
+			else
+				r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
@@ -104,7 +61,7 @@ public class CarrelloController {
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			carS.delete(id);
+			rcS.delete(id);
 			r.setMsg(msgS.get("rest_deleted"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
@@ -114,16 +71,15 @@ public class CarrelloController {
 	}
 	
 	/**
-	 * TODO: Da implementare
-	 * filtro sui manga contenuti?
+	 * @param tipoSpedizione
+	 * @return
 	 */
 	@GetMapping("/list")
-	public ResponseEntity<Object> list(
-			@RequestParam(required=false) List<String> isbns){
+	public ResponseEntity<Object> list(){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r= carS.list(isbns);
+			r= rcS.list();
 		} catch (Exception e) {
 			r=e.getMessage();
 			status = HttpStatus.BAD_REQUEST;
@@ -131,16 +87,12 @@ public class CarrelloController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
-	/**
-	 * @param id
-	 * @return
-	 */
 	@GetMapping("/findById")
 	public ResponseEntity<Object> findById (@RequestParam (required = true)  Integer id){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r= carS.findById(id);
+			r= rcS.findById(id);
 		} catch (Exception e) {
 			r=e.getMessage();
 			status = HttpStatus.BAD_REQUEST; 

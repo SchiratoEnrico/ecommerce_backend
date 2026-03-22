@@ -104,14 +104,6 @@ public class DtoBuildres {
     			.build();
 	}
 
-	private static CarrelloDTO idOnly(Carrello c) {
-	    return c == null ? 
-	    		null : 
-	    		CarrelloDTO.builder()
-    			.id(c.getId())
-    			.build();
-	}
-
 	public static AccountDTO buildAccountDTO(Account a, Boolean expand) {
 		return AccountDTO.builder()
 				.id(a.getId())
@@ -160,43 +152,6 @@ public class DtoBuildres {
 						.toList())
 				.build();
 	}
-	
-	public static RigaCarrelloDTO buildRigaCarrelloDTO(RigaCarrello req, Boolean expand) {
-		return RigaCarrelloDTO.builder()
-				.id(req.getId())
-				.carrelloId(req.getCarrello().getId())
-				.manga(expand? buildMangaDTO(req.getManga(), false):idOnly(req.getManga()))
-				.numeroCopie(req.getNumeroCopie())
-				.build();
-	}
-	
-	public static CarrelloDTO buildCarrelloDTO(Carrello c, Boolean expand) {
-		return CarrelloDTO.builder()
-				.id(c.getId())
-				.account(expand? buildAccountDTO(c.getAccount(), false) : idOnly(c.getAccount()))
-				.righeCarrello(c.getRigheCarrello()
-						.stream()
-						.map(r -> expand? buildRigaCarrelloDTO(r, false) : idOnly(r))
-						.collect(Collectors.toList())
-						)
-				.build();
-	}
-	
-	public static CasaEditriceDTO buildCasaEditriceDTO(CasaEditrice c, Boolean expand) {
-		return CasaEditriceDTO.builder()
-				.nome(c.getNome())
-				.descrizione(c.getDescrizione())
-				.indirizzo(c.getIndirizzo())
-				.email(c.getEmail())
-				.manga(c.getManga().stream()
-						.map(m -> expand?
-								buildMangaDTO(m, false) :
-								idOnly(m)
-								)
-						.toList())
-				.build();
-	}
-	
 	public static GenereDTO buildGenereDTO(Genere g, Boolean expand) {
 		return GenereDTO.builder()
 				.id(g.getId())

@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.models;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,8 +37,6 @@ public class CasaEditrice {
 	@Column (nullable=false)
 	private String email;
 	
-	@OneToMany(
-			mappedBy = "casaEditrice"
-			)
+	@OneToMany(mappedBy = "casaEditrice")
     private List<Manga> manga;
 }

@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.utilities;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,15 +9,46 @@ import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
 import com.betacom.ecommerce.backend.dto.outputs.CarrelloDTO;
 import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
+import com.betacom.ecommerce.backend.dto.outputs.RigaCarrelloDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Anagrafica;
 import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.CasaEditrice;
 import com.betacom.ecommerce.backend.models.Manga;
+import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.models.TipoSpedizione;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class Mapper {
+	
+	public static List<RigaCarrelloDTO> buildRigaCarrelloDTO(List<RigaCarrello> lrC){
+		return lrC.stream()
+				.map(c -> RigaCarrelloDTO.builder()
+						.carrelloId(c.getCarrello().getId())
+						.id(c.getId())
+						.manga(buildMangaDTO(c.getManga()))
+						.numeroCopie(c.getNumeroCopie())
+						.build()
+						)
+				.collect(Collectors.toList());
+	}
+	
+	public static RigaCarrelloDTO buildRigaCarrelloDTO(RigaCarrello c) {
+		return RigaCarrelloDTO.builder()
+				.carrelloId(c.getCarrello().getId())
+				.id(c.getId())
+				.manga(buildMangaDTO(c.getManga()))
+				.numeroCopie(c.getNumeroCopie())
+				.build();
+	}
+	
+	public static MangaDTO buildMangaDTO(Manga m) {
+		return null;
+				
+	}
 	
 	public static List<MangaDTO> buildMangaDTO(List<Manga> manga){
 		return null;
@@ -37,6 +69,7 @@ public class Mapper {
 		return CarrelloDTO.builder()
 				.id(c.getId())
 				.account(buildAccountDTO(c.getAccount()))
+				.righe(buildRigaCarrelloDTO(c.getRigheCarrello()))
 				.build();
 	}
 	
@@ -46,10 +79,11 @@ public class Mapper {
 						CarrelloDTO.builder()
 						.id(c.getId())
 						.account(buildAccountDTO(c.getAccount()))
+						.righe(buildRigaCarrelloDTO(c.getRigheCarrello()))
 						.build()
 						)
 				.collect(Collectors.toList());
-	}
+		}
 	
 	public static List<AnagraficaDTO> buildAnagraficaDTO(List<Anagrafica> lA) {
 		return lA.stream()
@@ -66,6 +100,23 @@ public class Mapper {
 						.build()
 						)
 				.collect(Collectors.toList());
+		
+	}
+	
+	private static List<String> IsbnsSupport(List<Manga> manga){
+		try {
+			log.debug("MangaSize: {}}", manga.size());
+			List<String> isbns = new ArrayList<>();
+			for(Manga m : manga) {
+				isbns.add(m.getIsbn());
+			}
+			return isbns;
+		}
+		catch(Exception e) {
+			log.debug(e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public static List<CasaEditriceDTO> buildCaseEditriciDTO(List<CasaEditrice> lC) {
@@ -76,7 +127,7 @@ public class Mapper {
 						.email(c.getEmail())
 						.id(c.getId())
 						.indirizzo(c.getIndirizzo())
-						.manga(buildMangaDTO(c.getManga()))
+						.isbns(IsbnsSupport(c.getManga()))
 						.build()
 						).collect(Collectors.toList());
 	}
@@ -87,7 +138,7 @@ public class Mapper {
 				.email(c.getEmail())
 				.id(c.getId())
 				.indirizzo(c.getIndirizzo())
-				.manga(buildMangaDTO(c.getManga()))
+				.isbns(IsbnsSupport(c.getManga()))
 				.build();
 	}
 	
