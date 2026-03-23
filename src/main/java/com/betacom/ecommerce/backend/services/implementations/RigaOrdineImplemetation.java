@@ -92,10 +92,9 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 						new MangaException("!exists_row"));
 		
 		Ordine o = r.getOrdine();
-		o.getRigheOrdine().remove(r);
-
-		ordeR.saveAndFlush(o);
+		
 		righR.delete(r);
+		o.getRigheOrdine().remove(r);
 	}
 
 	@Override

@@ -258,8 +258,8 @@ public class OrdineControllerTest {
 		id = 1;
 		log.debug("Start OrdineControllerTest.findByIdTest()");
 		resp = ordC.findById(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Assertions.assertThat(resp.getBody()).isInstanceOf(OrdineDTO.class);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
 	}
 	
 

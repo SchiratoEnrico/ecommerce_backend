@@ -17,6 +17,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
 import com.betacom.ecommerce.backend.dto.outputs.CarrelloDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,16 +27,19 @@ import lombok.extern.slf4j.Slf4j;
 public class CarrelloControllerTest {
 	@Autowired
 	private CarrelloController carC;
+	@Autowired
+	private IMessagesServices msgS;
+
 
 	@Test
 	public void testCarrelloController() {
+		findByIdSuccess();
+		deleteCarrelloSuccess();
 		createCarrello();
 		addRow();
 		updateRow();
 		deleteRow();
-		deleteCarrelloSuccess();
 		listCarrelli();
-		findByIdSuccess();
 	}
 
 	public void createCarrello() {
@@ -47,7 +51,7 @@ public class CarrelloControllerTest {
 		ResponseEntity<Response> resp = carC.create(req);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_created");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to bad account id *");
@@ -64,24 +68,24 @@ public class CarrelloControllerTest {
 		log.debug("*** Test aggiunta RigaCarrello a Carrello ***");
 		
 		log.debug("* Expected: success *");
-		ResponseEntity<Response> resp = carC.addRow(1, "DragonBall1", 1);
+		ResponseEntity<Response> resp = carC.addRow(2, "ISBN002", 1);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_updated");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to bad chart id*");
-		resp = carC.addRow(0, "DragonBall1", 1);
+		resp = carC.addRow(0, "ISBN002", 1);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to bad isbn *");
-		resp = carC.addRow(1, "Kawabanga", 1);
+		resp = carC.addRow(2, "Kawabanga", 1);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to bad copies number *");
-		resp = carC.addRow(1, "DragonBall1", 0);
+		resp = carC.addRow(1, "ISBN001", 0);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		log.debug("* Done *");
 		
@@ -92,14 +96,14 @@ public class CarrelloControllerTest {
 		log.debug("*** Test aggiornamento riga carrello del Carrello ***");
 		
 		log.debug("* Expected: success - modifying the row *");
-		ResponseEntity<Response> resp = carC.updateRow(1, 1, "DragonBall1", 2);
+		ResponseEntity<Response> resp = carC.updateRow(2, 1, "ISBN002", 2);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_updated");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to bad chart id *");
-		resp = carC.updateRow(0, 1, "DragonBall1", 1);
+		resp = carC.updateRow(0, 1, "ISBN002", 1);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		log.debug("* Done *");
 		
@@ -109,10 +113,10 @@ public class CarrelloControllerTest {
 		log.debug("* Done *");
 		
 		log.debug("* Expected: success - removing the row due to insufficient copies number *");
-		resp = carC.updateRow(1, 1, "DragonBall1", 0);
+		resp = carC.updateRow(2, 1, "ISBN002", 0);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_deleted");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
 		log.debug("* Done *");
 		
 		log.debug("*** Finished testing row updating of the chart ***");
@@ -122,10 +126,10 @@ public class CarrelloControllerTest {
 		log.debug("*** Test rimozione riga carrello dal Carrello ***");
 		
 		log.debug("* Expected - success *");
-		ResponseEntity<Response> resp = carC.deleteRow(1, 1);
+		ResponseEntity<Response> resp = carC.deleteRow(2, 1);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_deleted");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to chart id *");
@@ -143,7 +147,7 @@ public class CarrelloControllerTest {
 		ResponseEntity<Response> resp = carC.delete(1);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_deleted");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to bad chart id *");
@@ -156,7 +160,10 @@ public class CarrelloControllerTest {
 	
 	public void listCarrelli() {
 		log.debug("*** Test lista Carrelli ***");
-		
+		CarrelloRequest req = new CarrelloRequest();
+		req.setId_account(2);
+		ResponseEntity<Response> r= carC.create(req);
+
 		log.debug("* Expected: success - listAll *");
 		ResponseEntity<Object> resp = carC.list(null);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
@@ -181,7 +188,7 @@ public class CarrelloControllerTest {
 		log.debug("* Done *");
 		
 		log.debug("* Expected: success - filteredList *");
-		isbn.add("DragonBall1");
+		isbn.add("ISBN002");
 		resp = carC.list(isbn);			
 		log.debug("Resp body: {}", resp);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());

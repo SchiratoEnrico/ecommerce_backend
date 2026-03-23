@@ -40,22 +40,63 @@ public class CasaEditriceControllerTest {
 		findCasaByIdErrore();
 		updateCasaSuccess();
 		updateCasaError();
+		listCase();
 		deleteCasaSuccess();
 		deleteCasaError();
-		listCase();
 	}
 
-	public void createCasa() {
-		log.debug("*** Test creazione Case Editrice ***");
+	private CasaEditriceRequest buildCasaEditriceRequest() {
 		CasaEditriceRequest req = new CasaEditriceRequest();
 		req.setDescrizione("String");
 		req.setEmail("Email");
 		req.setIndirizzo("Indiririzzo");
 		req.setNome("Nome");
+		return req;
+	}
+	public void createCasa() {
+		log.debug("*** Test creazione Case Editrice ***");
+		CasaEditriceRequest req = buildCasaEditriceRequest();
 		ResponseEntity<Response> resp = casC.create(req);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = resp.getBody();
 		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
+	
+		// null_des
+		String msg = "null_des";
+		req = buildCasaEditriceRequest();
+		req.setDescrizione(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		ResponseEntity<Response> re = casC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_ema
+		msg = "null_ema";
+		req = buildCasaEditriceRequest();
+		req.setEmail(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = casC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_ind
+		msg = "null_ind";
+		req = buildCasaEditriceRequest();
+		req.setIndirizzo(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = casC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+		
+		// null_nom
+		msg = "null_nom";
+		req = buildCasaEditriceRequest();
+		req.setNome(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = casC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
 	}
 	
 	public void findCasaByIdSuccesso() {
@@ -146,7 +187,7 @@ public class CasaEditriceControllerTest {
 		lC.forEach(c -> c.toString());
 		
 		log.debug("* list: with params *");
-		resp = casC.list("Casa", null, null, null);
+		resp = casC.list("JPOP", null, null, null);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		b = resp.getBody();
 		Assertions.assertThat(b).isInstanceOf(List.class);

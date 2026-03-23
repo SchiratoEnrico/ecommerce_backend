@@ -49,13 +49,13 @@ public class Ordine {
     @JoinColumn(name = "id_stato", nullable = false)
 	private StatoOrdine stato;
 	
+	
+//	cascade = CascadeType.REMOVE,
+//    orphanRemoval = true
+
 	@OneToMany(
-			fetch = FetchType.EAGER
-//			cascade = CascadeType.REMOVE,
-//		    orphanRemoval = true
-			)
-	@JoinColumn(
-			name = "id_ordine"
-			)
+		    mappedBy = "ordine",
+		    orphanRemoval = true
+		)
 	private List<RigaOrdine> righeOrdine;
 }

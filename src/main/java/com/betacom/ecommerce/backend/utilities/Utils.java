@@ -20,6 +20,7 @@ public class Utils {
 	public static LocalDate stringToDate(String date) throws MangaException{
 		
 	 try {
+		 	// sarà yyyy-MM-dd
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             return LocalDate.parse(date, formatter);
         } catch (DateTimeParseException e) {

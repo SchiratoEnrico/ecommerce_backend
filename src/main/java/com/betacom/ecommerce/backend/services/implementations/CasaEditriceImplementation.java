@@ -1,5 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import static com.betacom.ecommerce.backend.utilities.Mapper.buildCaseEditriciDTO;
+
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -8,14 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.CasaEditriceRequest;
 import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
+import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.CasaEditrice;
 import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
-import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ICasaEditriceServices;
-import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.specification.CasaEditriceSpecifications;
-import com.betacom.ecommerce.backend.exceptions.MangaException;
-import static com.betacom.ecommerce.backend.utilities.Mapper.buildCaseEditriciDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,20 +22,18 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class CasaEditriceImplementation implements ICasaEditriceServices{
 	private final ICasaEditriceRepository caseR;
-	private final IMessagesServices msgS;
-	private final IMangaRepository manR;
 	
 	@Transactional (rollbackFor = MangaException.class)
 	@Override
 	public Integer create(CasaEditriceRequest req) throws MangaException {
 		if(req.getDescrizione()==null)
-			throw new MangaException("Descrizione non caricata");
+			throw new MangaException("null_des");
 		if(req.getEmail()==null)
-			throw new MangaException("Email non caricata");
+			throw new MangaException("null_ema");
 		if(req.getIndirizzo()==null)
-			throw new MangaException("Indirizzo non caricato");
+			throw new MangaException("null_ind");
 		if(req.getNome()==null)
-			throw new MangaException("Nome non caricato");
+			throw new MangaException("null_nom");
 		
 		CasaEditrice cas = new CasaEditrice();
 		cas.setDescrizione(req.getDescrizione());
@@ -51,7 +48,7 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	@Override
 	public void update(CasaEditriceRequest req) throws MangaException {
 		CasaEditrice cas = caseR.findById(req.getId())
-				.orElseThrow(() -> new MangaException(msgS.get("case_ntfnd")));
+				.orElseThrow(() -> new MangaException("case_ntfnd"));
 		
 		if(req.getDescrizione()!=null)
 			cas.setDescrizione(req.getDescrizione());
@@ -69,10 +66,10 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	@Override
 	public void delete(Integer id) throws MangaException {
 		CasaEditrice cas = caseR.findById(id)
-				.orElseThrow(() -> new MangaException(msgS.get("case_ntfnd")));
+				.orElseThrow(() -> new MangaException("case_ntfnd"));
 		
 		if(caseR.existsByIdAndMangaIsNotEmpty(id))
-			throw new MangaException("Non puoi eliminare una casa editrice con dei manga ancora allegati");
+			throw new MangaException("casa_man");
 		
 		caseR.delete(cas); 
 	}
@@ -92,7 +89,7 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	@Transactional
 	public CasaEditriceDTO findById(Integer id) throws Exception {
 		CasaEditrice cas = caseR.findById(id)
-				.orElseThrow(() -> new MangaException(msgS.get("case_ntfnd")+id));
+				.orElseThrow(() -> new MangaException("case_ntfnd"));
 
 		return buildCaseEditriciDTO(cas);
 	}

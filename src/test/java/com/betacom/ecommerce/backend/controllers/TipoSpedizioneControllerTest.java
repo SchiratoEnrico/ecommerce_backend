@@ -98,8 +98,9 @@ public class TipoSpedizioneControllerTest {
 	public void deleteSpedizioneSuccess() {
 		log.debug("*** Test delete Spedizione - successo ***");
 		
-		ResponseEntity<Response> resp = speC.delete(1);
-		
+		ResponseEntity<Response> resp = speC.delete(2);
+		Assertions.assertThat(resp.getBody().getMsg()).isEqualTo(msgS.get("rest_deleted"));
+
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
 		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));

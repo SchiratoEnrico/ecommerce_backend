@@ -82,8 +82,6 @@ public class TipoPagamentoImplemetation implements ITipoPagamentoServices{
 				.orElseThrow(() -> new MangaException("!exists_pag"));
 		
 		return DtoBuildres.buildTipoPagamentoDTO(pag, true);
-		
-				
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +27,10 @@ public class AccountControllerTest {
 	
 	@Autowired
 	private AccountController accC;
+	
+	@Autowired
+	private IMessagesServices msgS;
+	
 	
 	@Test
 	public void testAccountController() {
@@ -42,21 +48,106 @@ public class AccountControllerTest {
 		deleteError();
 		delete();
 	}
-
-	public void create() {
-		log.debug("Begin create Account Test");
-		
-		AccountRequest req = AccountRequest.builder()
+	
+	private AccountRequest buildAccountRequest() {
+		return AccountRequest.builder()
 				.username("   anna.anna   ")
 				.password("aaaA00.1")
 				.email("a.anna@test.it")
 				.ruolo("ADMIN")
 				.build();
+	}
+	public void create() {
 		
+		AccountRequest req = buildAccountRequest();
+		
+		log.debug("Begin create Account Test, req: {}", req);
 		ResponseEntity<Response> re = accC.create(req);
 		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Response r = re.getBody();
-		assertThat(r.getMsg()).isEqualTo("Elemento creato con successo");	
+		assertThat(r.getMsg()).isEqualTo("Elemento creato con successo");
+		
+		// null_usr
+		String msg = "null_usr";
+		req = buildAccountRequest();
+		req.setUsername(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_ema
+		msg = "null_ema";
+		req = buildAccountRequest();
+		req.setEmail(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "null_pwd";
+		req = buildAccountRequest();
+		req.setPassword(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "pwd_short";
+		req = buildAccountRequest();
+		req.setPassword("a12B!");
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "pwd_upper";
+		req = buildAccountRequest();
+		req.setPassword("a12bc!");
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "pwd_lower";
+		req = buildAccountRequest();
+		req.setPassword("A12BC!");
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "pwd_digit";
+		req = buildAccountRequest();
+		req.setPassword("ADEBc!");
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "pwd_special";
+		req = buildAccountRequest();
+		req.setPassword("A12BcD");
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "exists_usr";
+		req = buildAccountRequest();
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		msg = "exists_ema";
+		req = buildAccountRequest();
+		req.setUsername("jc.cj");
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = accC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
 	}
 	
 	public void update() {
@@ -66,6 +157,7 @@ public class AccountControllerTest {
 	            .username("user2")
 	            .password("Aaa.012!")
 	            .email("user@test.com")
+	            .ruolo("USER")
 	            .build();
 
 	    ResponseEntity<Response> re = accC.update(req);

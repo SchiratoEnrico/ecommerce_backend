@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import com.betacom.ecommerce.backend.dto.inputs.AnagraficaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +27,9 @@ public class AnagraficaControllerTest {
 	
 	@Autowired
 	private AnagraficaController anaC;
-	
+	@Autowired
+	private IMessagesServices msgS;
+
 	@Test
 	public void testAnagraficaController() {
 		create();
@@ -39,10 +43,8 @@ public class AnagraficaControllerTest {
 		createCognomeVuoto();
 	}
 
-	public void create() {
-		log.debug("Begin create Anagrafica Test");
-		
-		AnagraficaRequest req = AnagraficaRequest.builder()
+	private AnagraficaRequest buildAnagraficaRequest() {
+		return AnagraficaRequest.builder()
 				.nome("ANNA")
 				.cognome("VERDI ")
 				.stato("ITALIA     ")
@@ -52,11 +54,71 @@ public class AnagraficaControllerTest {
 				.via("   Via Tento ")
 				.predefinito(true)
 				.build();
+	}
+	
+	public void create() {
+		log.debug("Begin create Anagrafica Test");
+		
+		AnagraficaRequest req = buildAnagraficaRequest();
 					
 		ResponseEntity<Response> re = anaC.create(req);
 		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Response r = re.getBody();
 		assertThat(r.getMsg()).isEqualTo("Elemento creato con successo");	
+	
+		// null_sta
+		String msg = "null_sta";
+		req = buildAnagraficaRequest();
+		req.setStato(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = anaC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_cit
+		msg = "null_cit";
+		req = buildAnagraficaRequest();
+		req.setCitta(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = anaC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_pro
+		msg = "null_pro";
+		req = buildAnagraficaRequest();
+		req.setProvincia(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = anaC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_cap
+		msg = "null_cap";
+		req = buildAnagraficaRequest();
+		req.setCap(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = anaC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_via
+		msg = "null_via";
+		req = buildAnagraficaRequest();
+		req.setVia(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = anaC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+
+		// null_pre
+		msg = "null_pre";
+		req = buildAnagraficaRequest();
+		req.setPredefinito(null);
+		log.debug("Begin create Account Test, error expected: {}", msg);
+		re = anaC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
 	}
 	
 	public void update() { 

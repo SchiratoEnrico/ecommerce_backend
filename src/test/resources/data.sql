@@ -1,10 +1,13 @@
 
 insert into system_messages (code, messaggio) values ('null_usr', 'Username assente');
 insert into system_messages (code, messaggio) values ('null_pdw', 'Password assente');
+insert into system_messages (code, messaggio) values ('null_des', 'Descrizione assente');
 insert into system_messages (code, messaggio) values ('null_ema', 'Email assente');
 insert into system_messages (code, messaggio) values ('null_ruo', 'Ruolo assente');
+insert into system_messages (code, messaggio) values ('null_ind', 'Indirizzo assente');
 insert into system_messages (code, messaggio) values ('null_acc', 'Account assente');
 insert into system_messages (code, messaggio) values ('null_nom', 'Nome assente');
+insert into system_messages (code, messaggio) values ('casa_man', 'Non puoi eliminare una casa editrice con dei manga ancora allegati');
 insert into system_messages (code, messaggio) values ('null_cog', 'Cognome assente');
 insert into system_messages (code, messaggio) values ('null_sta', 'Stato assente');
 insert into system_messages (code, messaggio) values ('null_cit', 'Citta assente');
@@ -101,7 +104,8 @@ VALUES (
 
 INSERT INTO righe_carrello (id_carrello, isbn_manga, numero_copie)
 VALUES 
-(1, 'ISBN001', 2);
+(1, 'ISBN001', 2),
+(1, 'ISBN002', 2);
 
 -- =========================
 -- ORDERS

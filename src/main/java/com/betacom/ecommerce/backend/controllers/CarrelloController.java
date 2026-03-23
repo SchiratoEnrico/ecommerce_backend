@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,7 +43,7 @@ public class CarrelloController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
-	@PostMapping("/addRow")
+	@PutMapping("/addRow")
 	public ResponseEntity<Response> addRow(
 			@RequestParam(required=true) Integer chartId,
 			@RequestParam(required=true) String isbn,
@@ -60,7 +61,7 @@ public class CarrelloController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
-	@PostMapping("/updateRow")
+	@PutMapping("/updateRow")
 	public ResponseEntity<Response> updateRow(
 			@RequestParam(required=true) Integer chartId,
 			@RequestParam(required=true) Integer rowId,

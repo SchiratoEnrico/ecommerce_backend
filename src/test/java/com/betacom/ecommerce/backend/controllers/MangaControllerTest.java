@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,9 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
+import com.betacom.ecommerce.backend.models.Manga;
+import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +33,9 @@ public class MangaControllerTest {
 
     @Autowired
     private MangaController mangaC;
+    
+    @Autowired
+	private IMessagesServices msgS;
 
 	@Test
 	public void testMangaController() {
@@ -37,7 +45,7 @@ public class MangaControllerTest {
 		createFail();
 		update();
 		updateFail();
-		//delete();
+		delete();
 	}
 
     public void list() {
@@ -57,18 +65,18 @@ public class MangaControllerTest {
     public void findByIsbn() {
         log.debug("start find manga by isbn test");
 
-        ResponseEntity<?> resp = mangaC.findById("ISBN1");
+        ResponseEntity<?> resp = mangaC.findById("ISBN001");
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         Object b = resp.getBody();
         assertNotNull(b);
 		Assertions.assertThat(b).isInstanceOf(MangaDTO.class);
 
         MangaDTO m = (MangaDTO) b;
-        assertEquals("ISBN1", m.getIsbn());
-        assertEquals("NARUTO", m.getTitolo());
-        assertEquals(LocalDate.of(1999, 9, 21), m.getDataPubblicazione());
-        assertEquals(new BigDecimal("6.90"), m.getPrezzo());
-        assertEquals("NARUTO.JPG", m.getImmagine());
+        assertEquals("ISBN001", m.getIsbn());
+        assertEquals("One Piece Vol.1", m.getTitolo());
+        assertEquals(LocalDate.of(1997, 7, 22), m.getDataPubblicazione());
+        assertEquals(new BigDecimal("9.99"), m.getPrezzo());
+        assertEquals("img1.jpg", m.getImmagine());
         assertEquals(100, m.getNumeroCopie());
 
         assertNotNull(m.getCasaEditrice());
@@ -113,10 +121,8 @@ public class MangaControllerTest {
         assertNotNull(m.getAutori());
         assertNotNull(m.getGeneri());
     }
-
-    public void createFail() {
-        log.debug("start create manga fail test");
-
+    
+    private MangaRequest getMangaRequest() {
         MangaRequest req = new MangaRequest();
         req.setIsbn("ISBN004");
         req.setTitolo("TEST");
@@ -127,35 +133,34 @@ public class MangaControllerTest {
         req.setCasaEditrice(1);
         req.setGeneri(List.of(1));
         req.setAutori(List.of(1));
+        return req;
+    }
+
+    public void createFail() {
+        log.debug("start create manga fail test");
+
+        MangaRequest req =  getMangaRequest();
 
         // duplicato isbn già esistente nel data.sql
-        MangaRequest dup = new MangaRequest();
-        dup.setIsbn("ISBN1");
-        dup.setTitolo("ALTRO TITOLO");
-        dup.setDataPubblicazione("2020-01-01");
-        dup.setPrezzo(new BigDecimal("5.00"));
-        dup.setImmagine("IMG.JPG");
-        dup.setNumeroCopie(5);
-        dup.setCasaEditrice(1);
-        dup.setGeneri(List.of(1));
-        dup.setAutori(List.of(1));
+        req.setIsbn("ISBN001");
 
-        ResponseEntity<?> resp = mangaC.create(dup);
+        ResponseEntity<?> resp = mangaC.create(req);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // autore inesistente
+        req =  getMangaRequest();
         req.setAutori(List.of(99));
         resp = mangaC.create(req);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // genere inesistente
-        req.setAutori(List.of(1));
+        req =  getMangaRequest();
         req.setGeneri(List.of(99));
         resp = mangaC.create(req);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // casa editrice inesistente
-        req.setGeneri(List.of(1));
+        req =  getMangaRequest();
         req.setCasaEditrice(99);
         resp = mangaC.create(req);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
@@ -163,13 +168,37 @@ public class MangaControllerTest {
         // request null
         resp = mangaC.create(null);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-    }
+        
+        // casa editrice inesistente
+        req =  getMangaRequest();
+        req.setCasaEditrice(99);
+        resp = mangaC.create(req);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
+        // troppi autori
+        req =  getMangaRequest();
+        req.setAutori(Arrays.asList(1, 2, 3, 4));
+        resp = mangaC.create(req);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+
+        // autori non esistenti
+        req =  getMangaRequest();
+        req.setAutori(Arrays.asList(1, 99));
+        resp = mangaC.create(req);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+
+        // generi non esistenti
+        req =  getMangaRequest();
+        req.setGeneri(Arrays.asList(1, 99));
+        resp = mangaC.create(req);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+    }
+    
     public void update() {
         log.debug("start update manga test");
 
         MangaRequest req = new MangaRequest();
-        req.setIsbn("ISBN1");
+        req.setIsbn("ISBN001");
         req.setTitolo(" NARUTO SHIPPUDEN ");
         req.setDataPubblicazione("01/01/2001");
         req.setPrezzo(new BigDecimal("7.90"));
@@ -196,5 +225,54 @@ public class MangaControllerTest {
         // request null
         resp = mangaC.update(null);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+    }
+    
+    @SuppressWarnings("unchecked")
+	private List<MangaDTO> getLoadedList() {
+    	ResponseEntity<?> resp = mangaC.list();
+    	// test per:
+    	// linked_ord 
+    	// linked_car
+    	return ((List<MangaDTO>) resp.getBody());
+    }
+    
+    public void delete() {
+		// errore: id non trovato in db/non valido
+    	String msg = "!exists_man";
+		String isbn = "ABC!123";
+		log.debug("Start StatoOrdineControllerTest.deleteTest(): error expected: {}, invalid id: {}", msg, isbn);
+		ResponseEntity<Response> resp = mangaC.delete(isbn);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		Response r = resp.getBody();
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+
+		// linked_ord
+		msg = "linked_ord";
+		isbn = "ISBN001";
+		log.debug("Start StatoOrdineControllerTest.deleteTest(), expected error: {} id: {}", msg, isbn);
+		resp = mangaC.delete(isbn);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		r = resp.getBody();
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+		
+		// linked_car
+		msg = "linked_car";
+		isbn = "ISBN002";
+		log.debug("Start StatoOrdineControllerTest.deleteTest(), expected error: {} id: {}", msg, isbn);
+		resp = mangaC.delete(isbn);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		r = resp.getBody();
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+		
+		// normal workflow
+		msg = "rest_deleted";
+		List<MangaDTO> lM = getLoadedList();
+		isbn = lM.get(lM.size() - 1).getIsbn();
+		log.debug("Start StatoOrdineControllerTest.deleteTest(), expected success, id: {}", msg, isbn);
+		resp = mangaC.delete(isbn);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		r = resp.getBody();
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+
     }
 }

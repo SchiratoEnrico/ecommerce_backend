@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.utilities;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -203,6 +204,27 @@ public class DtoBuildres {
 						)
 			.build();
 	}
+	
+	@Transactional(readOnly = true)
+	public static OrdineDTO buildOrdineDTO(Ordine o, Boolean expand, List<RigaOrdine> lR) {
+		return OrdineDTO.builder()
+			.id(o.getId())
+			.account(expand? buildAccountDTO(o.getAccount(), false) : idOnly(o.getAccount()))
+			.spedizione(expand? buildTipoSpedizioneDTO(o.getTipoSpedizione(), false) : idOnly(o.getTipoSpedizione()))
+			.pagamento(expand? buildTipoPagamentoDTO(o.getTipoPagamento(), false) :  idOnly(o.getTipoPagamento()))
+			.data(o.getData())
+			.stato(expand? buildStatoOrdineDTO(o.getStato(), false) : idOnly(o.getStato()))
+			.righeOrdine(lR.stream()
+							.map(r ->
+								expand? 
+								buildRigaOrdineDTO(r, false) : 
+								idOnly(r)
+							)
+							.collect(Collectors.toList())
+						)
+			.build();
+	}
+
 
 	public static TipoPagamentoDTO buildTipoPagamentoDTO(TipoPagamento p, Boolean expand) {
 		return TipoPagamentoDTO.builder()

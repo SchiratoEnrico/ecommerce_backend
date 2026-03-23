@@ -1,7 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -160,7 +159,8 @@ public class OrdineImplemetation implements IOrdineServices{
 		}
 		Ordine o = ordeR.findById(id).orElseThrow(() ->
 					new MangaException("!exists_ord"));
-		List<RigaOrdine> lR = o.getRigheOrdine();
+		
+		List<RigaOrdine> lR = rowR.findAllByOrdineId(id);
 		
 		// rimozione automatica righe quando ordine viene eliminato
 		lR.stream()
@@ -168,15 +168,18 @@ public class OrdineImplemetation implements IOrdineServices{
 		ordeR.delete(o);
 	}
 
+	
+	List<OrdineDTO> getDTOs(List<Ordine> lO) {
+		return lO.stream()
+		.map(o -> DtoBuildres.buildOrdineDTO(o, true, rowR.findAllByOrdineId(o.getId())))
+		.collect(Collectors.toList());
+	}
 	@Override
 	public List<OrdineDTO> list() {
 		log.debug("ordine list()");
 
 		List<Ordine> lO = ordeR.findAll();
-		return lO.stream()
-			.map(o -> DtoBuildres.buildOrdineDTO(o, true))
-			.collect(Collectors.toList());
-		
+		return getDTOs(lO);
 	}
 
 	@Override
@@ -189,6 +192,6 @@ public class OrdineImplemetation implements IOrdineServices{
 
 		Ordine o = ordeR.findById(id).orElseThrow(() ->
 						new MangaException("!exists_ord"));
-		return DtoBuildres.buildOrdineDTO(o, true);
+		return DtoBuildres.buildOrdineDTO(o, true, rowR.findAllByOrdineId(o.getId()));
 	}
 }

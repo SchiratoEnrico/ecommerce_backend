@@ -1,71 +1,77 @@
 
-    set client_min_messages = WARNING;
+    alter table anagrafiche 
+       drop constraint FKppcbv6im3teug10ygcq2nw6h4;
 
-    alter table if exists anagrafiche 
-       drop constraint if exists FKoc2ya8cyewupshbwv2fuwqutx;
+    alter table carrelli 
+       drop constraint FK8bwmqjwt5v85bcicyrb2cp03y;
 
-    alter table if exists carrelli 
-       drop constraint if exists FK8bwmqjwt5v85bcicyrb2cp03y;
+    alter table manga 
+       drop constraint FKk0v2gv11etiuocmnsp8rkm1lb;
 
-    alter table if exists manga 
-       drop constraint if exists FKk0v2gv11etiuocmnsp8rkm1lb;
+    alter table manga_autori 
+       drop constraint FK8sm8r52ml93185a8y5aqcusyg;
 
-    alter table if exists manga_autori 
-       drop constraint if exists FK8sm8r52ml93185a8y5aqcusyg;
+    alter table manga_autori 
+       drop constraint FKbrfhd0saru9t2rikafxn8y2lh;
 
-    alter table if exists manga_autori 
-       drop constraint if exists FKbrfhd0saru9t2rikafxn8y2lh;
+    alter table manga_generi 
+       drop constraint FK6nu1inap7k0aerp8gaq7aojh6;
 
-    alter table if exists manga_generi 
-       drop constraint if exists FK6nu1inap7k0aerp8gaq7aojh6;
+    alter table manga_generi 
+       drop constraint FKlwtko0bh46dyuukj5g5d6f27l;
 
-    alter table if exists manga_generi 
-       drop constraint if exists FKlwtko0bh46dyuukj5g5d6f27l;
+    alter table ordini 
+       drop constraint FKeahnhannuwy5mebvhxy8lqe8b;
 
-    alter table if exists ordini 
-       drop constraint if exists FKeahnhannuwy5mebvhxy8lqe8b;
+    alter table ordini 
+       drop constraint FKo9jvgplgfwdyw1w66gxj8i3iq;
 
-    alter table if exists ordini 
-       drop constraint if exists FK76mc7hr7sthilhjy1rerhshmg;
+    alter table ordini 
+       drop constraint FK6j0iarcfjdeljghsl5hu41ywk;
 
-    alter table if exists ordini 
-       drop constraint if exists FKgp5h6gfg8c52s54gtsoyc2894;
+    alter table ordini 
+       drop constraint FKf7s1k810ss61tb8h9yan3kiax;
 
-    alter table if exists ordini 
-       drop constraint if exists FKo9jvgplgfwdyw1w66gxj8i3iq;
+    alter table righe_carrello 
+       drop constraint FKbkny6hvx39y1qpv8knmm4p1m6;
 
-    alter table if exists righeordine 
-       drop constraint if exists FKqofnxqjgpy7und7xfak25es7v;
+    alter table righe_carrello 
+       drop constraint FK647fphayoh41pfui4qmym6mnv;
 
-    alter table if exists righeordine 
-       drop constraint if exists FKa30cbtoatkcx6verd9yoyguse;
+    alter table righe_ordine 
+       drop constraint FKqylepa0isnmlaqhnny012eydn;
 
-    drop table if exists accounts cascade;
+    alter table righe_ordine 
+       drop constraint FK2ybnsnkyw4w9tfkxeojq1lr6h;
 
-    drop table if exists anagrafiche cascade;
+    drop table accounts;
 
-    drop table if exists autori cascade;
+    drop table anagrafiche;
 
-    drop table if exists carrelli cascade;
+    drop table autori;
 
-    drop table if exists case_editrici cascade;
+    drop table carrelli;
 
-    drop table if exists generi cascade;
+    drop table case_editrici;
 
-    drop table if exists manga cascade;
+    drop table generi;
 
-    drop table if exists manga_autori cascade;
+    drop table manga;
 
-    drop table if exists manga_generi cascade;
+    drop table manga_autori;
 
-    drop table if exists ordini cascade;
+    drop table manga_generi;
 
-    drop table if exists pagamenti cascade;
+    drop table ordini;
 
-    drop table if exists righeordine cascade;
+    drop table righe_carrello;
 
-    drop table if exists spedizioni cascade;
+    drop table righe_ordine;
 
-    drop table if exists stati_ordine cascade;
+    drop table stati_ordine;
 
-    drop table if exists system_messages cascade;
+    drop table system_messages;
+
+    drop table tipi_pagamento;
+
+    drop table tipi_spedizione;

@@ -39,7 +39,8 @@ public class AccountImplementation implements IAccountServices{
 	        throw new MangaException("null_usr");
 	    
 	    if(req.getPassword()==null || req.getPassword().isBlank())
-	    	throw new MangaException("null_pdw");
+	    	throw new MangaException("null_pwd");
+	    
 	    Utils.validatePassword(req.getPassword());
 
 	    if (req.getEmail() == null || req.getEmail().isBlank())
@@ -48,16 +49,16 @@ public class AccountImplementation implements IAccountServices{
 	    if (Utils.isBlank(req.getRuolo()))
 	        throw new MangaException("null_ruo");
 
-	    if (repAcc.findByUsername(Utils.normalize(req.getUsername())).isPresent())
+	    if (repAcc.findByUsername(req.getUsername().trim()).isPresent() )
 	        throw new MangaException("exists_usr");
 
-	    if (repAcc.findByEmail(req.getEmail().trim().toLowerCase()).isPresent())
+	    if (repAcc.findByEmail(req.getEmail().trim()).isPresent())
 	        throw new MangaException("exists_ema");
 
 	    Account acc = new Account();
 	    acc.setUsername(req.getUsername().trim());
 	    acc.setPassword(req.getPassword().trim());
-	    acc.setEmail(req.getEmail().trim().toLowerCase());
+	    acc.setEmail(req.getEmail().trim());
 	    acc.setRuolo(Utils.normalize(req.getRuolo()));
 
 	    repAcc.save(acc);
