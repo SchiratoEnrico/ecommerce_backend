@@ -14,7 +14,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.OrdineDTO;
-import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 

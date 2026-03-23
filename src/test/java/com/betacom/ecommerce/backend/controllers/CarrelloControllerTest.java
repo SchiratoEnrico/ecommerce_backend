@@ -1,36 +1,43 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
+import com.betacom.ecommerce.backend.dto.outputs.CarrelloDTO;
 import com.betacom.ecommerce.backend.response.Response;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class CarrelloControllerTest {
 	@Autowired
 	private CarrelloController carC;
 
 	@Test
-	@Order(1)
+	public void testCarrelloController() {
+		createCarrello();
+		addRow();
+		updateRow();
+		deleteRow();
+		deleteCarrelloSuccess();
+		listCarrelli();
+		findByIdSuccess();
+	}
+
 	public void createCarrello() {
 		log.debug("*** Test creazione Carrello ***");
 		
@@ -53,8 +60,6 @@ public class CarrelloControllerTest {
 		log.debug("*** Finished testing chart creation successfully ***");
 	}
 	
-	@Test
-	@Order(2)
 	public void addRow() {
 		log.debug("*** Test aggiunta RigaCarrello a Carrello ***");
 		
@@ -83,8 +88,6 @@ public class CarrelloControllerTest {
 		log.debug("*** Finished testing row adding to the chart ***");
 	}
 	
-	@Test
-	@Order(3)
 	public void updateRow() {
 		log.debug("*** Test aggiornamento riga carrello del Carrello ***");
 		
@@ -115,8 +118,6 @@ public class CarrelloControllerTest {
 		log.debug("*** Finished testing row updating of the chart ***");
 	}
 	
-	@Test
-	@Order(4)
 	public void deleteRow() {
 		log.debug("*** Test rimozione riga carrello dal Carrello ***");
 		
@@ -135,8 +136,6 @@ public class CarrelloControllerTest {
 		log.debug("*** Finished testing row deletion from the chart ***");
 	}
 	
-	@Test
-	@Order(5)
 	public void deleteCarrelloSuccess() {
 		log.debug("*** Test delete Carrello - successo ***");
 		
@@ -155,16 +154,17 @@ public class CarrelloControllerTest {
 		log.debug("*** Finished testing chart deletion ***");
 	}
 	
-	@Test
-	@Order(6)
 	public void listCarrelli() {
 		log.debug("*** Test lista Carrelli ***");
 		
 		log.debug("* Expected: success - listAll *");
 		ResponseEntity<Object> resp = carC.list(null);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		List<?> lC = (List<?>) resp.getBody();
-		Assertions.assertThat(lC.size()).isGreaterThan(0);
+        Object b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		List<?> lC = (List<?>) b;
+		assertThat(lC.size()).isGreaterThan(0);
+		Assertions.assertThat(lC.getFirst()).isInstanceOf(CarrelloDTO.class);
 		lC.forEach(c -> log.debug(c.toString()+'\n'));
 		log.debug("* Done *");
 		
@@ -172,8 +172,11 @@ public class CarrelloControllerTest {
 		List<String> isbn = new ArrayList<>();
 		resp = carC.list(isbn);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		lC = (List<?>) resp.getBody();
+        b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		lC = (List<?>) b;
 		Assertions.assertThat(lC.size()).isGreaterThan(0);
+		Assertions.assertThat(lC.getFirst()).isInstanceOf(CarrelloDTO.class);
 		lC.forEach(c -> log.debug(c.toString()+'\n'));
 		log.debug("* Done *");
 		
@@ -182,23 +185,27 @@ public class CarrelloControllerTest {
 		resp = carC.list(isbn);			
 		log.debug("Resp body: {}", resp);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		lC = (List<?>) resp.getBody();
+		b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		lC = (List<?>) b;		
 		Assertions.assertThat(lC.size()).isGreaterThan(0);
+		Assertions.assertThat(lC.getFirst()).isInstanceOf(CarrelloDTO.class);
 		lC.forEach(c -> log.debug(c.toString()+'\n'));
 		log.debug("* Done *");
 		
 		log.debug("*** Finished testing list chart ***");
 	}
 	
-	@Test
-	@Order(7)
 	public void findByIdSuccess() {
 		log.debug("*** Test ricerca per id Carrello - successo ***");
 		
 		log.debug("* Expected: success *");
 		ResponseEntity<Object> resp = carC.findById(1);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isNotNull();
+        Object b = resp.getBody();
+		Assertions.assertThat(b).isNotNull();
+		Assertions.assertThat(b).isInstanceOf(CarrelloDTO.class);
+
 		log.debug("* Done *");
 		
 		log.debug("* Expected: fail due to bad chart id *");

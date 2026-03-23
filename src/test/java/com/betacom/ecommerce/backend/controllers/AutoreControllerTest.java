@@ -1,49 +1,54 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.Rollback;
 
 import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AutoreDTO;
 
-import jakarta.transaction.Transactional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.time.LocalDate;
-
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
 public class AutoreControllerTest {
 	@Autowired
     private AutoreController autC;
 
-    @Test
-    @Order(1)
-    public void list() {
+	@Test
+	public void testAutoreController() {
+		list();
+		listById();
+		create();
+		update();
+		delete();
+	}
+
+	public void list() {
         log.debug("start list autori test");
 
         ResponseEntity<?> resp = autC.list();
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
+        Object b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		assertThat(((List<?>) b).size()).isGreaterThan(0);
+		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(AutoreDTO.class);
         assertNotNull(resp.getBody());
     }
 
-    @Test
-    @Order(2)
     public void listById() {
         log.debug("start list autore by id test");
 
@@ -51,7 +56,9 @@ public class AutoreControllerTest {
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
 
-        AutoreDTO a = (AutoreDTO) resp.getBody();
+        Object b = (AutoreDTO) resp.getBody();
+        Assertions.assertThat(b).isInstanceOf(AutoreDTO.class);
+        AutoreDTO a = (AutoreDTO) b;
         assertNotNull(a);
 
 
@@ -66,8 +73,6 @@ public class AutoreControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 
-    @Test
-    @Order(3)
     public void create() {
         log.debug("start create autore test");
 
@@ -97,8 +102,6 @@ public class AutoreControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, resp1.getStatusCode());
     }
 
-    @Test
-    @Order(4)
     public void update() {
         log.debug("start update autore test");
 
@@ -132,7 +135,7 @@ public class AutoreControllerTest {
         req.setId(99);
         req.setNome(" Test ");
         resp = autC.update(req);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // update errore duplicato
         // supponendo che l'autore creato sopra abbia id=3
@@ -143,15 +146,13 @@ public class AutoreControllerTest {
         req.setDataNascita("02/01/1960");
 
         resp = autC.update(req);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // update errore request null
         resp = autC.update(null);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 
-    @Test
-    @Order(5)
     public void delete() {
         log.debug("start delete autore test");
 
@@ -162,11 +163,11 @@ public class AutoreControllerTest {
 
         // delete id inesistente
         resp = autC.delete(99);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // delete autore collegato a manga
         // assumendo che id=1 sia collegato a un manga nel db di test
         resp = autC.delete(1);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 }

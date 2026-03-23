@@ -1,35 +1,47 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.betacom.ecommerce.backend.dto.inputs.TipoSpedizioneRequest;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TipoSpedizioneControllerTest {
 	
 	@Autowired
 	private TipoSpedizioneController speC;
-	
+	@Autowired 
+	private IMessagesServices msgS;
+
 	@Test
-	@Order(1)
+	public void testTipoSpedizioneController() {
+		createSpedizione();
+		findByIdSuccess();
+		findByIdError();
+		updteSpedizioneSuccess();
+		updateSpedizioneError();
+		deleteSpedizioneSuccess();
+		deleteSpedizioneError();
+		listSpedizioni();
+	}
+
 	public void createSpedizione() {
 		log.debug("*** Test creazione Tipo spedizione ***");
 		TipoSpedizioneRequest req = new TipoSpedizioneRequest();
@@ -37,29 +49,26 @@ public class TipoSpedizioneControllerTest {
 		ResponseEntity<Response> resp = speC.create(req);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_created");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
 	}
 
-	@Test
-	@Order(2)
 	public void findByIdSuccess() {
 		log.debug("*** Test ricerca per Tipo spedizione per id - successo ***");
 		ResponseEntity<Object> resp = speC.findById(1);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isNotNull();
+		Object b =  resp.getBody();
+		Assertions.assertThat(b).isNotNull();
+		Assertions.assertThat(b).isInstanceOf(TipoSpedizioneDTO.class);
+		assertThat(((TipoSpedizioneDTO) b).getId()).isEqualTo(1);
 	}
 	
-	@Test
-	@Order(3)
 	public void findByIdError() {
 		log.debug("*** Test ricerca per Tipo spedizione per id - errore ***");
 		ResponseEntity<Object> resp = speC.findById(0);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		Assertions.assertThat(resp.getBody().toString()).isNotEmpty();
 	}
-	
-	@Test
-	@Order(4)
+
 	public void updteSpedizioneSuccess() {
 		log.debug("*** Test update Tipo spedizione - successo ***");
 		
@@ -71,11 +80,9 @@ public class TipoSpedizioneControllerTest {
 		
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_updated");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
 	}
 	
-	@Test
-	@Order(5)
 	public void updateSpedizioneError() {
 		log.debug("*** Test update Tipo spedizione - errore ***");
 		
@@ -88,8 +95,6 @@ public class TipoSpedizioneControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
-	@Test
-	@Order(6)
 	public void deleteSpedizioneSuccess() {
 		log.debug("*** Test delete Spedizione - successo ***");
 		
@@ -97,11 +102,9 @@ public class TipoSpedizioneControllerTest {
 		
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_deleted");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
 	}
 	
-	@Test
-	@Order(7)
 	public void deleteSpedizioneError() {
 		log.debug("*** Test delete Spedizione - errore ***");
 		ResponseEntity<Response> resp = speC.delete(0);
@@ -109,8 +112,6 @@ public class TipoSpedizioneControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
-	@Test
-	@Order(8)
 	public void listSpedizioni() {
 		log.debug("*** Test list Spedizioni ***");
 		
@@ -118,16 +119,21 @@ public class TipoSpedizioneControllerTest {
 		ResponseEntity<?> resp = speC.list(null);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Object body = resp.getBody();
+		Assertions.assertThat(body).isInstanceOf(List.class);
+
 		List<?> lS = (List<?>) body;
 		Assertions.assertThat(lS.size()).isGreaterThan(0);
+		Assertions.assertThat(lS.getFirst()).isInstanceOf(TipoSpedizioneDTO.class);
 		lS.forEach(s -> log.debug(s.toString()));
 		
 		log.debug("* list: with params *");
 		resp = speC.list("Aereo");
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		body = resp.getBody();
+		Assertions.assertThat(body).isInstanceOf(List.class);
 		lS = (List<?>) body;
 		Assertions.assertThat(lS.size()).isGreaterThan(0);
+		Assertions.assertThat(lS.getFirst()).isInstanceOf(TipoSpedizioneDTO.class);
 		lS.forEach(s -> log.debug(s.toString()));
 	}
 	

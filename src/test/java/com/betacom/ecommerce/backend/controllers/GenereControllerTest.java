@@ -1,26 +1,24 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.Rollback;
 
 import com.betacom.ecommerce.backend.dto.inputs.GenereRequest;
 import com.betacom.ecommerce.backend.dto.outputs.GenereDTO;
 
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
 public class GenereControllerTest {
@@ -29,42 +27,45 @@ public class GenereControllerTest {
 	private GenereController genC;
 	
 	@Test
-	@Order(1)
+	public void testGenereController() {
+		list();
+		listById();
+		create();
+		update();
+		delete();
+	}
+
 	public void list() {
 		log.debug("start list generi test");
-		
 		ResponseEntity<?> resp = genC.list();
-		
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
+        Object b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		assertThat(((List<?>) b).size()).isGreaterThan(0);
+		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(GenereDTO.class);
+
 	}
 	
-	@Test
-	@Order(2)
 	public void listById() {
 		log.debug("start list generi by id test");
 		
 		ResponseEntity<?> resp = genC.findById(1);
-		GenereDTO g = (GenereDTO)resp.getBody();
-		assertEquals(g.getDescrizione(), "AZIONE");
+		Object b =  resp.getBody();
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		Assertions.assertThat(b).isInstanceOf(GenereDTO.class);
+		GenereDTO g = (GenereDTO) b;
+		assertEquals(g.getDescrizione(), "AZIONE");
 		
 		//error
 		resp = genC.findById(99);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		
 	}
 	
-	@Test
-	@Order(3)
 	public void create() {
 		GenereRequest req = new GenereRequest();
-		
 		req.setDescrizione(" comico");
-		
 		ResponseEntity<?> resp = genC.create(req);
-		
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		
 
 		resp = genC.findById(3);
 		GenereDTO g = (GenereDTO)resp.getBody();
@@ -72,13 +73,10 @@ public class GenereControllerTest {
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		
 		//errore duplicazione
-		ResponseEntity<?> resp1 = genC.create(req);
-		
-		assertEquals(HttpStatus.CONFLICT, resp1.getStatusCode());
+		resp = genC.create(req);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
-	@Test
-	@Order(4)
 	public void update() {
 	    GenereRequest req = new GenereRequest();
 
@@ -118,8 +116,6 @@ public class GenereControllerTest {
 	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
-	@Test
-	@Order(4)
 	public void delete() {
 		
 		//delete a buon fine

@@ -1,12 +1,12 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.betacom.ecommerce.backend.dto.inputs.CasaEditriceRequest;
+import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,8 +29,22 @@ public class CasaEditriceControllerTest {
 	@Autowired 
 	private CasaEditriceController casC;
 	
+	@Autowired 
+	private IMessagesServices msgS;
+
+	
 	@Test
-	@Order(1)
+	public void testCasaEditriceController() {
+		createCasa();
+		findCasaByIdSuccesso();
+		findCasaByIdErrore();
+		updateCasaSuccess();
+		updateCasaError();
+		deleteCasaSuccess();
+		deleteCasaError();
+		listCase();
+	}
+
 	public void createCasa() {
 		log.debug("*** Test creazione Case Editrice ***");
 		CasaEditriceRequest req = new CasaEditriceRequest();
@@ -39,20 +55,20 @@ public class CasaEditriceControllerTest {
 		ResponseEntity<Response> resp = casC.create(req);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_created");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
 	}
 	
-	@Test
-	@Order(2)
 	public void findCasaByIdSuccesso() {
 		log.debug("*** Test ricerca Casa Editrice per id - successo");
 		ResponseEntity<Object> resp = casC.findById(1);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isNotNull();
+		Object b =  resp.getBody();
+		Assertions.assertThat(b).isNotNull();
+
+		Assertions.assertThat(b).isInstanceOf(CasaEditriceDTO.class);
+		assertThat(((CasaEditriceDTO) b).getId()).isEqualTo(1);
 	}
-	
-	@Test
-	@Order(3)
+				
 	public void findCasaByIdErrore() {
 		log.debug("*** Test ricerca Casa Editrice per id - errore ***");
 		ResponseEntity<Object> resp = casC.findById(0);
@@ -60,8 +76,6 @@ public class CasaEditriceControllerTest {
 		Assertions.assertThat(resp.getBody().toString()).isNotEmpty();
 	}
 	
-	@Test
-	@Order(4)
 	public void updateCasaSuccess() {
 		log.debug("*** Test update Casa Editrice - successo ***");
 		
@@ -76,11 +90,9 @@ public class CasaEditriceControllerTest {
 		
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_updated");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
 	}
 	
-	@Test
-	@Order(5)
 	public void updateCasaError() {
 		log.debug("*** Test update Casa Editrice - errore ***");
 		
@@ -96,8 +108,6 @@ public class CasaEditriceControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
-	@Test
-	@Order(6)
 	public void deleteCasaSuccess() {
 		log.debug("*** Test delete Casa Editrice ***");
 		
@@ -110,12 +120,10 @@ public class CasaEditriceControllerTest {
 		resp = casC.delete(2);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo("rest_deleted");
+		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
 		log.debug("* Done *");
 	}
 	
-	@Test
-	@Order(7)
 	public void deleteCasaError() {
 		log.debug("*** Test delete Casa Editrice - errore ***");
 		
@@ -123,28 +131,28 @@ public class CasaEditriceControllerTest {
 		
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
-	
-	@Test
-	@Order(8)
+
 	public void listCase() {
 		log.debug("*** Test list Case ***");
 		
 		log.debug("* list: no params *");
 		ResponseEntity<?> resp = casC.list(null, null, null, null);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Object body = resp.getBody();
-		List<?> lC = (List<?>) body;
+        Object b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		List<?> lC = (List<?>) b;
 		Assertions.assertThat(lC.size()).isGreaterThan(0);
+		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(CasaEditriceDTO.class);
 		lC.forEach(c -> c.toString());
 		
 		log.debug("* list: with params *");
 		resp = casC.list("Casa", null, null, null);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		body = resp.getBody();
-		lC = (List<?>) body;
+		b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		lC = (List<?>) b;
 		Assertions.assertThat(lC.size()).isGreaterThan(0);
+		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(CasaEditriceDTO.class);
 		lC.forEach(c -> c.toString());
-		
 	}
-	
 }

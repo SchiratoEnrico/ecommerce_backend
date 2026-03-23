@@ -1,13 +1,11 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -22,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AccountControllerTest {
 	
@@ -30,7 +27,22 @@ public class AccountControllerTest {
 	private AccountController accC;
 	
 	@Test
-	@Order(9)
+	public void testAccountController() {
+		create();
+		createPasswordInvalida();
+		createSenzaRuolo();
+		createSenzaUsername();
+		update();
+		updateEmailDuplicata();
+		updateUserNameDuplicato();
+		updateErrorId();
+		list();
+		findById();
+		findByIdError();
+		deleteError();
+		delete();
+	}
+
 	public void create() {
 		log.debug("Begin create Account Test");
 		
@@ -47,8 +59,6 @@ public class AccountControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Elemento creato con successo");	
 	}
 	
-	@Test
-	@Order(1)
 	public void update() {
 	    log.debug("Begin update Account test");
 	    AccountRequest req = AccountRequest.builder()
@@ -64,8 +74,6 @@ public class AccountControllerTest {
 	    assertThat(r.getMsg()).isEqualTo("Elemento aggiornato con successo");
 	}
 	
-	@Test
-	@Order(2)
 	public void updateEmailDuplicata() { 
 		log.debug("Begin update Account test");
 		AccountRequest req = AccountRequest.builder()
@@ -80,8 +88,6 @@ public class AccountControllerTest {
 			
 	}
 	
-	@Test
-	@Order(3)
 	public void updateUserNameDuplicato() { 
 		log.debug("Begin update Account test");
 		AccountRequest req = AccountRequest.builder()
@@ -96,8 +102,6 @@ public class AccountControllerTest {
 			
 	}
 	
-	@Test
-	@Order(4)
 	public void updateErrorId() { 
 		log.debug("Begin Account update error id");
 		
@@ -112,38 +116,33 @@ public class AccountControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Account assente");	
 	}
 	
-	@Test
-	@Order(5)
 	public void list() { 
 		log.debug("Begin list() Account test");
 		
 		ResponseEntity<Object> re = accC.list();
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
-		List<AccountDTO> b = (List<AccountDTO>) re.getBody();
-		assertThat(b.size()).isGreaterThan(0);	
+		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);		
+        Object b = re.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		assertThat(((List<?>) b).size()).isGreaterThan(0);
+		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(AccountDTO.class);
 	}
 	
-	@Test
-	@Order(6)
 	public void findById() { 
 		log.debug("Begin find by id tipoPagamento test");
 		ResponseEntity<Object> re = accC.findById(1);
 		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
-		AccountDTO b = (AccountDTO) re.getBody();
-		assertThat(b.getId()).isEqualTo(1);
+		Object b =  re.getBody();
+		Assertions.assertThat(b).isInstanceOf(AccountDTO.class);
+		assertThat(((AccountDTO) b).getId()).isEqualTo(1);
 		
 	}
 	
-	@Test
-	@Order(7)
 	public void findByIdError() { 
 		log.debug("Begin findById TipoPagamento test error");
 		ResponseEntity<Object> re = accC.findById(100);
 		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 	
-	@Test
-	@Order(8)
 	public void deleteError() { 
 		log.debug("Begin delete Account test error");
 		
@@ -153,8 +152,6 @@ public class AccountControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Account assente");
 	}
 	
-	@Test
-	@Order(10)
 	public void createPasswordInvalida() {
 	    log.debug("Begin create Account Test - password invalida");
 
@@ -169,8 +166,6 @@ public class AccountControllerTest {
 	    assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 	
-	@Test
-	@Order(11)
 	public void delete() {
 		log.debug("Delete Account Test");
 		ResponseEntity<Response> resp = accC.delete(2);
@@ -179,8 +174,6 @@ public class AccountControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Elemento eliminato con successo");
 	}
 	
-	@Test
-	@Order(12)
 	public void createSenzaRuolo() {
 		log.debug("Begin create Account Test");
 		
@@ -195,8 +188,7 @@ public class AccountControllerTest {
 		Response r = re.getBody();
 		assertThat(r.getMsg()).isEqualTo("Ruolo assente");	
 	}
-	@Test
-	@Order(12)
+	
 	public void createSenzaUsername() {
 		log.debug("Begin create Account Test");
 		

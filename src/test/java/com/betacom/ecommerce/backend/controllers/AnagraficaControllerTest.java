@@ -1,13 +1,11 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -22,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AnagraficaControllerTest {
 	
@@ -30,9 +27,19 @@ public class AnagraficaControllerTest {
 	private AnagraficaController anaC;
 	
 	@Test
-	@Order(1)
+	public void testAnagraficaController() {
+		create();
+		update();
+		list();
+		findById();
+		findByIdError();
+		deleteError();
+		createNomeVuoto();
+		delete();
+		createCognomeVuoto();
+	}
+
 	public void create() {
-		
 		log.debug("Begin create Anagrafica Test");
 		
 		AnagraficaRequest req = AnagraficaRequest.builder()
@@ -52,10 +59,7 @@ public class AnagraficaControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Elemento creato con successo");	
 	}
 	
-	@Test
-	@Order(2)
 	public void update() { 
-	
 		log.debug("Begin update Anagrafiche test");
 		AnagraficaRequest req = AnagraficaRequest.builder()
 				.id(1)
@@ -75,36 +79,28 @@ public class AnagraficaControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Elemento aggiornato con successo");
 	}
 
-	@Test
-	@Order(3)
 	public void list() { 
-		
 		log.debug("Begin list() Account test");
 		
 		ResponseEntity<Object> re = anaC.list();
 		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		List<AnagraficaDTO> b = (List<AnagraficaDTO>) re.getBody();
+		List<?> b = (List<?>) re.getBody();
 		assertThat(b.size()).isGreaterThan(0);
+		Assertions.assertThat(b.getFirst()).isInstanceOf(AnagraficaDTO.class);
 		
 	}
 	
-	@Test
-	@Order(4)
 	public void findById() { 
 		
 		log.debug("Begin find by id tipoPagamento test");
-		
 		ResponseEntity<Object> re = anaC.findById(1);
 		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
-		
-		AnagraficaDTO b = (AnagraficaDTO) re.getBody();
-		assertThat(b.getId()).isEqualTo(1);
+		Object b =  re.getBody();
+		Assertions.assertThat(b).isInstanceOf(AnagraficaDTO.class);
+		assertThat(((AnagraficaDTO) b).getId()).isEqualTo(1);
 		
 	}
 	
-	@Test
-	@Order(5)
 	public void findByIdError() { 
 		log.debug("Begin findById TipoPagamento test error");
 		
@@ -112,8 +108,6 @@ public class AnagraficaControllerTest {
 		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 	
-	@Test
-	@Order(6)
 	public void deleteError() { 
 		
 		log.debug("Begin delete anagrafica test error");
@@ -124,8 +118,6 @@ public class AnagraficaControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Anagrafica assente");
 	}
 	
-	@Test
-	@Order(8)
 	public void delete() {
 		log.debug("Delete Test");
 		ResponseEntity<Response> resp = anaC.delete(1);
@@ -134,8 +126,6 @@ public class AnagraficaControllerTest {
 		assertThat(r.getMsg()).isEqualTo("Elemento eliminato con successo");
 	}
 	
-	@Test
-	@Order(7)
 	public void createNomeVuoto() {
 		log.debug("Begin create Anagrafica Test Error");
 		
@@ -154,8 +144,7 @@ public class AnagraficaControllerTest {
 		Response r = re.getBody();
 		assertThat(r.getMsg()).isEqualTo("Nome assente");	
 	}
-	@Test
-	@Order(10)
+
 	public void createCognomeVuoto() {
 		log.debug("Begin create Anagrafica Test Error");
 		

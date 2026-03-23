@@ -116,7 +116,7 @@ public class DtoBuildres {
 							)
 							.toList()
 							)
-				.carrelloId(a.getCarrello().getId())
+				.carrelloId(a.getCarrello() == null ? null: a.getCarrello().getId())
 				.email(a.getEmail())
 				.ruolo(a.getRuolo())
 				.username(a.getUsername())

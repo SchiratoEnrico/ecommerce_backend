@@ -1,20 +1,17 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.StatoOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
@@ -25,8 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-//@Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class StatoOrdineControllerTest {
 
@@ -37,8 +32,7 @@ public class StatoOrdineControllerTest {
 	private IMessagesServices msgS;
 
 	@Test
-	//@Order(1)
-	public void testCertificatoController() {
+	public void testStatoOrdineController() {
 		createTest();
 		updateTest();
 		listTest();
@@ -54,9 +48,8 @@ public class StatoOrdineControllerTest {
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Assertions.assertThat(resp.getBody()).isInstanceOf(List.class);
 		List<?> body = (List<?>) resp.getBody();
-		if (body.size() > 0) {
-			Assertions.assertThat(body.getFirst()).isInstanceOf(StatoOrdineDTO.class);
-		}
+		assertThat(body.size()).isGreaterThan(0);
+		Assertions.assertThat(body.getFirst()).isInstanceOf(StatoOrdineDTO.class);
 	}
 	
 	public void findByIdTest() {

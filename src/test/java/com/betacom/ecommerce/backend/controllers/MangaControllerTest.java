@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -7,10 +8,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,6 @@ import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
 public class MangaControllerTest {
@@ -31,27 +29,41 @@ public class MangaControllerTest {
     @Autowired
     private MangaController mangaC;
 
-    @Test
-    @Order(1)
+	@Test
+	public void testMangaController() {
+		list();
+		findByIsbn();
+		create();
+		createFail();
+		update();
+		updateFail();
+		//delete();
+	}
+
     public void list() {
         log.debug("start list manga test");
 
         ResponseEntity<?> resp1 = mangaC.list();
 
         assertEquals(HttpStatus.OK, resp1.getStatusCode());
-        assertNotNull(resp1.getBody());
+        Object b = resp1.getBody();
+        assertNotNull(b);
+		Assertions.assertThat(b).isInstanceOf(List.class);
+		assertThat(((List<?>) b).size()).isGreaterThan(0);
+		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(MangaDTO.class);
+
     }
 
-    @Test
-    @Order(2)
     public void findByIsbn() {
         log.debug("start find manga by isbn test");
 
         ResponseEntity<?> resp = mangaC.findById("ISBN1");
         assertEquals(HttpStatus.OK, resp.getStatusCode());
+        Object b = resp.getBody();
+        assertNotNull(b);
+		Assertions.assertThat(b).isInstanceOf(MangaDTO.class);
 
-        MangaDTO m = (MangaDTO) resp.getBody();
-        assertNotNull(m);
+        MangaDTO m = (MangaDTO) b;
         assertEquals("ISBN1", m.getIsbn());
         assertEquals("NARUTO", m.getTitolo());
         assertEquals(LocalDate.of(1999, 9, 21), m.getDataPubblicazione());
@@ -68,8 +80,6 @@ public class MangaControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 
-    @Test
-    @Order(3)
     public void create() {
         log.debug("start create manga test");
 
@@ -104,8 +114,6 @@ public class MangaControllerTest {
         assertNotNull(m.getGeneri());
     }
 
-    @Test
-    @Order(4)
     public void createFail() {
         log.debug("start create manga fail test");
 
@@ -133,32 +141,30 @@ public class MangaControllerTest {
         dup.setAutori(List.of(1));
 
         ResponseEntity<?> resp = mangaC.create(dup);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // autore inesistente
         req.setAutori(List.of(99));
         resp = mangaC.create(req);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // genere inesistente
         req.setAutori(List.of(1));
         req.setGeneri(List.of(99));
         resp = mangaC.create(req);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // casa editrice inesistente
         req.setGeneri(List.of(1));
         req.setCasaEditrice(99);
         resp = mangaC.create(req);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // request null
         resp = mangaC.create(null);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 
-    @Test
-    @Order(5)
     public void update() {
         log.debug("start update manga test");
 
@@ -171,12 +177,10 @@ public class MangaControllerTest {
 
         ResponseEntity<?> resp = mangaC.update(req);
 
-        // con l'implementazione attuale questo va in conflict
+        // con l'implementazione attuale questo va in BAD_REQUEST
         assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
-    @Test
-    @Order(6)
     public void updateFail() {
         log.debug("start update manga fail test");
 
@@ -187,10 +191,10 @@ public class MangaControllerTest {
         req.setTitolo("TEST");
 
         ResponseEntity<?> resp = mangaC.update(req);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
         // request null
         resp = mangaC.update(null);
-        assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
 import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
@@ -38,7 +37,7 @@ public class MangaController {
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) { 
 			r.setMsg(e.getMessage());
-			status = HttpStatus.CONFLICT;
+			status = HttpStatus.BAD_REQUEST;
 		}
 		
 		return ResponseEntity.status(status).body(r);
@@ -53,7 +52,7 @@ public class MangaController {
 			r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
-			status = HttpStatus.CONFLICT;
+			status = HttpStatus.BAD_REQUEST;
 		}
 		
 		return ResponseEntity.status(status).body(r);
