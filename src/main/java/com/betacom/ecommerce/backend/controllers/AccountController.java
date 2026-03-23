@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
+import com.betacom.ecommerce.backend.dto.inputs.LoginRequest;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
@@ -99,6 +100,20 @@ public class AccountController {
 		}
 		return ResponseEntity.status(status).body(r); 
 	}
-	
-	
+		
+	@PostMapping("/login")
+	public ResponseEntity<Object> login(@RequestBody (required = true) LoginRequest req){
+		Object r = new Object();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			r = accS.login(req);
+		}catch (Exception e) {
+			r = new Response();
+			((Response) r).setMsg(e.getMessage());
+
+			status = HttpStatus.BAD_REQUEST;
+		}	
+		
+		return ResponseEntity.status(status).body(r);
+	}
 }

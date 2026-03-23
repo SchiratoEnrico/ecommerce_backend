@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
+import com.betacom.ecommerce.backend.dto.inputs.LoginRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
+import com.betacom.ecommerce.backend.dto.outputs.LoginDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
@@ -124,5 +127,24 @@ public class AccountImplementation implements IAccountServices{
 
 	    return DtoBuildres.buildAccountDTO(acc, true);
 	}
+	
+	@Override
+	public LoginDTO login(LoginRequest req) throws MangaException {
+		log.debug("login {}", req);
+		
+		Account usr = repAcc.findByUsername(req.getUsername())
+				.orElseThrow(()-> new MangaException("!valid_log"));
+		
+		if(!usr.getPassword().equals(req.getPassword())) 
+			throw new MangaException("!valid_log");
+		
+		return LoginDTO.builder()
+				.id(usr.getId())
+				.username(usr.getUsername())
+				.ruolo(usr.getRuolo().toString())
+				.build();
+		
+	}
+
 	
 }
