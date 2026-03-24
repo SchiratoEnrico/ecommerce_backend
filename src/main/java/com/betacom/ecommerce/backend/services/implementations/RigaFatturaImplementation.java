@@ -15,7 +15,7 @@ import com.betacom.ecommerce.backend.models.RigaFattura;
 import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaFatturaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaFatturaServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -140,7 +140,7 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
 		log.debug("RigaFattura list()");
         List<RigaFattura> lR = rigR.findAll();
         return lR.stream()
-                .map(r -> DtoBuildres.buildRigaFatturaDTO(r, true))
+                .map(r -> DtoBuilders.buildRigaFatturaDTO(r, fattR.findById(r.getIdFattura().getId())))
                 .collect(Collectors.toList());
 	}
 	
@@ -154,7 +154,7 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
 
         RigaFattura r = rigR.findById(id).orElseThrow(() ->
                 new MangaException("!exists_rig"));
-        return DtoBuildres.buildRigaFatturaDTO(r, true);
+        return DtoBuilders.buildRigaFatturaDTO(r, fattR.findById(r.getIdFattura().getId()));
 	}
 	
 }

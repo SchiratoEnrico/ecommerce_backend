@@ -40,6 +40,7 @@ public class AutoreControllerTest {
         log.debug("start list autori test");
 
         ResponseEntity<?> resp = autC.list();
+		Assertions.assertThat(resp.getBody()).isInstanceOf(List.class);
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         Object b = resp.getBody();
@@ -77,10 +78,10 @@ public class AutoreControllerTest {
         log.debug("start create autore test");
 
         AutoreRequest req = new AutoreRequest();
-        req.setNome(" Eiichiroo ");
-        req.setCognome(" Oda ");
-        req.setDataNascita("01/01/1975");
-        req.setDescrizione(" mangaka ");
+        req.setNome(" Hirohiko ");
+        req.setCognome(" Araki ");
+        req.setDataNascita("1960-06-07");
+        req.setDescrizione(" Le bizzarre avventure di JoJo ");
 
         ResponseEntity<?> resp = autC.create(req);
 
@@ -92,10 +93,10 @@ public class AutoreControllerTest {
 
         AutoreDTO a = (AutoreDTO) resp.getBody();
         assertNotNull(a);
-        assertEquals("EIICHIROO", a.getNome());
-        assertEquals("ODA", a.getCognome());
-        assertEquals("MANGAKA", a.getDescrizione());
-        assertEquals(LocalDate.of(1975, 1, 1), a.getDataNascita());
+        assertEquals("HIROHIKO", a.getNome());
+        assertEquals("ARAKI", a.getCognome());
+        assertEquals("LE BIZZARRE AVVENTURE DI JOJO", a.getDescrizione());
+        assertEquals(LocalDate.of(1960, 6, 7), a.getDataNascita());
 
         // errore duplicazione
         ResponseEntity<?> resp1 = autC.create(req);
@@ -109,7 +110,7 @@ public class AutoreControllerTest {
         AutoreRequest createReq = new AutoreRequest();
         createReq.setNome(" Naoki ");
         createReq.setCognome(" Urasawa ");
-        createReq.setDataNascita("02/01/1960");
+        createReq.setDataNascita("1960-01-02");
         createReq.setDescrizione(" autore seinen ");
         autC.create(createReq);
 
@@ -143,7 +144,7 @@ public class AutoreControllerTest {
         req.setId(1);
         req.setNome("NAOKI");
         req.setCognome("URASAWA");
-        req.setDataNascita("02/01/1960");
+        req.setDataNascita("1960-01-02");
 
         resp = autC.update(req);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());

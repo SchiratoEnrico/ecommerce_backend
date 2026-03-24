@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoPagamentoRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoSpedizioneRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IOrdineServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -171,9 +172,17 @@ public class OrdineImplemetation implements IOrdineServices{
 	
 	List<OrdineDTO> getDTOs(List<Ordine> lO) {
 		return lO.stream()
-		.map(o -> DtoBuildres.buildOrdineDTO(o, true, rowR.findAllByOrdineId(o.getId())))
+		.map(o -> 
+			DtoBuilders.buildOrdineDTO(
+				o, 
+				Optional.ofNullable(o.getAccount()), 
+				Optional.ofNullable(o.getTipoPagamento()), 
+				Optional.ofNullable(o.getStato()), 
+				Optional.ofNullable(o.getTipoSpedizione()), 
+				Optional.ofNullable(rowR.findAllByOrdineId(o.getId()))))
 		.collect(Collectors.toList());
 	}
+	
 	@Override
 	public List<OrdineDTO> list() {
 		log.debug("ordine list()");
@@ -192,6 +201,12 @@ public class OrdineImplemetation implements IOrdineServices{
 
 		Ordine o = ordeR.findById(id).orElseThrow(() ->
 						new MangaException("!exists_ord"));
-		return DtoBuildres.buildOrdineDTO(o, true, rowR.findAllByOrdineId(o.getId()));
+		return DtoBuilders.buildOrdineDTO(
+				o, 
+				Optional.ofNullable(o.getAccount()), 
+				Optional.ofNullable(o.getTipoPagamento()), 
+				Optional.ofNullable(o.getStato()), 
+				Optional.ofNullable(o.getTipoSpedizione()), 
+				Optional.ofNullable(rowR.findAllByOrdineId(o.getId())));
 	}
 }

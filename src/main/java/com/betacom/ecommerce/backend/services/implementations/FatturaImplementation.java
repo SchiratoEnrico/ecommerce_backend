@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.services.implementations;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Fattura;
 import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -172,7 +173,7 @@ public class FatturaImplementation implements IFatturaServices{
 		log.debug("Fattura list()");
         List<Fattura> lF = fattR.findAll();
         return lF.stream()
-                .map(f -> DtoBuildres.buildFatturaDTO(f, true))
+                .map(f -> DtoBuilders.buildFatturaDTO(f, Optional.ofNullable(f.getRighe())))
                 .collect(Collectors.toList());
 
 	}
@@ -187,7 +188,7 @@ public class FatturaImplementation implements IFatturaServices{
 
         Fattura fat = fattR.findById(id).orElseThrow(() ->
                 new MangaException("!exists_fat"));
-        return DtoBuildres.buildFatturaDTO(fat, true);
+        return DtoBuilders.buildFatturaDTO(fat, Optional.ofNullable(fat.getRighe()));
     }
 
 	

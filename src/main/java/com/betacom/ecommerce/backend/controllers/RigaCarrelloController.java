@@ -34,7 +34,7 @@ public class RigaCarrelloController {
 			rcS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -46,12 +46,12 @@ public class RigaCarrelloController {
 		HttpStatus status = HttpStatus.OK;
 		try {
 			rcS.update(req);
-			if(req.getNumeroCopie()!=null || req.getNumeroCopie()<=0)
+			if(req.getNumeroCopie()==null || req.getNumeroCopie()<=0)
 				r.setMsg(msgS.get("rest_deleted"));
 			else
 				r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -65,7 +65,7 @@ public class RigaCarrelloController {
 			rcS.delete(id);
 			r.setMsg(msgS.get("rest_deleted"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);		
@@ -82,7 +82,7 @@ public class RigaCarrelloController {
 		try {
 			r= rcS.list();
 		} catch (Exception e) {
-			r=e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -95,7 +95,7 @@ public class RigaCarrelloController {
 		try {
 			r= rcS.findById(id);
 		} catch (Exception e) {
-			r=e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST; 
 		}
 		return ResponseEntity.status(status).body(r);

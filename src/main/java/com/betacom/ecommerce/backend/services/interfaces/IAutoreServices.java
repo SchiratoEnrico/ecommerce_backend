@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AutoreDTO;
-import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 
 public interface IAutoreServices {

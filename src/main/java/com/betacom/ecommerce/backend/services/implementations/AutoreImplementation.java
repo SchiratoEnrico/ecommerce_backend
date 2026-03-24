@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.services.implementations;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,8 @@ import com.betacom.ecommerce.backend.models.Autore;
 import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAutoreServices;
-import com.betacom.ecommerce.backend.utilities.AutoriUtils;
+import com.betacom.ecommerce.backend.utilities.ReqValidators;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ public class AutoreImplementation implements IAutoreServices{
 	public void create(AutoreRequest req) throws MangaException {
 		log.debug("Begin creating autore -> {}", req);
 		
-		AutoriUtils.validateRequest(req, true);
+		ReqValidators.validateAutoreRequest(req, true);
 		log.debug("Autore validated...");
 		
 		//check unicità autore
@@ -44,7 +46,7 @@ public class AutoreImplementation implements IAutoreServices{
 	        throw new MangaException("exists_aut");   
 	    }
 
-		autRepo.save(AutoriUtils.buildAutore(new Autore(), req, true));
+		autRepo.save(ReqValidators.buildAutore(new Autore(), req, true));
 		log.debug("autore saved in db succesfully");
 	}
 
@@ -56,13 +58,13 @@ public class AutoreImplementation implements IAutoreServices{
 		log.debug("new autore parameters {}", req);
 		
 		//false flag, update
-		AutoriUtils.validateRequest(req, false);
+		ReqValidators.validateAutoreRequest(req, false);
 		
 		//check se autore che voglio modificare esiste
 		Autore aut = autRepo.findById(req.getId())
 				.orElseThrow(()-> new MangaException("!exists_aut"));
 		
-		AutoriUtils.buildAutore(aut, req, false);
+		ReqValidators.buildAutore(aut, req, false);
 		
 		log.debug("builded autore");
 		
@@ -104,8 +106,10 @@ public class AutoreImplementation implements IAutoreServices{
 		log.debug("Begin find all autori");
 		
 		List<Autore> lA = autRepo.findAll();
-		
-		return lA.stream().map(a -> AutoriUtils.buildAutDTO(a)).toList();
+		for (Autore a : lA) {
+			log.debug(a.toString());
+		}
+		return lA.stream().map(a -> DtoBuilders.buildAutoreDTO(a, Optional.ofNullable(mangaRepo.findAllByAutoriId(a.getId())))).toList();
 	}
 
 	@Override
@@ -115,9 +119,8 @@ public class AutoreImplementation implements IAutoreServices{
 		Autore aut = autRepo.findById(id)
 				.orElseThrow(()-> new MangaException("!exists_aut"));
 		
-		return AutoriUtils.buildAutDTO(aut);
+		return DtoBuilders.buildAutoreDTO(aut, Optional.ofNullable(mangaRepo.findAllByAutoriId(aut.getId())));
 	}
-
 	
 	private Boolean checkDuplicateAutore(String nome, String cognome, LocalDate dataNascita, Integer id) throws MangaException{
 		log.debug("checking duplicate autore");

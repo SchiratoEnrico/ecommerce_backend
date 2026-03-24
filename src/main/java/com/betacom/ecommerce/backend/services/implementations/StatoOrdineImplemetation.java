@@ -13,7 +13,7 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IStatoOrdineServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,7 +84,7 @@ public class StatoOrdineImplemetation implements IStatoOrdineServices{
 	public List<StatoOrdineDTO> list() {
 		List<StatoOrdine> lS = statR.findAll();
 		return lS.stream()
-				.map(s -> DtoBuildres.buildStatoOrdineDTO(s, true))
+				.map(s -> DtoBuilders.buildStatoOrdineDTO(s))
 				.collect(Collectors.toList());
 	}
 
@@ -92,6 +92,6 @@ public class StatoOrdineImplemetation implements IStatoOrdineServices{
 	public StatoOrdineDTO findById(Integer id) throws MangaException {
 		StatoOrdine o = statR.findById(id).orElseThrow(() ->
 				new MangaException("!exists_sta"));
-		return DtoBuildres.buildStatoOrdineDTO(o, true);
+		return DtoBuilders.buildStatoOrdineDTO(o);
 	}
 }

@@ -1,7 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
-
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,8 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
+import com.betacom.ecommerce.backend.utilities.ReqValidators;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class AccountImplementation implements IAccountServices{
 	    if(req.getPassword()==null || req.getPassword().isBlank())
 	    	throw new MangaException("null_pwd");
 	    
-	    Utils.validatePassword(req.getPassword());
+	    ReqValidators.validatePassword(req.getPassword());
 
 	    if (req.getEmail() == null || req.getEmail().isBlank())
 	        throw new MangaException("null_ema");
@@ -100,7 +100,7 @@ public class AccountImplementation implements IAccountServices{
 	    }
 
 	    if (req.getPassword() != null && !req.getPassword().isBlank())
-	    	 Utils.validatePassword(req.getPassword());
+	    	ReqValidators.validatePassword(req.getPassword());
 	    	acc.setPassword(req.getPassword().trim());
 
 	    if (!Utils.isBlank(req.getRuolo()))
@@ -115,7 +115,7 @@ public class AccountImplementation implements IAccountServices{
 
 	    return repAcc.findAll()
 	            .stream()
-	            .map(a -> DtoBuildres.buildAccountDTO(a, true))
+	            .map(a -> DtoBuilders.buildAccountDTO(a, Optional.ofNullable(a.getCarrello()), Optional.ofNullable(a.getAnagrafiche())))
 	            .collect(Collectors.toList());
 	}
 
@@ -126,7 +126,7 @@ public class AccountImplementation implements IAccountServices{
 	    Account acc = repAcc.findById(id)
 	            .orElseThrow(() -> new MangaException("!exists_acc"));
 
-	    return DtoBuildres.buildAccountDTO(acc, true);
+	    return DtoBuilders.buildAccountDTO(acc, Optional.ofNullable(acc.getCarrello()), Optional.ofNullable(acc.getAnagrafiche()));
 	}
 	
 	@Override

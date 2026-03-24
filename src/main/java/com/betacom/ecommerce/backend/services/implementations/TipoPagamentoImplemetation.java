@@ -12,7 +12,7 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
 import com.betacom.ecommerce.backend.repositories.ITipoPagamentoRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ITipoPagamentoServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -70,7 +70,7 @@ public class TipoPagamentoImplemetation implements ITipoPagamentoServices{
 	    List<TipoPagamento> lP = repPag.findAll();
 
 	    return lP.stream()
-	            .map(p -> DtoBuildres.buildTipoPagamentoDTO(p, true))
+	            .map(p -> DtoBuilders.buildTipoPagamentoDTO(p))
 	            .collect(Collectors.toList());
 	}
 	
@@ -81,7 +81,7 @@ public class TipoPagamentoImplemetation implements ITipoPagamentoServices{
 		TipoPagamento pag = repPag.findById(id)
 				.orElseThrow(() -> new MangaException("!exists_pag"));
 		
-		return DtoBuildres.buildTipoPagamentoDTO(pag, true);
+		return DtoBuilders.buildTipoPagamentoDTO(pag);
 	}
 
 }

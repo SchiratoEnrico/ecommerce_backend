@@ -1,17 +1,17 @@
 package com.betacom.ecommerce.backend.dto.inputs;
 
-import com.betacom.ecommerce.backend.models.Manga;
-
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class RigaCarrelloRequest {
 	private Integer id;
 	private Integer carrelloId;
-	private Manga manga;
+	private String manga;
 	private Integer numeroCopie;
 }

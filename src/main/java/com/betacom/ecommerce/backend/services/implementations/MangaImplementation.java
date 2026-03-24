@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,8 @@ import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
-import com.betacom.ecommerce.backend.utilities.MangaUtils;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
+import com.betacom.ecommerce.backend.utilities.ReqValidators;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -42,14 +44,14 @@ public class MangaImplementation implements IMangaServices{
 	@Transactional
 	public void create(MangaRequest req) throws MangaException {
 		log.debug("Begin creating manga {}", req);
-		
-		MangaUtils.validateRequest(req, true); 
+		//
+		ReqValidators.validateMangaRequest(req, true); 
 		log.debug("Manga validated...");
 		
 		if(checkDuplicateManga(req.getIsbn()))
 			throw new MangaException("exists_man");
 		
-		Manga m = MangaUtils.buildManga(new Manga(), req, true);
+		Manga m = ReqValidators.buildManga(new Manga(), req, true);
 		
 		
 		log.debug("Autori -> " + req.getAutori());
@@ -82,12 +84,12 @@ public class MangaImplementation implements IMangaServices{
 	public void update(MangaRequest req) throws MangaException {
 	    log.debug("begin updating manga  isbn {}", req);
 
-	    MangaUtils.validateRequest(req, false);
+	    ReqValidators.validateMangaRequest(req, false);
 
 	    Manga m = mangaRepo.findById(req.getIsbn())
 	            .orElseThrow(() -> new MangaException("!exists_man"));
 
-	    MangaUtils.buildManga(m, req, false);
+	    ReqValidators.buildManga(m, req, false);
 
 	    mangaRepo.save(m);
 
@@ -100,8 +102,10 @@ public class MangaImplementation implements IMangaServices{
 		log.debug("begin find manga by isbn {}", isbn);
 		Manga m = mangaRepo.findByIsbn(Utils.normalize(isbn))
 				.orElseThrow(()-> new MangaException("!exists_man"));
-		
-		return MangaUtils.buildMangaDTO(m);
+		List<Autore> a = m.getAutori();
+		List<Genere> g = m.getGeneri();
+		CasaEditrice c = m.getCasaEditrice();
+		return DtoBuilders.buildMangaDTO(m, Optional.ofNullable(c), Optional.ofNullable(a), Optional.ofNullable(g));
 	}
 
 	@Override
@@ -110,8 +114,24 @@ public class MangaImplementation implements IMangaServices{
 		log.debug("begin find all manga");
 		
 		List<Manga> lM = mangaRepo.findAll();
+		for (Manga m : lM) {
+			MangaDTO mdto = DtoBuilders.buildMangaDTO(m,  
+					Optional.ofNullable(m.getCasaEditrice()), 
+					Optional.ofNullable(m.getAutori()), 
+					Optional.ofNullable(m.getGeneri())
+					);
+			log.debug(mdto.toString());
+		}
 		
-		return lM.stream().map(m->	MangaUtils.buildMangaDTO(m)).toList();
+		return lM.stream()
+				.map(m->	
+					DtoBuilders.buildMangaDTO(m,  
+							Optional.ofNullable(m.getCasaEditrice()), 
+							Optional.ofNullable(m.getAutori()), 
+							Optional.ofNullable(m.getGeneri())
+							)
+					)
+				.toList();
 	}
 
 	@Override

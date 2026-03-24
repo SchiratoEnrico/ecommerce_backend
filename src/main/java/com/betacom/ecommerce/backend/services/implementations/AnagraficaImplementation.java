@@ -11,7 +11,7 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Anagrafica;
 import com.betacom.ecommerce.backend.repositories.IAnagraficaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAnagraficaServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -116,7 +116,7 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	    log.debug("findAll() Anagrafica");
 
 	    return repAna.findAll().stream()
-	            .map(a -> DtoBuildres.buildAnagraficaDTO(a, true))
+	            .map(a -> DtoBuilders.buildAnagraficaDTO(a))
 	            .toList();
 	}
 
@@ -127,7 +127,7 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	    Anagrafica a = repAna.findById(id)
 	            .orElseThrow(() -> new MangaException("!exists_ana"));
 
-	    return DtoBuildres.buildAnagraficaDTO(a, true);
+	    return DtoBuilders.buildAnagraficaDTO(a);
 	}
 	
 }

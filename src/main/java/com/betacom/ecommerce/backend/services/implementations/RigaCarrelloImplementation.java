@@ -1,8 +1,9 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
-import static com.betacom.ecommerce.backend.utilities.Mapper.buildRigaCarrelloDTO;
+import static com.betacom.ecommerce.backend.utilities.DtoBuilders.buildRigaCarrelloDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,8 +12,10 @@ import com.betacom.ecommerce.backend.dto.inputs.RigaCarrelloRequest;
 import com.betacom.ecommerce.backend.dto.outputs.RigaCarrelloDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Carrello;
+import com.betacom.ecommerce.backend.models.Manga;
 import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
+import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
@@ -27,25 +30,28 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 	private final IRigaCarrelloRepository rcR;
 	private final IMessagesServices msgS;
 	private final ICarrelloRepository carR;
+	private final IMangaRepository manR;
 	
 	@Transactional(rollbackFor=MangaException.class)
 	@Override
 	public Integer create(RigaCarrelloRequest req) throws MangaException{
 		if(req==null)
-			throw new MangaException("RigaCarelloRequest cannot be null");
+			throw new MangaException("null_crq");
 		if(req.getCarrelloId()==null)
-			throw new MangaException("Carrello Id cannot be null");
+			throw new MangaException("null_cri");
 		if(req.getManga()==null)
-			throw new MangaException("Manga cannot be null");
+			throw new MangaException("null_man");
 		if(req.getNumeroCopie()==null || req.getNumeroCopie()<=0)
-			throw new MangaException("Numero copie cannot be null or lesser than 1");
+			throw new MangaException("null_qua");
 		
 		RigaCarrello rc = new RigaCarrello();
 		Carrello car = carR.findById(req.getCarrelloId())
-				.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
+				.orElseThrow(() -> new MangaException(msgS.get("!exists_car")));
 		
 		rc.setCarrello(car);
-		rc.setManga(req.getManga());
+		Manga m = manR.findByIsbn(req.getManga()).orElseThrow(
+				() -> new MangaException("!exists_man"));
+		rc.setManga(m);
 		rc.setNumeroCopie(req.getNumeroCopie());
 		
 		List<RigaCarrello> rC = car.getRigheCarrello();
@@ -59,12 +65,15 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 	@Override
 	public void update(RigaCarrelloRequest req) throws MangaException {
 		RigaCarrello rc = rcR.findById(req.getId())
-				.orElseThrow(() -> new MangaException(msgS.get("riga_carrello_ntfnd")));
+				.orElseThrow(() -> new MangaException(msgS.get("!exists_rcr")));
 		
 		if(req.getCarrelloId()!=null)
-			throw new MangaException("Cannot change the chart of a chart row");
-		if(req.getManga()!=null) 
-			rc.setManga(req.getManga());
+			throw new MangaException("id_chng");
+		if(req.getManga()!=null) {
+			Manga m = manR.findByIsbn(req.getManga()).orElseThrow(
+					() -> new MangaException("!exists_man"));
+			rc.setManga(m);
+		}
 		if(req.getNumeroCopie()!=null) {
 			if(req.getNumeroCopie()<=0) {
 				rcR.delete(rc);
@@ -80,21 +89,29 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 	@Override
 	public void delete(Integer id) throws MangaException {
 		RigaCarrello rc = rcR.findById(id)
-				.orElseThrow(() -> new MangaException(msgS.get("riga_carrello_ntfnd")));
+				.orElseThrow(() -> new MangaException(msgS.get("!exists_rcr")));
 		rcR.delete(rc);
 	}
-
+	
+	private RigaCarrelloDTO builderCall(RigaCarrello rc) {
+		Optional<Manga> m = manR.findByIsbn(rc.getManga().getIsbn());
+		return buildRigaCarrelloDTO(rc, m);
+	}
+	
 	@Override
 	public List<RigaCarrelloDTO> list() throws Exception {
 		List<RigaCarrello> lrC = rcR.findAll();
-		return buildRigaCarrelloDTO(lrC);
+		
+		return lrC.stream()
+				.map(rC -> builderCall(rC))
+				.toList();
 	}
 
 	@Override
 	public RigaCarrelloDTO findById(Integer id) throws Exception {
 		RigaCarrello rc = rcR.findById(id)
-				.orElseThrow(() -> new MangaException(msgS.get("riga_carrello_ntfnd")));
-		
-		return buildRigaCarrelloDTO(rc);
+				.orElseThrow(() -> new MangaException(msgS.get("!exists_rcr")));
+		Optional<Manga> m = manR.findByIsbn(rc.getManga().getIsbn());
+		return buildRigaCarrelloDTO(rc, m);
 	}
 }

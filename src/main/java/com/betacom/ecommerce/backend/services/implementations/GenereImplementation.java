@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,10 +10,12 @@ import com.betacom.ecommerce.backend.dto.inputs.GenereRequest;
 import com.betacom.ecommerce.backend.dto.outputs.GenereDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Genere;
+import com.betacom.ecommerce.backend.models.Manga;
 import com.betacom.ecommerce.backend.repositories.IGenereRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IGenereServices;
-import com.betacom.ecommerce.backend.utilities.GeneriUtils;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
+import com.betacom.ecommerce.backend.utilities.ReqValidators;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +33,7 @@ public class GenereImplementation implements IGenereServices{
 	public void create(GenereRequest req) throws MangaException {
 		log.debug("Begin creating genere {}", req);
 		
-		GeneriUtils.validateRequest(req, true);
+		ReqValidators.validateGenereRequest(req, true);
 		log.debug("Genere validated...");
 		log.debug(req.getDescrizione());
 		//check unicità genere
@@ -38,8 +41,9 @@ public class GenereImplementation implements IGenereServices{
 	    	log.debug("genere already present");
 	        throw new MangaException("exists_gen");   
 	    }
+	    
 
-		genRepo.save(GeneriUtils.buildGenere(new Genere(), req, true));
+		genRepo.save(ReqValidators.buildGenere(new Genere(), req, true));
 		log.debug("genere saved in db succesfully");		
 	}
 
@@ -50,7 +54,7 @@ public class GenereImplementation implements IGenereServices{
 		log.debug(" new genere parameters {}", req);
 		
 		//update mode
-		GeneriUtils.validateRequest(req, false);
+		ReqValidators.validateGenereRequest(req, false);
 		
 		//check se genere che voglio modificare esiste
 		Genere gen = genRepo.findById(req.getId())
@@ -60,7 +64,7 @@ public class GenereImplementation implements IGenereServices{
 		if(checkDuplicateGenere(req.getDescrizione(), req.getId()))
 			throw new MangaException("exists_gen");
 		
-		GeneriUtils.buildGenere(gen, req, false);
+		ReqValidators.buildGenere(gen, req, false);
 		
 		log.debug("builded genere");
 		
@@ -98,8 +102,16 @@ public class GenereImplementation implements IGenereServices{
 		
 		List<Genere> lG = genRepo.findAll();
 		
-		return lG.stream().map(g -> GeneriUtils.buildGenDTO(g)).toList();
-	}
+		  return lG.stream()
+		            .map(g -> {
+		                List<Manga> m = mangaRepo.findAllByGeneriId(g.getId());
+		                return DtoBuilders.buildGenereDTO(
+		                        g,
+		                        Optional.ofNullable(m)
+		                );
+		            })
+		            .toList();
+		}
 
 	@Override
 	public GenereDTO findById(Integer id) throws MangaException {
@@ -107,8 +119,8 @@ public class GenereImplementation implements IGenereServices{
 		
 		Genere gen = genRepo.findById(id)
 				.orElseThrow(()-> new MangaException("!exists_gen"));
-		
-		return GeneriUtils.buildGenDTO(gen);
+		List<Manga> lM = mangaRepo.findAllByGeneriId(gen.getId());
+		return DtoBuilders.buildGenereDTO(gen, Optional.ofNullable(lM));
 	}
 
 	private Boolean checkDuplicateGenere(String descrizione, Integer id) throws MangaException{

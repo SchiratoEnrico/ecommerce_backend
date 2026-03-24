@@ -1,3 +1,7 @@
+-- =========================
+-- SYSTEM MESSAGES (UNIQUE)
+-- =========================
+
 INSERT INTO system_messages (code, messaggio) VALUES ('null_usr', 'Username assente');
 INSERT INTO system_messages (code, messaggio) VALUES ('null_pdw', 'Password assente');
 INSERT INTO system_messages (code, messaggio) VALUES ('null_ema', 'Email assente');
@@ -13,7 +17,7 @@ INSERT INTO system_messages (code, messaggio) VALUES ('null_via', 'Via assente')
 INSERT INTO system_messages (code, messaggio) VALUES ('null_ana', 'Anagrafica assente');
 INSERT INTO system_messages (code, messaggio) VALUES ('null_pag', 'Tipo pagamento assente');
 INSERT INTO system_messages (code, messaggio) VALUES ('null_pre', 'Predefinito assente');
-INSERT INTO system_messages (code, messaggio) VALUES ('null_ord', 'Riga d ordine assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_ord', 'Ordine assente');
 INSERT INTO system_messages (code, messaggio) VALUES ('null_row', 'Riga d ordine assente');
 
 INSERT INTO system_messages (code, messaggio) VALUES ('!exists_acc', 'Account non esistente');
@@ -22,8 +26,6 @@ INSERT INTO system_messages (code, messaggio) VALUES ('!exists_pag', 'Tipo pagam
 INSERT INTO system_messages (code, messaggio) VALUES ('!exists_sta', 'Stato d ordine non esistente');
 INSERT INTO system_messages (code, messaggio) VALUES ('!exists_ord', 'Riga d ordine già esistente');
 INSERT INTO system_messages (code, messaggio) VALUES ('!exists_row', 'Riga d ordine non esistente');
-
-INSERT INTO system_messages (code, messaggio) VALUES ('!valid_tar', 'Targa non valida');
 
 INSERT INTO system_messages (code, messaggio) VALUES ('exists_usr', 'Username già presente');
 INSERT INTO system_messages (code, messaggio) VALUES ('exists_ema', 'Email già presente');
@@ -40,10 +42,37 @@ INSERT INTO system_messages (code, messaggio) VALUES ('pwd_lower', 'Password non
 INSERT INTO system_messages (code, messaggio) VALUES ('pwd_digit', 'Password non contiene caratteri numerici');
 INSERT INTO system_messages (code, messaggio) VALUES ('pwd_special', 'Password non contiene caratteri speciali');
 
-INSERT INTO system_messages (code, messaggio) VALUES ('null_des', 'Descrizione assente');
-INSERT INTO system_messages (code, messaggio) VALUES ('null_ind', 'Indirizzo assente');
+-- aggiuntivi fatture / manga
 
-INSERT INTO system_messages (code, messaggio) VALUES ('casa_man', 'Non puoi eliminare una casa editrice con dei manga ancora allegati');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_isb', 'ISBN assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_aut', 'Autore assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_ind', 'Indirizzo assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_rig', 'Riga fattura assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_fat', 'Fattura assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_dat', 'Data emissione assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_tit', 'Titolo assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_pri', 'Prezzo assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_qua', 'Quantita assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_num_fat', 'Numero fattura assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_rig_fat', 'Riga fattura assente');
+
+INSERT INTO system_messages (code, messaggio) VALUES ('!exists_fat', 'Fattura non esistente');
+INSERT INTO system_messages (code, messaggio) VALUES ('!exists_rig_fat', 'Riga fattura non esistente');
+
+INSERT INTO system_messages (code, messaggio) VALUES ('null_des', 'Descrizione assente');
+
+INSERT INTO system_messages (code, messaggio) VALUES ('casa_man', 'Non puoi eliminare una casa editrice con dei manga ancora allegati');-- =========================
+
+-- =========================
+-- CARRELLO
+-- =========================
+INSERT INTO system_messages (code, messaggio) VALUES ('null_crq', 'RigaCarelloRequest cannot be null');
+INSERT INTO system_messages (code, messaggio) VALUES ('null_cri', 'Carrello Id cannot be null');
+INSERT INTO system_messages (code, messaggio) VALUES ('id_chng', 'Cannot change the chart of a chart row');
+INSERT INTO system_messages (code, messaggio) VALUES ('!exists_car', 'Carrello assente');
+INSERT INTO system_messages (code, messaggio) VALUES ('!exists_rcr', 'Riga carrello assente');
+
+
 -- =========================
 -- BASE TABLES (NO FK)
 -- =========================
@@ -136,3 +165,28 @@ INSERT INTO righe_ordine (
 )
 VALUES 
 (1, 'ISBN001', 2, 9.99);
+
+-- =========================
+-- FATTURE
+-- =========================
+
+INSERT INTO fatture (numero_fattura, data_emissione, totale, costo_spedizione, tipo_pagamento, tipo_spedizione,
+                     cliente_nome, cliente_cognome, cliente_email, cliente_indirizzo, cliente_citta, cliente_provincia, cliente_cap, cliente_stato)
+VALUES
+('FAT-2026-001', '2026-03-20', 39.94, 5.00, 'PAYPAL', 'STANDARD',
+ 'Mario', 'Rossi', 'mario.rossi@email.com', 'Via Roma 1', 'Roma', 'RM', '00100', 'Italia'),
+
+('FAT-2026-002', '2026-03-21', 15.98, 0.00, 'PAYPAL', 'STANDARD',
+ 'Mario', 'Rossi', 'mario.rossi@email.com', 'Via Roma 1', 'Roma', 'RM', '00100', 'Italia');
+
+
+-- =========================
+-- RIGHE FATTURA
+-- =========================
+
+INSERT INTO righe_fattura (id_fattura, titolo, autore, isbn, prezzo_unitario, quantita, totale_riga)
+VALUES
+(1, 'One Piece Vol.1', 'Eiichiro Oda', 'ISBN001', 9.99, 2, 19.98),
+(1, 'Dragon Ball', 'Akira Toriyama', 'ISBN002', 20.34, 1, 20.34) ,
+(2, 'One Piece Vol.1', 'Eiichiro Oda', 'ISBN001', 7.99, 2, 15.98);
+

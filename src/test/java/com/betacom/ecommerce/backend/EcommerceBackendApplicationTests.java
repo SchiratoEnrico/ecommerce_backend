@@ -1,6 +1,5 @@
 package com.betacom.ecommerce.backend;
 
-import org.junit.jupiter.api.Test;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
@@ -9,9 +8,12 @@ import com.betacom.ecommerce.backend.controllers.AnagraficaControllerTest;
 import com.betacom.ecommerce.backend.controllers.AutoreControllerTest;
 import com.betacom.ecommerce.backend.controllers.CarrelloControllerTest;
 import com.betacom.ecommerce.backend.controllers.CasaEditriceControllerTest;
+import com.betacom.ecommerce.backend.controllers.FatturaControllerTest;
 import com.betacom.ecommerce.backend.controllers.GenereControllerTest;
 import com.betacom.ecommerce.backend.controllers.MangaControllerTest;
 import com.betacom.ecommerce.backend.controllers.OrdineControllerTest;
+import com.betacom.ecommerce.backend.controllers.RigaCarrelloControllerTest;
+import com.betacom.ecommerce.backend.controllers.RigaFatturaControllerTest;
 import com.betacom.ecommerce.backend.controllers.RigaOrdineControllerTest;
 import com.betacom.ecommerce.backend.controllers.StatoOrdineControllerTest;
 import com.betacom.ecommerce.backend.controllers.TipoPagamentoControllerTest;
@@ -31,7 +33,10 @@ import com.betacom.ecommerce.backend.controllers.TipoSpedizioneControllerTest;
 	RigaOrdineControllerTest.class,
 	StatoOrdineControllerTest.class,
 	TipoPagamentoControllerTest.class,
-	TipoSpedizioneControllerTest.class
+	TipoSpedizioneControllerTest.class,
+	FatturaControllerTest.class,
+	RigaFatturaControllerTest.class,
+	RigaCarrelloControllerTest.class
 })
 
 

@@ -2,8 +2,6 @@ package com.betacom.ecommerce.backend.dto.outputs;
 
 import java.util.List;
 
-import com.betacom.ecommerce.backend.models.Carrello;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -43,7 +43,7 @@ public class OrdineControllerTest {
                 .account(1)
                 .pagamento("PAYPAL")
                 .spedizione("STANDARD")
-                .data("20/03/2026")
+                .data("2026-03-20")
                 .stato("CREATED")
                 .build();
     }

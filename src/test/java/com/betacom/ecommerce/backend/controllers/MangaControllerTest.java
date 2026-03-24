@@ -94,7 +94,7 @@ public class MangaControllerTest {
         MangaRequest req = new MangaRequest();
         req.setIsbn(" isbn003 ");
         req.setTitolo(" bleach ");
-        req.setDataPubblicazione("07/08/2001");
+        req.setDataPubblicazione("2001-08-07");
         req.setPrezzo(new BigDecimal("8.50"));
         req.setImmagine(" bleach.jpg ");
         req.setNumeroCopie(30);
@@ -200,7 +200,7 @@ public class MangaControllerTest {
         MangaRequest req = new MangaRequest();
         req.setIsbn("ISBN001");
         req.setTitolo(" NARUTO SHIPPUDEN ");
-        req.setDataPubblicazione("01/01/2001");
+        req.setDataPubblicazione("2001-01-01");
         req.setPrezzo(new BigDecimal("7.90"));
         req.setNumeroCopie(120);
 

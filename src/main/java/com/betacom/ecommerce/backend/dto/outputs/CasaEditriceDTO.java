@@ -2,8 +2,6 @@ package com.betacom.ecommerce.backend.dto.outputs;
 
 import java.util.List;
 
-import com.betacom.ecommerce.backend.models.Manga;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

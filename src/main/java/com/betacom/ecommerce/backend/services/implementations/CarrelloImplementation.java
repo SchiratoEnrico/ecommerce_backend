@@ -1,7 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,7 @@ import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
 import com.betacom.ecommerce.backend.specification.CarrelloSpecifications;
-
-import static com.betacom.ecommerce.backend.utilities.Mapper.buildCarrelloDTO;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,12 +57,14 @@ public class CarrelloImplementation implements ICarrelloServices{
 		Carrello car = carR.findById(chartId)
 				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
 		
-		Manga man = manR.findById(isbn)
-				.orElseThrow(() -> new MangaException("manga_ntfnd"));
+		Optional<Manga> man = manR.findById(isbn);
+		if (man.isEmpty()) {
+				throw new MangaException("manga_ntfnd");
+		}
 		
 		RigaCarrelloRequest req = new RigaCarrelloRequest();
 		req.setCarrelloId(chartId);
-		req.setManga(man);
+		req.setManga(isbn);
 		req.setNumeroCopie(nCopie);
 		
 		Integer id = rcS.create(req);
@@ -82,16 +83,17 @@ public class CarrelloImplementation implements ICarrelloServices{
 		Carrello car = carR.findById(chartId)
 				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
 		
-		Manga man = (isbn==null) ? null : manR.findById(isbn)
-				.orElseThrow(() -> new MangaException(msgS.get("manga_ntfnd")));
-		
+		Optional<Manga> man = manR.findById(isbn);
+		if (man.isEmpty()) {
+				throw new MangaException("manga_ntfnd");
+		}		
 		List<RigaCarrello> lrC = car.getRigheCarrello();
 		
 		lrC.forEach(c -> {
 			if(c.getId()==rowId) {
 				RigaCarrelloRequest req = new RigaCarrelloRequest();
 				req.setId(rowId);
-				req.setManga(man);
+				req.setManga(isbn);
 				req.setNumeroCopie(nCopie);
 				rcS.update(req);
 				return;
@@ -141,7 +143,15 @@ public class CarrelloImplementation implements ICarrelloServices{
 	public List<CarrelloDTO> list(List<String> isbns) {
 		Specification<Carrello> spec = Specification
 				.where(CarrelloSpecifications.hasAnyMangaIds(isbns));
-		return buildCarrelloDTO(carR.findAll(spec));
+		List<Carrello> lC = carR.findAll(spec);
+		return lC.stream()
+				.map(c ->
+				DtoBuilders.buildCarrelloDTO(
+						c,
+						Optional.ofNullable(c.getAccount()),
+						Optional.ofNullable(c.getRigheCarrello())
+						)
+				).toList();
 	}
 	
 	@Override
@@ -149,6 +159,10 @@ public class CarrelloImplementation implements ICarrelloServices{
 		Carrello car = carR.findById(id)
 				.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
 		
-		return buildCarrelloDTO(car);
+		return DtoBuilders.buildCarrelloDTO(
+				car,
+				Optional.ofNullable(car.getAccount()),
+				Optional.ofNullable(car.getRigheCarrello())
+				);
 	}
 }

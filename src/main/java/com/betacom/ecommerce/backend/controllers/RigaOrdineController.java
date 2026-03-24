@@ -32,7 +32,7 @@ public class RigaOrdineController {
 		Response r = new Response();
         HttpStatus status = HttpStatus.OK;
         try {
-            Integer id = rowS.create(req);
+            rowS.create(req);
             r.setMsg(msgS.get("rest_created"));
         } catch (MangaException e) {
         	r.setMsg(msgS.get(e.getMessage()));

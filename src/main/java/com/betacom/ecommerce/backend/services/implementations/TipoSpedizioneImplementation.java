@@ -14,7 +14,7 @@ import com.betacom.ecommerce.backend.repositories.ITipoSpedizioneRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.ITipoSpedizioneServices;
 import com.betacom.ecommerce.backend.specification.SpedizioneSpecifications;
-import static com.betacom.ecommerce.backend.utilities.Mapper.buildSpedizioniDTO;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 
 import lombok.RequiredArgsConstructor;
 
@@ -61,8 +61,10 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 	public List<TipoSpedizioneDTO> list(String tipoSpedizione) throws Exception {
 		Specification<TipoSpedizione> spec = Specification
 				.where(SpedizioneSpecifications.tipoSpedizioneLike(tipoSpedizione));
-		
-		return buildSpedizioniDTO(speR.findAll(spec));
+		List<TipoSpedizione> lS = speR.findAll(spec);
+		return lS.stream()
+				.map(s -> DtoBuilders.buildTipoSpedizioneDTO(s))
+				.toList();
 	}
 
 	@Override
@@ -70,7 +72,7 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 		TipoSpedizione spe = speR.findById(id)
 				.orElseThrow(() -> new MangaException(msgS.get("spedizione_ntfnd")));
 		
-		return buildSpedizioniDTO(spe);
+		return DtoBuilders.buildTipoSpedizioneDTO(spe);
 	}
 
 }

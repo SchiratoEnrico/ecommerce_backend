@@ -32,7 +32,7 @@ public class StatoOrdineController {
 		Response r = new Response();
         HttpStatus status = HttpStatus.OK;
         try {
-            Integer id = staS.create(req);
+            staS.create(req);
             r.setMsg(msgS.get("rest_created"));
         } catch (MangaException e) {
         	r.setMsg(msgS.get(e.getMessage()));

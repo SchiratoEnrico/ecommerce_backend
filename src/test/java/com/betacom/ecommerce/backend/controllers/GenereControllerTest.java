@@ -38,9 +38,9 @@ public class GenereControllerTest {
 	public void list() {
 		log.debug("start list generi test");
 		ResponseEntity<?> resp = genC.list();
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
         Object b = resp.getBody();
 		Assertions.assertThat(b).isInstanceOf(List.class);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		assertThat(((List<?>) b).size()).isGreaterThan(0);
 		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(GenereDTO.class);
 

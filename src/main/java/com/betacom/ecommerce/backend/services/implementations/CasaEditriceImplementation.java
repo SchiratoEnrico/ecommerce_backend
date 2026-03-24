@@ -1,7 +1,5 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
-import static com.betacom.ecommerce.backend.utilities.Mapper.buildCaseEditriciDTO;
-
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -15,6 +13,7 @@ import com.betacom.ecommerce.backend.models.CasaEditrice;
 import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ICasaEditriceServices;
 import com.betacom.ecommerce.backend.specification.CasaEditriceSpecifications;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 
 import lombok.RequiredArgsConstructor;
 
@@ -82,7 +81,7 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	            .and(CasaEditriceSpecifications.indirizzoLike(indirizzo))
 	            .and(CasaEditriceSpecifications.emailLike(email));
 		
-		return buildCaseEditriciDTO(caseR.findAll(spec));
+		return DtoBuilders.buildCaseEditriciDTO(caseR.findAll(spec));
 	}
 	
 	@Override
@@ -91,6 +90,6 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 		CasaEditrice cas = caseR.findById(id)
 				.orElseThrow(() -> new MangaException("case_ntfnd"));
 
-		return buildCaseEditriciDTO(cas);
+		return DtoBuilders.buildCasaEditriceDTO(cas);
 	}
 }

@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
-import com.betacom.ecommerce.backend.utilities.DtoBuildres;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -101,7 +102,7 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 	public List<RigaOrdineDTO> list() {
 		List<RigaOrdine> lR = righR.findAll();
 		return lR.stream()
-				.map(r -> DtoBuildres.buildRigaOrdineDTO(r, true))
+				.map(r -> DtoBuilders.buildRigaOrdineDTO(r, Optional.ofNullable(r.getManga())))
 				.collect(Collectors.toList());
 	}
 
@@ -109,6 +110,6 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 	public RigaOrdineDTO findById(Integer id) throws MangaException {
 		RigaOrdine r = righR.findById(id).orElseThrow(()->
 							new MangaException("!exists_row"));
-		return DtoBuildres.buildRigaOrdineDTO(r, true);
+		return DtoBuilders.buildRigaOrdineDTO(r, Optional.ofNullable(r.getManga()));
 	}
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import com.betacom.ecommerce.backend.dto.inputs.CasaEditriceRequest;
 import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
-import com.betacom.ecommerce.backend.models.Manga;
 
 public interface ICasaEditriceServices {
 	Integer create(CasaEditriceRequest req) throws MangaException;
