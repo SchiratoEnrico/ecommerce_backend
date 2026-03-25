@@ -19,6 +19,8 @@ public class TipoSpedizione {
 	private Integer id;
 	
 	@Column(length=100,
-			nullable=false)
+			nullable=false,
+			unique=true
+			)
 	private String tipoSpedizione;
 }

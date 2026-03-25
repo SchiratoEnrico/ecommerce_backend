@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.dto.inputs.TipoSpedizioneRequest;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.response.Response;
@@ -37,6 +38,7 @@ public class TipoSpedizioneControllerTest {
 		findByIdError();
 		updteSpedizioneSuccess();
 		updateSpedizioneError();
+		updateTipoSpedizioneDuplicata();
 		deleteSpedizioneSuccess();
 		deleteSpedizioneError();
 		listSpedizioni();
@@ -74,7 +76,7 @@ public class TipoSpedizioneControllerTest {
 		
 		TipoSpedizioneRequest req = new TipoSpedizioneRequest();
 		req.setId(1);
-		req.setTipoSpedizione("Aereo");
+		req.setTipoSpedizione("Treno");
 		
 		ResponseEntity<Response> resp = speC.update(req);
 		
@@ -94,6 +96,19 @@ public class TipoSpedizioneControllerTest {
 		
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
+	public void updateTipoSpedizioneDuplicata() { 
+		log.debug("Begin update TipoSpedizione test");
+		TipoSpedizioneRequest req = new TipoSpedizioneRequest();
+		req.setId(1);
+		req.setTipoSpedizione("Treno");
+		
+		ResponseEntity<Response> re = speC.update(req);
+		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		Response r = re.getBody();
+		assertThat(r.getMsg()).isEqualTo("exists_spe");
+			
+	}
+	
 	
 	public void deleteSpedizioneSuccess() {
 		log.debug("*** Test delete Spedizione - successo ***");

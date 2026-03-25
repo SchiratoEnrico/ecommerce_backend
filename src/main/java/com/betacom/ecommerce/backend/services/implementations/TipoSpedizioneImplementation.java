@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.ITipoSpedizioneServices;
 import com.betacom.ecommerce.backend.specification.SpedizioneSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
+import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,8 +32,11 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 		if(req.getTipoSpedizione()==null)
 			throw new MangaException("Tipo spedizione non caricata");
 		
+		if (speR.findByTipoSpedizione(req.getTipoSpedizione().trim().toUpperCase()).isPresent())
+	        throw new MangaException("exists_spe");
+		
 		TipoSpedizione spe = new TipoSpedizione();
-		spe.setTipoSpedizione(req.getTipoSpedizione());
+		spe.setTipoSpedizione(Utils.normalize(req.getTipoSpedizione()));
 		
 		return speR.save(spe).getId();
 	}
@@ -42,8 +47,14 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 		TipoSpedizione spe = speR.findById(req.getId())
 				.orElseThrow(() -> new MangaException(msgS.get("spedizione_ntfnd")));
 		
-		if(req.getTipoSpedizione()!=null)
-			spe.setTipoSpedizione(req.getTipoSpedizione());
+		if (!Utils.isBlank(req.getTipoSpedizione())) {
+	        Optional<TipoSpedizione> byTipoSped = speR.findByTipoSpedizione(req.getTipoSpedizione().trim().toUpperCase());
+
+	        if (byTipoSped.isPresent() && !byTipoSped.get().getId().equals(req.getId()))
+	            throw new MangaException("exists_spe");
+	        	
+	        spe.setTipoSpedizione(req.getTipoSpedizione().trim().toUpperCase());
+	    }
 		
 		speR.save(spe);
 	}
