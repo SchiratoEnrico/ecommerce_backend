@@ -1,6 +1,9 @@
 package com.betacom.ecommerce.backend.models;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import com.betacom.ecommerce.backend.enums.Ruoli;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -41,8 +44,12 @@ public class Account {
 			unique = true)
 	private String email;
 	
+	@Column(nullable = false,
+			name = "data_creazione")
+	private LocalDateTime dataCreazione;
+	
 	@Column (nullable = false)
-	private String ruolo;
+	private Ruoli ruolo;
 	
 	@OneToMany(fetch = FetchType.EAGER,
 			cascade = CascadeType.ALL

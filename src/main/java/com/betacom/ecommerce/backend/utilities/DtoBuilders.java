@@ -66,7 +66,7 @@ public class DtoBuilders {
 						.provincia(a.getProvincia())
 						.cap(a.getCap())
 						.via(a.getVia())
-						.predefinito(a.getPredefinito())
+						.predefinito(a.getPredefinito()) 
 						.build()
 						)
 				.collect(Collectors.toList());
@@ -155,7 +155,7 @@ public class DtoBuilders {
 						 c.get().getId() : null
 						 )
 				.email(a.getEmail())
-				.ruolo(a.getRuolo())
+				.ruolo(a.getRuolo().toString())
 				.username(a.getUsername())
 				.build();	
 	}
