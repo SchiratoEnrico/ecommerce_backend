@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,11 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.assertj.core.api.Assertions;
 
 import com.betacom.ecommerce.backend.dto.inputs.FatturaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.FatturaDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,13 +34,16 @@ public class FatturaControllerTest {
 	 @Autowired
 	 private IMessagesServices msgS;
 	 
+	 @MockitoSpyBean
+	 private IFatturaServices fatS;
+	 
 	 @Test
      public void testFatturaController() {
         create();
         update();
-        list();
         findById();
         findByIdError();
+        list();
         deleteError();
         delete();
     }
@@ -188,6 +194,12 @@ public class FatturaControllerTest {
 	     	assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
 	     	Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
 		
+	     	// set cost to zero
+	     	req = buildFatturaRequest();
+	     	req.setCostoSpedizione(null);
+	     	log.debug("Begin create Fattura Test, success expected: {}");
+	     	re = fatC.create(req);
+	     	assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
 		}
 
 	    public void update() {
@@ -204,6 +216,7 @@ public class FatturaControllerTest {
 	                .clienteCap("00100")
 	                .clienteProvincia("Roma")
 	                .clienteStato("Italia")
+	                .note("Nota")
 	                .tipoPagamento("PayPal")
 	                .tipoSpedizione("Espresso")
 	                .costoSpedizione(new BigDecimal("7.99"))
@@ -214,6 +227,14 @@ public class FatturaControllerTest {
 	        assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
 	        Response r = re.getBody();
 	        assertThat(r.getMsg()).isEqualTo("Elemento aggiornato con successo");
+	        
+	        req.setId(0);
+	        re = fatC.update(req);
+	        assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+	        
+	        req.setId(null);
+	        re = fatC.update(req);
+	        assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
 	    }
 
     public void list() {
@@ -224,6 +245,11 @@ public class FatturaControllerTest {
         List<?> b = (List<?>) re.getBody();
         assertThat(b.size()).isGreaterThan(0);
         Assertions.assertThat(b.getFirst()).isInstanceOf(FatturaDTO.class);
+        
+        String error = "generic error";
+        doThrow(new RuntimeException(error)).when(fatS).list();
+        re = fatC.list();
+        assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
     }
 
     public void findById() {
@@ -234,6 +260,9 @@ public class FatturaControllerTest {
         Object b = re.getBody();
         Assertions.assertThat(b).isInstanceOf(FatturaDTO.class);
         assertThat(((FatturaDTO) b).getId()).isEqualTo(1);
+        
+        re = fatC.findById(null);
+        assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
     }
 
     public void findByIdError() {
@@ -250,6 +279,9 @@ public class FatturaControllerTest {
         assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         Response r = re.getBody();
         assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_fat"));
+        
+        re = fatC.delete(null);
+        assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
     }
 
     public void delete() {

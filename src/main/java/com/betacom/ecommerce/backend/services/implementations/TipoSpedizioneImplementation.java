@@ -49,7 +49,7 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 		
 		if (!Utils.isBlank(req.getTipoSpedizione())) {
 	        Optional<TipoSpedizione> byTipoSped = speR.findByTipoSpedizione(req.getTipoSpedizione().trim().toUpperCase());
-
+	        
 	        if (byTipoSped.isPresent() && !byTipoSped.get().getId().equals(req.getId()))
 	            throw new MangaException("exists_spe");
 	        	

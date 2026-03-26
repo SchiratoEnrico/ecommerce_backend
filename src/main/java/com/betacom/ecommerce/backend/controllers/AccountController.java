@@ -80,7 +80,7 @@ public class AccountController {
 
         try {
             r = accS.list();
-        } catch (MangaException e) {
+        } catch (Exception e) {
             r = msgS.get(e.getMessage());
             status = HttpStatus.BAD_REQUEST;
         }

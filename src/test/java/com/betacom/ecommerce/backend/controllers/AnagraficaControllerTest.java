@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.List;
 
@@ -12,10 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.betacom.ecommerce.backend.dto.inputs.AnagraficaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IAnagraficaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,18 +32,21 @@ public class AnagraficaControllerTest {
 	private AnagraficaController anaC;
 	@Autowired
 	private IMessagesServices msgS;
+	
+	@MockitoSpyBean
+	private IAnagraficaServices anaS;
 
 	@Test
-	public void testAnagraficaController() {
+	public void testAnagraficaController() throws Exception{
 		create();
 		update();
-		list();
 		findById();
 		findByIdError();
 		deleteError();
 		createNomeVuoto();
 		delete();
 		createCognomeVuoto();
+		list();
 	}
 
 	private AnagraficaRequest buildAnagraficaRequest() {
@@ -136,12 +142,28 @@ public class AnagraficaControllerTest {
 	            .build();
 		
 		ResponseEntity<Response> re = anaC.update(req);
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertEquals(HttpStatus.OK, re.getStatusCode());
 		Response r = re.getBody();
-		assertThat(r.getMsg()).isEqualTo("Elemento aggiornato con successo");
+		assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
+		
+		log.debug("Test fail update due to poor id");
+		req = AnagraficaRequest.builder()
+				.id(0)
+				.nome("Maria")
+				.cognome("Federico")
+				.stato("ITALIA     ")
+				.citta("Modena")
+				.provincia("Mirandola")
+				.cap("00099")
+				.via("Viale Venezia")
+				.predefinito(true)
+	            .build();
+		re = anaC.update(req);
+		r = re.getBody();
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
 	}
 
-	public void list() { 
+	public void list() throws Exception { 
 		log.debug("Begin list() Account test");
 		
 		ResponseEntity<Object> re = anaC.list();
@@ -150,6 +172,11 @@ public class AnagraficaControllerTest {
 		assertThat(b.size()).isGreaterThan(0);
 		Assertions.assertThat(b.getFirst()).isInstanceOf(AnagraficaDTO.class);
 		
+		log.debug("Test fail list anagrafiche");
+		String error = "generic error";
+		doThrow(new RuntimeException(error)).when(anaS).list();
+		re = anaC.list();
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
 	}
 	
 	public void findById() { 

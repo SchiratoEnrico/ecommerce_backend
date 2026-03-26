@@ -3,6 +3,7 @@ package com.betacom.ecommerce.backend.controllers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,9 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AutoreDTO;
+import com.betacom.ecommerce.backend.services.interfaces.IAutoreServices;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,17 +29,20 @@ import lombok.extern.slf4j.Slf4j;
 public class AutoreControllerTest {
 	@Autowired
     private AutoreController autC;
+	
+	@MockitoSpyBean
+	private IAutoreServices	autS;
 
 	@Test
-	public void testAutoreController() {
-		list();
+	public void testAutoreController() throws Exception{
 		listById();
 		create();
 		update();
 		delete();
+		list();
 	}
 
-	public void list() {
+	public void list() throws Exception{
         log.debug("start list autori test");
 
         ResponseEntity<?> resp = autC.list();
@@ -48,6 +54,11 @@ public class AutoreControllerTest {
 		assertThat(((List<?>) b).size()).isGreaterThan(0);
 		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(AutoreDTO.class);
         assertNotNull(resp.getBody());
+        
+        String error = "generic error";
+        doThrow(new RuntimeException(error)).when(autS).list();
+        resp = autC.list();
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 
     public void listById() {

@@ -50,7 +50,7 @@ public class AnagraficaController {
         try {
         	anaS.update(req);
             r.setMsg(msgS.get("rest_updated"));
-        } catch (MangaException e) {
+        } catch (Exception e) {
             r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
         }
@@ -79,7 +79,7 @@ public class AnagraficaController {
 
         try {
             r = anaS.list();
-        } catch (MangaException e) {
+        } catch (Exception e) {
             r = msgS.get(e.getMessage());
             status = HttpStatus.BAD_REQUEST;
         }

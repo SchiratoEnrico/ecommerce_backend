@@ -28,9 +28,13 @@ public class FatturaImplementation implements IFatturaServices{
 	private final IFatturaRepository fattR;
 	 
 	@Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = MangaException.class)
 	public void create(FatturaRequest req) throws MangaException {
 		log.debug("Create Fattura: {}", req);
+		
+		log.debug("Is blank: {}", Utils.isBlank(req.getNumeroFattura()));
+		
+		log.debug("N fattura: {}", req.getNumeroFattura());
 
 		if (Utils.isBlank(req.getNumeroFattura()))
             throw new MangaException("null_num_fat");

@@ -34,9 +34,9 @@ public class FatturaController {
 		Response r = new Response();
         HttpStatus status = HttpStatus.OK;
         try {
-           fattS.create(req);
+        		fattS.create(req);
             r.setMsg(msgS.get("rest_created"));
-        } catch (MangaException e) {
+        } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
         }
@@ -50,7 +50,7 @@ public class FatturaController {
         try {
             fattS.update(req);
             r.setMsg(msgS.get("rest_updated"));
-        } catch (MangaException e) {
+        } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
         }
@@ -64,7 +64,7 @@ public class FatturaController {
         try {
             fattS.delete(id);
             r.setMsg(msgS.get("rest_deleted"));
-        } catch (MangaException e) {
+        } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
         }
@@ -77,7 +77,7 @@ public class FatturaController {
 		HttpStatus status = HttpStatus.OK;
 		try {
             r = fattS.list();
-        } catch (MangaException e) {
+        } catch (Exception e) {
             r = msgS.get(e.getMessage());
             status = HttpStatus.BAD_REQUEST;
         }

@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.List;
 
@@ -12,10 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,9 @@ public class AccountControllerTest {
 	@Autowired
 	private IMessagesServices msgS;
 	
+	@MockitoSpyBean
+	private IAccountServices accS;
+	
 	
 	@Test
 	public void testAccountController() {
@@ -42,11 +48,11 @@ public class AccountControllerTest {
 		updateEmailDuplicata();
 		updateUserNameDuplicato();
 		updateErrorId();
-		list();
 		findById();
 		findByIdError();
 		deleteError();
 		delete();
+		list();
 	}
 	
 	private AccountRequest buildAccountRequest() {
@@ -57,6 +63,7 @@ public class AccountControllerTest {
 				.ruolo("ADMIN")
 				.build();
 	}
+	
 	public void create() {
 		
 		AccountRequest req = buildAccountRequest();
@@ -217,6 +224,12 @@ public class AccountControllerTest {
 		Assertions.assertThat(b).isInstanceOf(List.class);
 		assertThat(((List<?>) b).size()).isGreaterThan(0);
 		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(AccountDTO.class);
+		
+		log.debug("Test error in list account");
+		String error = "generic error";
+		doThrow(new RuntimeException(error)).when(accS).list();
+		re = accC.list();
+		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
 	}
 	
 	public void findById() { 

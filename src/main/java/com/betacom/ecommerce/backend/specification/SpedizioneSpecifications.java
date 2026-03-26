@@ -6,7 +6,7 @@ import com.betacom.ecommerce.backend.models.TipoSpedizione;
 
 public class SpedizioneSpecifications {
 	public static Specification<TipoSpedizione> tipoSpedizioneLike(String tipoSpedizione){
-		return (root, query, cb) -> (tipoSpedizione==null || tipoSpedizione.isBlank())
+		return (root, _, cb) -> (tipoSpedizione==null || tipoSpedizione.isBlank())
 				? cb.conjunction()
 				: cb.like(cb.lower(root.get("tipoSpedizione")), "%" + tipoSpedizione.toLowerCase() +"%");
 	}

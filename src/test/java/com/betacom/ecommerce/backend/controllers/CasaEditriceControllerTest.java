@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.List;
 
@@ -13,10 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.betacom.ecommerce.backend.dto.inputs.CasaEditriceRequest;
 import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.ICasaEditriceServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +34,12 @@ public class CasaEditriceControllerTest {
 	
 	@Autowired 
 	private IMessagesServices msgS;
-
 	
+	@MockitoSpyBean
+	private ICasaEditriceServices casS;
+
 	@Test
-	public void testCasaEditriceController() {
+	public void testCasaEditriceController() throws Exception {
 		createCasa();
 		findCasaByIdSuccesso();
 		findCasaByIdErrore();
@@ -173,7 +178,7 @@ public class CasaEditriceControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 
-	public void listCase() {
+	public void listCase() throws Exception {
 		log.debug("*** Test list Case ***");
 		
 		log.debug("* list: no params *");
@@ -195,5 +200,10 @@ public class CasaEditriceControllerTest {
 		Assertions.assertThat(lC.size()).isGreaterThan(0);
 		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(CasaEditriceDTO.class);
 		lC.forEach(c -> c.toString());
+		
+		String error = "generic error";
+		doThrow(new RuntimeException(error)).when(casS).list(null, null, null, null);
+		resp = casC.list(null, null, null, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 }

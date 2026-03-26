@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
 import com.betacom.ecommerce.backend.dto.outputs.CarrelloDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +32,13 @@ public class CarrelloControllerTest {
 	private CarrelloController carC;
 	@Autowired
 	private IMessagesServices msgS;
+	
+	@MockitoSpyBean
+	private ICarrelloServices carS;
 
 
 	@Test
-	public void testCarrelloController() {
+	public void testCarrelloController() throws Exception {
 		findByIdSuccess();
 		deleteCarrelloSuccess();
 		createCarrello();
@@ -158,11 +164,8 @@ public class CarrelloControllerTest {
 		log.debug("*** Finished testing chart deletion ***");
 	}
 	
-	public void listCarrelli() {
+	public void listCarrelli() throws Exception {
 		log.debug("*** Test lista Carrelli ***");
-		CarrelloRequest req = new CarrelloRequest();
-		req.setId_account(2);
-		ResponseEntity<Response> r= carC.create(req);
 
 		log.debug("* Expected: success - listAll *");
 		ResponseEntity<Object> resp = carC.list(null);
@@ -201,6 +204,11 @@ public class CarrelloControllerTest {
 		log.debug("* Done *");
 		
 		log.debug("*** Finished testing list chart ***");
+		
+		String error = "generic error";
+		doThrow(new RuntimeException(error)).when(carS).list(null);
+		resp = carC.list(null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
 	public void findByIdSuccess() {
