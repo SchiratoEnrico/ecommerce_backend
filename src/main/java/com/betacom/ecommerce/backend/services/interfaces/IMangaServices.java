@@ -14,8 +14,17 @@ public interface IMangaServices {
 	
 	MangaDTO findByIsbn(String isbn) throws MangaException;
 	
-	List<MangaDTO> list() throws MangaException;
-	
+	List<MangaDTO> list(
+			String titolo,
+			String casaEditriceNome,
+			String autoreNome,
+			String sagaNome,
+			Integer sagaId,
+			Integer casaEditriceId,
+			Integer autoreId,
+			List<Integer> generiId
+			) throws MangaException;
+
 	void delete(String isbn) throws MangaException;
 	
 }

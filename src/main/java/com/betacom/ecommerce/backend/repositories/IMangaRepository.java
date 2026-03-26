@@ -4,12 +4,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import com.betacom.ecommerce.backend.models.Manga;
 
 @Repository
-public interface IMangaRepository extends JpaRepository<Manga, String>{
+public interface IMangaRepository extends 
+	JpaRepository<Manga, String>,
+	JpaSpecificationExecutor<Manga>
+{
 
 	boolean existsByAutoriId(Integer idAutore);
 	
@@ -20,4 +24,6 @@ public interface IMangaRepository extends JpaRepository<Manga, String>{
 	List<Manga> findAllByAutoriId(Integer id);
 	
 	List<Manga> findAllByGeneriId(Integer id);
+
+	boolean existsBySagaIdAndSagaVol(Integer sagaId, Integer sagaVol);
 }

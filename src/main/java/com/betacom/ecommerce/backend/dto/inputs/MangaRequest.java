@@ -30,6 +30,10 @@ public class MangaRequest {
 	
 	private Integer numeroCopie;
 	
+	private Integer saga;
+	
+	private Integer sagaVol;
+	
 	//questi sono id
 	private Integer casaEditrice;
 	private List<Integer> generi;

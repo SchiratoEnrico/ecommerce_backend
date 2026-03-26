@@ -13,29 +13,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
+import com.betacom.ecommerce.backend.dto.inputs.SagaRequest;
 import com.betacom.ecommerce.backend.response.Response;
-import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.betacom.ecommerce.backend.services.interfaces.ISagaServices;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/rest/manga")
+@RequestMapping("/rest/saga")
 @RequiredArgsConstructor
 @Slf4j
-public class MangaController {
-	
-	private final IMangaServices mangaS;
+public class SagaController {
+	private final ISagaServices sagaS;
 	private final IMessagesServices msgS;
 	
 	@PostMapping("/create")
-	public ResponseEntity<Response> create(@RequestBody (required = true) MangaRequest req){
+	public ResponseEntity<Response> create(@RequestBody (required = true) SagaRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			mangaS.create(req);
+			sagaS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) { 
 			r.setMsg(e.getMessage());
@@ -46,11 +45,11 @@ public class MangaController {
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<Response> update(@RequestBody (required = true) MangaRequest req){
+	public ResponseEntity<Response> update(@RequestBody (required = true) SagaRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			mangaS.update(req);
+			sagaS.update(req);
 			r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
@@ -63,7 +62,6 @@ public class MangaController {
 	
 	@GetMapping("/list")
 	public ResponseEntity<Object> list(
-			@RequestParam (required = false)  String titolo,
 			@RequestParam (required = false)  String casaEditriceNome,
 			@RequestParam (required = false)  String autoreNome,
 			@RequestParam (required = false)  String sagaNome,
@@ -75,11 +73,10 @@ public class MangaController {
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r =  mangaS.list(
-					titolo,
+			r =  sagaS.list(
+					sagaNome,
 					casaEditriceNome,
 					autoreNome,
-					sagaNome,
 					sagaId,
 					casaEditriceId,
 					autoreId,
@@ -93,11 +90,11 @@ public class MangaController {
 	}
 
 	@GetMapping ("/find_by_isbn")
-	public ResponseEntity<Object> findById(@RequestParam (required = true) String id){
+	public ResponseEntity<Object> findById(@RequestParam (required = true) Integer id){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r =  mangaS.findByIsbn(id);
+			r =  sagaS.findById(id);
 		}catch (Exception e) {
 			r = e.getMessage();
 			status = HttpStatus.BAD_REQUEST;
@@ -107,12 +104,12 @@ public class MangaController {
 	}
 	
 	@DeleteMapping("/delete")
-	public ResponseEntity<Response> delete(@RequestParam(required = true) String id){
+	public ResponseEntity<Response> delete(@RequestParam(required = true) Integer id){
 	    Response r = new Response();
 	    HttpStatus status = HttpStatus.OK;
 
 	    try {
-	        mangaS.delete(id);
+	        sagaS.delete(id);
 	        r.setMsg(msgS.get("rest_deleted"));
 	    } catch (Exception e) {
 	        r.setMsg(e.getMessage());
@@ -121,4 +118,5 @@ public class MangaController {
 
 	    return ResponseEntity.status(status).body(r);
 	}
+
 }

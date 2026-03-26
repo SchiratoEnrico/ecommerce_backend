@@ -19,6 +19,7 @@ import com.betacom.ecommerce.backend.dto.outputs.OrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.RigaCarrelloDTO;
 import com.betacom.ecommerce.backend.dto.outputs.RigaFatturaDTO;
 import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
+import com.betacom.ecommerce.backend.dto.outputs.SagaDTO;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
@@ -34,6 +35,7 @@ import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.models.RigaFattura;
 import com.betacom.ecommerce.backend.models.RigaOrdine;
+import com.betacom.ecommerce.backend.models.Saga;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
 import com.betacom.ecommerce.backend.models.TipoSpedizione;
@@ -131,7 +133,7 @@ public class DtoBuilders {
 				.carrelloId(c.getCarrello().getId())
 				.id(c.getId())
 				.manga(man.isPresent()?
-						buildMangaDTO(man.get(), Optional.empty(), Optional.empty(), Optional.empty()):
+						buildMangaDTO(man.get(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()):
 							null
 							)
 				.numeroCopie(c.getNumeroCopie())
@@ -183,7 +185,7 @@ public class DtoBuilders {
 				.manga(
 					lM.isPresent() ?
 							lM.get().stream()
-									.map(g -> buildMangaDTO(g, Optional.empty(), Optional.empty(), Optional.empty())).toList() :
+									.map(g -> buildMangaDTO(g, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())).toList() :
 										null
 						)
 				.build();
@@ -197,13 +199,13 @@ public class DtoBuilders {
 				.descrizione(g.getDescrizione())
 				.manga(lM.isPresent() ?
 						lM.get().stream()
-						.map(m -> buildMangaDTO(m, Optional.empty(), Optional.empty(), Optional.empty())).toList() :
+						.map(m -> buildMangaDTO(m, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())).toList() :
 							null
 					)
 				.build();
 	}
 	
-	public static MangaDTO buildMangaDTO(Manga m, Optional<CasaEditrice> c, Optional<List<Autore>> lA, Optional<List<Genere>> lG) {
+	public static MangaDTO buildMangaDTO(Manga m, Optional<CasaEditrice> c, Optional<List<Autore>> lA, Optional<List<Genere>> lG, Optional<Saga> s) {
 		return MangaDTO.builder()
 				.isbn(m.getIsbn())
 				.titolo(m.getTitolo())
@@ -225,6 +227,9 @@ public class DtoBuilders {
 									.map(g -> buildGenereDTO(g, Optional.empty())).toList() :
 										null
 						)
+				.saga(s.isPresent()?
+						buildSagaDTO(s.get(), Optional.empty()):null )
+				.sagaVol(m.getSagaVol())
 				.build();
 	}
 	
@@ -342,5 +347,18 @@ public class DtoBuilders {
                 .build();
     }
 
+    public static SagaDTO buildSagaDTO(Saga s, Optional<List<Manga>> lM) {
+    	return SagaDTO.builder()
+    			.id(s.getId())
+    			.nome(s.getNome())
+    			.descrizione(s.getDescrizione())
+    			.immagine(s.getImmagine())
+    			.manga(lM.isPresent()?
+                		lM.get().stream().map(
+                				r -> buildMangaDTO(r, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())
+                		).collect(Collectors.toList())
+                        : null)
+    			.build();
+    }
 }
 

@@ -29,6 +29,10 @@ public class MangaDTO {
 	
 	private Integer numeroCopie;
 	
+	private SagaDTO saga;
+	
+	private Integer sagaVol;
+
 	//questi sono id
 	private CasaEditriceDTO casaEditrice;
 	private List<GenereDTO> generi;

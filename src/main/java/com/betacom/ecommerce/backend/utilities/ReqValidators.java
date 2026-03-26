@@ -119,7 +119,6 @@ public class ReqValidators {
 			toReturn.setNumeroCopie(req.getNumeroCopie());
 			toReturn.setTitolo(req.getTitolo());
 			toReturn.setPrezzo(req.getPrezzo());
-
 		}else {
 			
 			if(!Utils.isBlank(req.getIsbn()))
@@ -139,8 +138,6 @@ public class ReqValidators {
 			
 			if(req.getPrezzo()!=null) 
 				toReturn.setPrezzo(req.getPrezzo());
-			
-			//da capire generi, casa editrice e autori cosa fare
 		}
 		
 		return toReturn;
@@ -166,8 +163,8 @@ public class ReqValidators {
 	    if(create && Utils.isBlank(req.getDataPubblicazione()))
 	    	throw new MangaException("null_dtp");
 	    
-	    if(create && Utils.isBlank(req.getImmagine()))
-	    	throw new MangaException("null_img");
+	    //if(create && Utils.isBlank(req.getImmagine()))
+	    //	throw new MangaException("null_img");
 	    
 	    if(create && Utils.isBlank(req.getIsbn()))
 	    	throw new MangaException("null_isb");
@@ -189,10 +186,13 @@ public class ReqValidators {
 	    
 	    if(create && req.getPrezzo()==null)
 	    	throw new MangaException("null_pre");
-	    
+	    // check se volSaga inserito ma non id saga
+	    if (create && req.getSaga() == null && req.getSagaVol() > 0) {
+	    	throw new MangaException("null_sag");
+	    }
+
 	    // validazione data (solo se presente)
 	    if (!Utils.isBlank(req.getDataPubblicazione())) {
-	    	
 	    	Utils.stringToDate(req.getDataPubblicazione());
 	    }
 	}

@@ -64,4 +64,11 @@ public class Manga {
         inverseJoinColumns = @JoinColumn(name = "id_genere")
     )
 	private List<Genere> generi;
+	
+	@ManyToOne
+	@JoinColumn(name = "id_saga", nullable = true)
+	private Saga saga;
+
+	@Column(name = "saga_volume")
+	private Integer sagaVol;
 }
