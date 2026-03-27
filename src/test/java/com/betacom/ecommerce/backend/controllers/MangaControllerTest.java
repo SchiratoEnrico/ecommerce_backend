@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
-import com.betacom.ecommerce.backend.models.Manga;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
@@ -50,17 +49,65 @@ public class MangaControllerTest {
 
     public void list() {
         log.debug("start list manga test");
+		String titolo = "";
+		String casaEditriceNome = "";
+		String autoreNome = "";
+		String sagaNome = "";
+		Integer sagaId = null;
+		Integer casaEditriceId = null;
+		Integer autoreId = null;
+		List<Integer> generiId = new ArrayList<Integer>();
 
-        ResponseEntity<?> resp1 = mangaC.list();
+		// vuoto
+    	List<MangaDTO> lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	// titolo
+    	titolo = "one";
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	titolo = "";
+    	assertThat(lM.get(0).getTitolo().toLowerCase().startsWith(titolo));
 
-        assertEquals(HttpStatus.OK, resp1.getStatusCode());
-        Object b = resp1.getBody();
-        assertNotNull(b);
-		Assertions.assertThat(b).isInstanceOf(List.class);
-		assertThat(((List<?>) b).size()).isGreaterThan(0);
-		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(MangaDTO.class);
+    	// casaEditriceNome
+    	casaEditriceNome = "Shueis";
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	casaEditriceNome = "";
+    	assertThat(lM.get(0).getTitolo().toLowerCase().contains("one piece"));
 
-    }
+    	// autoreNome
+    	autoreNome = "iich";
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	autoreNome = "";
+    	assertThat(lM.get(0).getTitolo().toLowerCase().contains("one piece"));
+
+    	// sagaNome
+    	sagaNome = "piec";
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	sagaNome = "";
+    	assertThat(lM.get(0).getTitolo().toLowerCase().contains("one piece"));
+
+    	// sagaId
+    	sagaId= 1;
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	sagaId = null;
+    	assertThat(lM.get(0).getTitolo().toLowerCase().contains("one piece"));
+
+    	// casaEditriceId
+    	casaEditriceId= 1;
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	casaEditriceId = null;
+    	assertThat(lM.get(0).getTitolo().toLowerCase().contains("one piece"));
+
+    	// autoreId
+    	autoreId= 1;
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	autoreId = null;
+    	assertThat(lM.get(0).getTitolo().toLowerCase().contains("one piece"));
+
+    	// genereId
+    	generiId.add(2);
+    	lM = getLoadedList(titolo, casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	generiId = null;
+    	assertThat(lM.get(0).getTitolo().toLowerCase().contains("one piece"));}
+
 
     public void findByIsbn() {
         log.debug("start find manga by isbn test");
@@ -227,12 +274,37 @@ public class MangaControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
     
+    
     @SuppressWarnings("unchecked")
-	private List<MangaDTO> getLoadedList() {
-    	ResponseEntity<?> resp = mangaC.list();
+	private List<MangaDTO> getLoadedList(
+			String titolo,
+			String casaEditriceNome,
+			String autoreNome,
+			String sagaNome,
+			Integer sagaId,
+			Integer casaEditriceId,
+			Integer autoreId,
+			List<Integer> generiId
+
+			) {
+
+    	ResponseEntity<?> resp = mangaC.list(
+				titolo,
+				casaEditriceNome,
+				autoreNome,
+				sagaNome,
+				sagaId,
+				casaEditriceId,
+				autoreId,
+				generiId
+        		);
     	// test per:
     	// linked_ord 
     	// linked_car
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        Object b = resp.getBody();
+		Assertions.assertThat(b).isInstanceOf(List.class);
+
     	return ((List<MangaDTO>) resp.getBody());
     }
     
@@ -266,7 +338,7 @@ public class MangaControllerTest {
 		
 		// normal workflow
 		msg = "rest_deleted";
-		List<MangaDTO> lM = getLoadedList();
+		List<MangaDTO> lM = getLoadedList("", "", "", "", null, null, null, null);
 		isbn = lM.get(lM.size() - 1).getIsbn();
 		log.debug("Start StatoOrdineControllerTest.deleteTest(), expected success, id: {}", msg, isbn);
 		resp = mangaC.delete(isbn);

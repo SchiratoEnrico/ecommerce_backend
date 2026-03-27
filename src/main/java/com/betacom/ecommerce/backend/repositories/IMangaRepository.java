@@ -25,5 +25,7 @@ public interface IMangaRepository extends
 	
 	List<Manga> findAllByGeneriId(Integer id);
 
+	List<Manga> findAllBySagaId(Integer id);
+
 	boolean existsBySagaIdAndSagaVol(Integer sagaId, Integer sagaVol);
 }

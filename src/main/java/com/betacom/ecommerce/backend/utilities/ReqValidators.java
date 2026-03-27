@@ -187,7 +187,7 @@ public class ReqValidators {
 	    if(create && req.getPrezzo()==null)
 	    	throw new MangaException("null_pre");
 	    // check se volSaga inserito ma non id saga
-	    if (create && req.getSaga() == null && req.getSagaVol() > 0) {
+	    if (create && req.getSaga() == null && req.getSagaVol() != null && req.getSagaVol() > 0) {
 	    	throw new MangaException("null_sag");
 	    }
 

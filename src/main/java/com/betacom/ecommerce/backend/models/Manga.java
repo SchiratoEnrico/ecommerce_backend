@@ -66,7 +66,7 @@ public class Manga {
 	private List<Genere> generi;
 	
 	@ManyToOne
-	@JoinColumn(name = "id_saga", nullable = true)
+	@JoinColumn(name = "id_saga")
 	private Saga saga;
 
 	@Column(name = "saga_volume")

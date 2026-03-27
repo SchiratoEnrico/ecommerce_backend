@@ -115,7 +115,7 @@ public class MangaController {
 	        mangaS.delete(id);
 	        r.setMsg(msgS.get("rest_deleted"));
 	    } catch (Exception e) {
-	        r.setMsg(e.getMessage());
+	        r.setMsg(msgS.get(e.getMessage()));
 	        status = HttpStatus.BAD_REQUEST;
 	    }
 

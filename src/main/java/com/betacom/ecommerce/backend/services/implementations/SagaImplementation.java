@@ -48,7 +48,7 @@ public class SagaImplementation implements  ISagaServices {
 		
 		Saga s = new Saga();
 		if (req.getNome() != null && !req.getNome().isEmpty()) {
-			myNome = req.getNome().trim().toUpperCase();
+			myNome = req.getNome().trim();
 		} else {
 			throw new MangaException("null_snom");
 		}
@@ -126,9 +126,18 @@ public class SagaImplementation implements  ISagaServices {
 		Saga s = sagaRepo.findById(id).orElseThrow(() ->
 					new MangaException("!exists_sag")
 					);
+		List<Manga> lM = mangaRepo.findAllBySagaId(id);
+		if (lM.size() > 0) {
+			throw new MangaException("exists_sagman");
+		}
 		sagaRepo.delete(s);
 	}
 
+	private SagaDTO callBuilder(Saga s) {
+		List<Manga> lM = mangaRepo.findAllBySagaId(s.getId());
+		return DtoBuilders.buildSagaDTO(s, Optional.ofNullable(lM));
+	}
+	
 	@Override
 	public List<SagaDTO> list(
 			String sagaNome,
@@ -153,7 +162,7 @@ public class SagaImplementation implements  ISagaServices {
 		List<Saga> lS = sagaRepo.findAll(spec);
 		
 		return lS.stream()
-				.map(s -> DtoBuilders.buildSagaDTO(s, Optional.ofNullable(s.getManga())))
+				.map(s -> callBuilder(s))
 				.collect(Collectors.toList());
 	}
 
@@ -164,6 +173,6 @@ public class SagaImplementation implements  ISagaServices {
 					new MangaException("!exists_sag")
 					);
 		
-		return DtoBuilders.buildSagaDTO(s, Optional.ofNullable(s.getManga()));
+		return callBuilder(s);
 	}
 }
