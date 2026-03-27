@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.dto.inputs.LoginRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.LoginDTO;
+import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
@@ -33,7 +35,7 @@ public class AccountImplementation implements IAccountServices{
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void create(AccountRequest req) throws MangaException {
-	    log.debug("create macchina {}", req);
+	    log.debug("create account {}", req);
 
 	    if (req.getUsername()==null || req.getUsername().isBlank())
 	        throw new MangaException("null_usr");
@@ -47,19 +49,25 @@ public class AccountImplementation implements IAccountServices{
 	        throw new MangaException("null_ema");
 
 	    if (Utils.isBlank(req.getRuolo()))
-	        throw new MangaException("null_ruo");
+	        throw new MangaException("null_ruo"); 
 
 	    if (repAcc.findByUsername(req.getUsername().trim()).isPresent() )
 	        throw new MangaException("exists_usr");
 
 	    if (repAcc.findByEmail(req.getEmail().trim()).isPresent())
 	        throw new MangaException("exists_ema");
-
+ 
 	    Account acc = new Account();
 	    acc.setUsername(req.getUsername().trim());
 	    acc.setPassword(req.getPassword().trim());
 	    acc.setEmail(req.getEmail().trim());
-	    acc.setRuolo(Utils.normalize(req.getRuolo()));
+	    acc.setDataCreazione(LocalDateTime.now());
+	    
+	    try {
+	    	acc.setRuolo(Ruoli.valueOf(Utils.normalize(req.getRuolo())));
+	    }catch(IllegalArgumentException e) {
+	    	throw new MangaException("!valid_rol");
+	    }
 
 	    repAcc.save(acc);
 	}
@@ -70,6 +78,15 @@ public class AccountImplementation implements IAccountServices{
 		log.debug("Delete Account, id: {}", id);
         Account acc = repAcc.findById(id)
                 .orElseThrow(() -> new MangaException("null_acc"));
+        
+        if(acc.getRuolo().equals(Ruoli.ADMIN)) {
+			List<Account> lU = repAcc.findByRuolo(Ruoli.ADMIN);
+			
+			if(lU.size()==1)
+				throw new MangaException("last_adm");
+		}
+        
+        
         repAcc.delete(acc);	
 	}
 	
@@ -104,7 +121,7 @@ public class AccountImplementation implements IAccountServices{
 	    	acc.setPassword(req.getPassword().trim());
 
 	    if (!Utils.isBlank(req.getRuolo()))
-	        acc.setRuolo(Utils.normalize(req.getRuolo()));
+	    	acc.setRuolo(Ruoli.valueOf(Utils.normalize(req.getRuolo())));
 
 	    repAcc.save(acc);
 	}
