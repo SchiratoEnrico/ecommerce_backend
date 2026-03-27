@@ -70,11 +70,13 @@ public class RigaOrdineController {
     }
 
 	@GetMapping ("/list")
-	public ResponseEntity<Object> list(){
+	public ResponseEntity<Object> list(
+			@RequestParam(required=false) Integer idOrdine){
+		
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-            r = rowS.list();
+            r = rowS.list(idOrdine);
         } catch (MangaException e) {
             r = msgS.get(e.getMessage());
             status = HttpStatus.BAD_REQUEST;

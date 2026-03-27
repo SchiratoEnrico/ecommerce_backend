@@ -1,14 +1,21 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
+import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.OrdineDTO;
+import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
+import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
+import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
+import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Ordine;
@@ -23,6 +30,7 @@ import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoPagamentoRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoSpedizioneRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IOrdineServices;
+import com.betacom.ecommerce.backend.specification.OrdineSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
@@ -184,12 +192,37 @@ public class OrdineImplemetation implements IOrdineServices{
 	}
 	
 	@Override
-	public List<OrdineDTO> list() {
-		log.debug("ordine list()");
+	@Transactional(readOnly = true)
+	public List<OrdineDTO> list(
+			AccountDTO account,
+	        TipoPagamentoDTO tipoPagamento,
+	        TipoSpedizioneDTO tipoSpedizione,
+	        Integer anno,
+	        Integer mese,
+	        Integer giorno,
+	        StatoOrdineDTO stato,
+	        List<String> isbns)  {
 
-		List<Ordine> lO = ordeR.findAll();
-		return getDTOs(lO);
-	}
+		 Specification<Ordine> spec = Specification
+		            .where(OrdineSpecifications.accountUsernameLike(account != null ? account.getUsername() : null))
+		            .and(OrdineSpecifications.tipoPagamentoLike(tipoPagamento != null ? tipoPagamento.getTipoPagamento() : null))
+		            .and(OrdineSpecifications.tipoSpedizioneLike(tipoSpedizione != null ? tipoSpedizione.getTipoSpedizione() : null))
+		            .and(OrdineSpecifications.statoOrdineLike(stato != null ? stato.getStatoOrdine() : null))
+		            .and(OrdineSpecifications.hasAnyMangaIds(isbns))
+		            .and(OrdineSpecifications.meseAnnoEquals(giorno, mese, anno));
+
+		    List<Ordine> lO = ordeR.findAll(spec);
+		    return lO.stream()
+		            .map(o -> DtoBuilders.buildOrdineDTO(
+		                    o,
+		                    Optional.ofNullable(o.getAccount()),
+		                    Optional.ofNullable(o.getTipoPagamento()),
+		                    Optional.ofNullable(o.getStato()),
+		                    Optional.ofNullable(o.getTipoSpedizione()),
+		                    Optional.ofNullable(o.getRigheOrdine())
+		            ))
+		            .toList();
+		}
 
 	@Override
 	public OrdineDTO findById(Integer id) throws MangaException {

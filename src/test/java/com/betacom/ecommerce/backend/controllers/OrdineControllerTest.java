@@ -1,7 +1,10 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -32,7 +35,7 @@ public class OrdineControllerTest {
 	public void testOrdineController() {
 		createTest();
 		updateTest();
-		listTest();
+		listOrdiniTest();
 		findByIdTest();
 		deleteTest();
 	}
@@ -224,7 +227,7 @@ public class OrdineControllerTest {
 		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_sta"));
 
 	};
-
+/*
 	private void listTest(){
 		log.debug("Start OrdineControllerTest.listTest()");
 		
@@ -237,7 +240,98 @@ public class OrdineControllerTest {
 			Assertions.assertThat(body.getFirst()).isInstanceOf(OrdineDTO.class);
 		}
 	};
+*/
+	@Test
+    public void listOrdiniTest() {
+        log.debug("start list ordini test");
+        
+        // Inizializzazione parametri di ricerca
+        String username = null;
+        String tipoPagamento = null;
+        String tipoSpedizione = null;
+        LocalDate data = null;
+        String statoOrdine = null;
+        List<String> isbns = new ArrayList<>();
 
+        //Test Lista Vuota (senza filtri)
+        List<OrdineDTO> lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
+        assertThat(lO).isNotEmpty();
+        
+        // Test per Username
+        username = "Mario";
+        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
+        username = null;
+        assertThat(lO).isNotEmpty();
+        assertThat(lO.get(0).getAccount().getUsername()).containsIgnoringCase("mario");
+
+        // Test per Tipo Pagamento
+        tipoPagamento = "PayPal";
+        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
+        tipoPagamento = null;
+        assertThat(lO).isNotEmpty();
+        assertThat(lO.get(0).getPagamento().getTipoPagamento()).isEqualToIgnoringCase("paypal");
+
+        // Test per Tipo Spedizione
+        tipoSpedizione = "Corriere";
+        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
+        tipoSpedizione = null;
+        assertThat(lO).isNotEmpty();
+        assertThat(lO.get(0).getSpedizione().getTipoSpedizione()).isEqualToIgnoringCase("corriere");
+
+        // Test per Stato Ordine
+        statoOrdine = "Spedito";
+        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
+        statoOrdine = null;
+        assertThat(lO).isNotEmpty();
+        assertThat(lO.get(0).getStato().getStatoOrdine()).isEqualToIgnoringCase("spedito");
+
+        // Test per ISBN
+        isbns.add("978-1234567890");
+        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
+        isbns.clear();
+        assertThat(lO).isNotEmpty();
+        assertThat(lO.get(0).getRigheOrdine().stream()
+            .anyMatch(r -> r.getManga().equals("978-1234567890"))).isTrue();
+
+        // Test per Data
+        data = LocalDate.of(2024, 5, 15);
+        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
+        data = null;
+        assertThat(lO).isNotEmpty();
+        assertThat(lO.get(0).getData().getMonthValue()).isEqualTo(5);
+        assertThat(lO.get(0).getData().getYear()).isEqualTo(2024);
+    }
+	
+	@SuppressWarnings("unchecked")
+	private List<OrdineDTO> getLoadedList(
+	        String username,
+	        String tipoPagamento,
+	        String tipoSpedizione,
+	        LocalDate data,
+	        String statoOrdine,
+	        List<String> isbns
+	) {
+		Integer anno = (data != null) ? data.getYear() : null;
+	    Integer mese = (data != null) ? data.getMonthValue() : null;
+	    Integer giorno = (data != null) ? data.getDayOfMonth() : null;
+	    ResponseEntity<Object> resp = ordC.list(
+	            username,
+	            tipoPagamento,
+	            tipoSpedizione,
+	            statoOrdine,
+	            anno,
+	            mese,
+	            giorno,
+	            isbns
+	    );
+
+	    assertEquals(HttpStatus.OK, resp.getStatusCode());
+	    Object b = resp.getBody();
+	    Assertions.assertThat(b).isInstanceOf(List.class);
+
+	    return (List<OrdineDTO>) b;
+	}
+	
 	private void findByIdTest(){
 		// Id error
 		// null_ord

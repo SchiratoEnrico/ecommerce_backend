@@ -2,14 +2,15 @@ package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
+import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.Manga;
 import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.models.RigaOrdine;
@@ -17,6 +18,8 @@ import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
+import com.betacom.ecommerce.backend.specification.CarrelloSpecifications;
+import com.betacom.ecommerce.backend.specification.RigaOrdineSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
@@ -98,11 +101,13 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 	}
 
 	@Override
-	public List<RigaOrdineDTO> list() {
-		List<RigaOrdine> lR = righR.findAll();
-		return lR.stream()
-				.map(r -> DtoBuilders.buildRigaOrdineDTO(r, Optional.ofNullable(r.getManga())))
-				.collect(Collectors.toList());
+	public List<RigaOrdineDTO> list(Integer idOrdine) throws MangaException {
+	    Specification<RigaOrdine> spec = Specification
+	            .where(RigaOrdineSpecifications.idOrdineEquals(idOrdine));
+	    List<RigaOrdine> lR = righR.findAll(spec);
+	    return lR.stream()
+	            .map(r -> DtoBuilders.buildRigaOrdineDTO(r, Optional.empty()))
+	            .toList();
 	}
 
 	@Override

@@ -10,7 +10,7 @@ public interface IRigaOrdineServices {
 	Integer create(RigaOrdineRequest req) throws MangaException; 
 	void update(RigaOrdineRequest req) throws MangaException; 
 	void delete(Integer id) throws MangaException; 
-	List<RigaOrdineDTO> list();
+	List<RigaOrdineDTO> list(Integer idOrdine);
 	RigaOrdineDTO findById(Integer id) throws MangaException;
 
 }

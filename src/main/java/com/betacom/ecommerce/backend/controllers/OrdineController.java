@@ -1,5 +1,8 @@
 package com.betacom.ecommerce.backend.controllers;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
+import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
+import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
+import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
+import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
@@ -69,6 +76,7 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
 
+/*	
 	@GetMapping ("/list")
 	public ResponseEntity<Object> list(){
 		Object r = new Object();
@@ -80,6 +88,35 @@ public class OrdineController {
             status = HttpStatus.BAD_REQUEST;
         }
         return ResponseEntity.status(status).body(r);
+	}
+*/
+	@GetMapping("/list")
+	public ResponseEntity<Object> list(
+	        @RequestParam(required = false) String username,
+	        @RequestParam(required = false) String tipoPagamento,
+	        @RequestParam(required = false) String tipoSpedizione,
+	        @RequestParam(required = false) String statoOrdine,
+	        @RequestParam(required = false) Integer anno,
+	        @RequestParam(required = false) Integer mese,
+	        @RequestParam(required = false) Integer giorno,
+	        @RequestParam(required = false) List<String> isbns
+	        ) {
+	    Object r = new Object();
+	    HttpStatus status = HttpStatus.OK;
+	    try {
+	        r = ordS.list(
+	                username != null ? AccountDTO.builder().username(username).build() : null,
+	                tipoPagamento != null ? TipoPagamentoDTO.builder().tipoPagamento(tipoPagamento).build() : null,
+	                tipoSpedizione != null ? TipoSpedizioneDTO.builder().tipoSpedizione(tipoSpedizione).build() : null,
+	                anno, mese, giorno,
+	                statoOrdine != null ? StatoOrdineDTO.builder().statoOrdine(statoOrdine).build() : null,
+	                isbns
+	        );
+	    } catch (Exception e) {
+	        r = e.getMessage();
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+	    return ResponseEntity.status(status).body(r);
 	}
 	
 	@GetMapping("/findById")

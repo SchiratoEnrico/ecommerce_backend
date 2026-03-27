@@ -1,7 +1,9 @@
 
 package com.betacom.ecommerce.backend.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.List;
 
@@ -12,11 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
+import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,12 +35,14 @@ public class RigaOrdineControllerTest {
 	private RigaOrdineController rowC;
 	@Autowired
 	private IMessagesServices msgS;
+	@MockitoSpyBean
+	private IRigaOrdineServices rowS;
 	
 	@Test
 	public void testRigaOrdineController() {
 		createTest();
 		updateTest();
-		listTest();
+		listRigaOrdine();
 		findByIdTest();
 		deleteTest();
 	}
@@ -47,7 +54,7 @@ public class RigaOrdineControllerTest {
                 .numeroCopie(1)
                 .build();
     }
-    
+    /*
     private void printList() {
 		ResponseEntity<?> resp = rowC.list();
 		List<?> body = (List<?>) resp.getBody();
@@ -69,7 +76,40 @@ public class RigaOrdineControllerTest {
 			Assertions.assertThat(body.getFirst()).isInstanceOf(RigaOrdineDTO.class);
 		}
 	}
-	
+	*/
+    
+    public void listRigaOrdine() throws MangaException {
+        log.debug("*** Test list RigaOrdine ***");
+
+        log.debug("* list: no params *");
+        ResponseEntity<?> resp = rowC.list(null);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        Object b = resp.getBody();
+        Assertions.assertThat(b).isInstanceOf(List.class);
+        List<?> lR = (List<?>) b;
+        Assertions.assertThat(lR.size()).isGreaterThan(0);
+        Assertions.assertThat(lR.getFirst()).isInstanceOf(RigaOrdineDTO.class);
+        lR.forEach(r -> r.toString());
+
+        log.debug("* list: with idOrdine *");
+        resp = rowC.list(1); // adatta l'id
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        b = resp.getBody();
+        Assertions.assertThat(b).isInstanceOf(List.class);
+        lR = (List<?>) b;
+        Assertions.assertThat(lR.size()).isGreaterThan(0);
+        Assertions.assertThat(lR.getFirst()).isInstanceOf(RigaOrdineDTO.class);
+        lR.forEach(r -> r.toString());
+
+        String error = "generic error";
+        doThrow(new RuntimeException(error)).when(rowS).list(null);
+        resp = rowC.list(null);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+    }
+    
+    
+    
+    
 	public void findByIdTest() {
 		// Id error
 		Integer id = 99;
@@ -116,7 +156,6 @@ public class RigaOrdineControllerTest {
 		req = getProva();
 		req.setManga(null);
 		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest\n\t\t\t{}", req);
-		printList();
 		resp = rowC.create(req);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		r = (Response)resp.getBody();
