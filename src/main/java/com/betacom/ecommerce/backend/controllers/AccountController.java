@@ -116,4 +116,19 @@ public class AccountController {
 		
 		return ResponseEntity.status(status).body(r);
 	}
+	
+	@GetMapping("/findByUsername")
+	public ResponseEntity<Object> findByUsername(@RequestParam String username) {
+	    Object r = new Object();
+	    HttpStatus status = HttpStatus.OK;
+	    try {
+	        r = accS.findByUsername(username);
+	    } catch (MangaException e) {
+	        r = e.getMessage();
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+	    return ResponseEntity.status(status).body(r);
+	}
+	
+	
 }

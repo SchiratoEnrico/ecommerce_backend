@@ -178,5 +178,13 @@ public class AccountImplementation implements IAccountServices{
 		
 	}
 
+	@Override
+	public AccountDTO findByUsername(String username) throws MangaException {
+		Account acc = repAcc.findByUsername(username)
+	            .orElseThrow(() -> new MangaException("!exists_acc"));
+
+	    return DtoBuilders.buildAccountDTO(acc, Optional.ofNullable(acc.getCarrello()), Optional.ofNullable(acc.getAnagrafiche()));
+	}
+
 	
 }
