@@ -35,6 +35,10 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	    //check sull'account
 	    Account acc = repAcc.findById(req.getIdAccount()).orElseThrow(()-> new MangaException("!exists_acc"));
 	    
+	    //se la nuova richiesta è predefinito true, setto tutte le altre a false
+	    if(req.getPredefinito())
+	    	acc.getAnagrafiche().forEach(a -> a.setPredefinito(false));
+	    
 	    if (Utils.isBlank(req.getNome()))
 	        throw new MangaException("null_nom");
 
@@ -67,7 +71,7 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	    an.setProvincia(Utils.normalize(req.getProvincia()));
 	    an.setCap(Utils.normalize(req.getCap()));
 	    an.setVia(Utils.normalize(req.getVia()));
-	    an.setPredefinito(false);
+	    an.setPredefinito(req.getPredefinito());
 	    an.setAccount(acc);
 
 	    repAna.save(an);
@@ -80,7 +84,13 @@ public class AnagraficaImplementation implements IAnagraficaServices{
         
 		Anagrafica ana = repAna.findById(id)
 				.orElseThrow(() -> new MangaException("null_ana"));
+		
+		if (ana.getAccount() != null) {
+		        ana.getAccount().getAnagrafiche().remove(ana);
+	    	}
+		
 		repAna.delete(ana);
+		repAna.flush();
 	}
 
 	@Override
@@ -91,6 +101,10 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	    Anagrafica ana = repAna.findById(req.getId())
 	            .orElseThrow(() -> new MangaException("null_ana"));
 
+	  //se la nuova richiesta è predefinito true, setto tutte le altre a false
+	    if(req.getPredefinito())
+	    	ana.getAccount().getAnagrafiche().forEach(a -> a.setPredefinito(false));
+	    
 	    if (!Utils.isBlank(req.getNome()))
 	        ana.setNome(Utils.normalize(req.getNome()));
 
