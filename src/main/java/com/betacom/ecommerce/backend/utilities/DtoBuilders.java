@@ -39,11 +39,58 @@ import com.betacom.ecommerce.backend.models.Saga;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
 import com.betacom.ecommerce.backend.models.TipoSpedizione;
+import com.betacom.ecommerce.backend.services.interfaces.IUploadServices;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+@RequiredArgsConstructor
 @Slf4j
 public class DtoBuilders {
+	
+	private final IUploadServices uploS;
+	
+    public SagaDTO buildSagaImgDTO(Saga s, Optional<List<Manga>> lM) {
+    	return SagaDTO.builder()
+    			.id(s.getId())
+    			.nome(s.getNome())
+    			.descrizione(s.getDescrizione())
+    			.immagine(uploS.buildUrl(s.getImmagine()))
+    			.manga(lM.isPresent()?
+                		lM.get().stream().map(
+                				r -> buildMangaDTO(r, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())
+                		).collect(Collectors.toList())
+                        : null)
+    			.build();
+    }
+
+	public MangaDTO buildMangaImgDTO(Manga m, Optional<CasaEditrice> c, Optional<List<Autore>> lA, Optional<List<Genere>> lG, Optional<Saga> s) {
+		return MangaDTO.builder()
+				.isbn(m.getIsbn())
+				.titolo(m.getTitolo())
+				.dataPubblicazione(m.getDataPubblicazione())
+				.prezzo(m.getPrezzo())
+				.immagine(uploS.buildUrl(m.getImmagine()))
+				.numeroCopie(m.getNumeroCopie())
+				.casaEditrice(c.isPresent()?
+						buildCasaEditriceDTO(c.get()) : null)
+				.autori(
+						lA.isPresent() ?
+						lA.get().stream()
+							.map(a -> buildAutoreDTO(a, Optional.empty())).toList() :
+								null
+						)
+				.generi(
+						lG.isPresent() ?
+								lG.get().stream()
+									.map(g -> buildGenereDTO(g, Optional.empty())).toList() :
+										null
+						)
+				.saga(s.isPresent()?
+						buildSagaDTO(s.get(), Optional.empty()):null )
+				.sagaVol(m.getSagaVol())
+				.build();
+	}
+
 	
 	public static List<TipoSpedizioneDTO> buildSpedizioniDTO(List<TipoSpedizione> lS){
 		return lS.stream()
