@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,6 @@ import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -76,11 +76,15 @@ public class RigaCarrelloController {
 	 * @return
 	 */
 	@GetMapping("/list")
-	public ResponseEntity<Object> list(){
+	public ResponseEntity<Object> list(
+			@RequestParam(required=false) Integer chartId,
+			@RequestParam(required=false) String isbn,
+			@RequestParam(required=false) Integer nCopie
+			){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r= rcS.list();
+			r= rcS.list(chartId, isbn, nCopie);
 		} catch (Exception e) {
 			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;

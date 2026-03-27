@@ -9,14 +9,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
+import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
 import com.betacom.ecommerce.backend.dto.inputs.LoginRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.LoginDTO;
 import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
+import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
+import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.ReqValidators;
 import com.betacom.ecommerce.backend.utilities.Utils;
@@ -28,8 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class AccountImplementation implements IAccountServices{
-
+	private final CarrelloImplementation carI;
 	private final IAccountRepository repAcc;
+	private final ICarrelloRepository carR;
+	private final IMessagesServices msgS;
 	
 	
 	@Override
@@ -69,6 +75,14 @@ public class AccountImplementation implements IAccountServices{
 	    	throw new MangaException("!valid_rol");
 	    }
 
+	    Integer id = repAcc.save(acc).getId();
+	    
+	    CarrelloRequest carReq = new CarrelloRequest();
+	    carReq.setId_account(id);
+	    Integer chartId = carI.create(carReq);
+	    Carrello car = carR.findById(chartId)
+	    		.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
+	    acc.setCarrello(car);
 	    repAcc.save(acc);
 	}
 

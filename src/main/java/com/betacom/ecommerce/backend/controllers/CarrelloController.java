@@ -148,4 +148,17 @@ public class CarrelloController {
 		}
 		return ResponseEntity.status(status).body(r);
 	}
+	
+	@GetMapping("/findByAccountId")
+	public ResponseEntity<Object> findByAccountId (@RequestParam (required = true)  Integer id){
+		Object r = new Object();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			r= carS.findByAccountId(id);
+		} catch (Exception e) {
+			r=e.getMessage();
+			status = HttpStatus.BAD_REQUEST; 
+		}
+		return ResponseEntity.status(status).body(r);
+	}
 }

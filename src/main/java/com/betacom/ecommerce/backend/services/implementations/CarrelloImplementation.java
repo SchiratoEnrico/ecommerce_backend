@@ -165,4 +165,18 @@ public class CarrelloImplementation implements ICarrelloServices{
 				Optional.ofNullable(car.getRigheCarrello())
 				);
 	}
+	
+	@Override
+	public CarrelloDTO findByAccountId(Integer id) throws Exception{
+		Carrello car = carR.findByAccountId(id)
+				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
+		
+		log.debug("Carrello: {}", car);
+		
+		return DtoBuilders.buildCarrelloDTO(
+				car,
+				Optional.ofNullable(car.getAccount()),
+				Optional.ofNullable(car.getRigheCarrello())
+				);
+	}
 }

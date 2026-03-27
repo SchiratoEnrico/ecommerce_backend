@@ -11,6 +11,6 @@ public interface IRigaCarrelloServices {
 	void update(RigaCarrelloRequest req) throws MangaException;
 	void delete(Integer id) throws MangaException;
 	
-	List<RigaCarrelloDTO> list() throws Exception;
+	List<RigaCarrelloDTO> list(Integer chartId, String isbn, Integer nCopie) throws Exception;
 	RigaCarrelloDTO findById(Integer id) throws Exception;
 }

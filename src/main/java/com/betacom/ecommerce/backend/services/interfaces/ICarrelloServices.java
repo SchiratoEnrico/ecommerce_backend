@@ -16,4 +16,5 @@ public interface ICarrelloServices {
 	
 	List<CarrelloDTO> list(List<String> isbns) throws Exception;
 	CarrelloDTO findById(Integer id) throws Exception;
+	CarrelloDTO findByAccountId(Integer id) throws Exception;
 }

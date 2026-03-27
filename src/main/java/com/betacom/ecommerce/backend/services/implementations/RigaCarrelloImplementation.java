@@ -5,6 +5,7 @@ import static com.betacom.ecommerce.backend.utilities.DtoBuilders.buildRigaCarre
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
+import com.betacom.ecommerce.backend.specification.RigaCarrelloSpecifications;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 	public Integer create(RigaCarrelloRequest req) throws MangaException{
 		if(req==null)
 			throw new MangaException("null_crq");
+		log.debug("Request of creation: {}", req);
 		if(req.getCarrelloId()==null)
 			throw new MangaException("null_cri");
 		if(req.getManga()==null)
@@ -99,8 +102,13 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 	}
 	
 	@Override
-	public List<RigaCarrelloDTO> list() throws Exception {
-		List<RigaCarrello> lrC = rcR.findAll();
+	public List<RigaCarrelloDTO> list(Integer chartId, String isbn, Integer nCopie) throws Exception {
+		Specification<RigaCarrello> spec = Specification
+				.where(RigaCarrelloSpecifications.chartIdLike(chartId))
+				.and(RigaCarrelloSpecifications.mangaLike(isbn))
+				.and(RigaCarrelloSpecifications.hasAtLeast(nCopie));
+		
+		List<RigaCarrello> lrC = rcR.findAll(spec);
 		
 		return lrC.stream()
 				.map(rC -> builderCall(rC))

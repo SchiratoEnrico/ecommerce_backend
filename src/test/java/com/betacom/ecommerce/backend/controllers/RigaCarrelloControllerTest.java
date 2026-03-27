@@ -46,7 +46,7 @@ public class RigaCarrelloControllerTest {
 	public void listTest() {
 		log.debug("Start RigaCarrelloControllerTest.listTest()");
 		
-		ResponseEntity<?> resp = rowC.list();
+		ResponseEntity<?> resp = rowC.list(null, null, null);
 
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		Assertions.assertThat(resp.getBody()).isInstanceOf(List.class);
