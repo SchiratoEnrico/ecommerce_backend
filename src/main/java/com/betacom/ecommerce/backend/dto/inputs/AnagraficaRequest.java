@@ -24,4 +24,5 @@ public class AnagraficaRequest {
 	private String cap;
 	private String via;
 	private Boolean predefinito;
+	private Integer idAccount;
 }

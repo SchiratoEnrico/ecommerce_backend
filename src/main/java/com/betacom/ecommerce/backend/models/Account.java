@@ -51,10 +51,12 @@ public class Account {
 	@Column (nullable = false)
 	private Ruoli ruolo;
 	
-	@OneToMany(fetch = FetchType.EAGER,
-			cascade = CascadeType.ALL
-			) 
-	@JoinColumn(name = "id_account")
+	@OneToMany(
+	        mappedBy = "account",   
+	        fetch = FetchType.EAGER,
+	        cascade = CascadeType.ALL,
+	        orphanRemoval = true
+	    )
 	private List<Anagrafica> anagrafiche;
 	
 	@OneToOne(

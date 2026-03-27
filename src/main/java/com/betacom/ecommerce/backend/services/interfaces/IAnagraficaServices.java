@@ -17,5 +17,6 @@ public interface IAnagraficaServices {
 	  public List<AnagraficaDTO> list();
 	    
 	  AnagraficaDTO findById(Integer id) throws MangaException;
-
+	  
+	  public List<AnagraficaDTO> findByAccountId(Integer id) throws MangaException;
 }

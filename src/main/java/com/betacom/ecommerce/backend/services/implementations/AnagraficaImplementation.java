@@ -8,7 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.betacom.ecommerce.backend.dto.inputs.AnagraficaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
+import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Anagrafica;
+import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.IAnagraficaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAnagraficaServices;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
@@ -23,12 +25,16 @@ import lombok.extern.slf4j.Slf4j;
 public class AnagraficaImplementation implements IAnagraficaServices{
 
 	private final IAnagraficaRepository repAna;
+	private final IAccountRepository repAcc;
 	
 	@Override
 	@Transactional (rollbackFor = Exception.class)
 	public void create(AnagraficaRequest req) throws MangaException {
 	    log.debug("Create Account", req);
-
+	    
+	    //check sull'account
+	    Account acc = repAcc.findById(req.getIdAccount()).orElseThrow(()-> new MangaException("!exists_acc"));
+	    
 	    if (Utils.isBlank(req.getNome()))
 	        throw new MangaException("null_nom");
 
@@ -62,6 +68,7 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	    an.setCap(Utils.normalize(req.getCap()));
 	    an.setVia(Utils.normalize(req.getVia()));
 	    an.setPredefinito(false);
+	    an.setAccount(acc);
 
 	    repAna.save(an);
 	}
@@ -128,6 +135,15 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	            .orElseThrow(() -> new MangaException("!exists_ana"));
 
 	    return DtoBuilders.buildAnagraficaDTO(a);
+	}
+
+	@Override
+	public List<AnagraficaDTO> findByAccountId(Integer id) throws MangaException {
+		log.debug("findind anagrafiche di account {}", id);
+		
+		List<Anagrafica> lA = repAna.findByAccountId(id);
+		
+		return DtoBuilders.buildAnagraficaDTO(lA);
 	}
 	
 }

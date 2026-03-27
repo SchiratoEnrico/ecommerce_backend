@@ -114,6 +114,7 @@ public class DtoBuilders {
 						.cap(a.getCap())
 						.via(a.getVia())
 						.predefinito(a.getPredefinito()) 
+						.idAccount(a.getAccount().getId())
 						.build()
 						)
 				.collect(Collectors.toList());
@@ -218,6 +219,7 @@ public class DtoBuilders {
 				.predefinito(a.getPredefinito())
 				.stato(a.getStato())
 				.via(a.getVia())
+				.idAccount(a.getAccount().getId())
 				.build();
 	}
 	

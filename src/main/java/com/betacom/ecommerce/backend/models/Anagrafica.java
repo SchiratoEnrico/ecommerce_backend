@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,4 +54,7 @@ public class Anagrafica {
 	@Column (nullable = false)
 	private Boolean predefinito;
 	
+	@ManyToOne
+    @JoinColumn(name = "id_account", nullable = false)
+    private Account account;
 }
