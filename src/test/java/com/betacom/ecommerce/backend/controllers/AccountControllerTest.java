@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
+import com.betacom.ecommerce.backend.dto.outputs.AutoreDTO;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
@@ -40,7 +42,7 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testAccountController() {
-		create();
+		create(); 
 		createPasswordInvalida();
 		createSenzaRuolo();
 		createSenzaUsername();
@@ -49,6 +51,7 @@ public class AccountControllerTest {
 		updateUserNameDuplicato();
 		updateErrorId();
 		findById();
+		listByFilters();
 		findByIdError();
 		deleteError();
 		delete();
@@ -177,7 +180,7 @@ public class AccountControllerTest {
 		log.debug("Begin update Account test");
 		AccountRequest req = AccountRequest.builder()
 				.id(1)
-	            .email("admin@email.com")
+	            .email("admin@email.com") 
 	            .build();
 		
 		ResponseEntity<Response> re = accC.update(req);
@@ -241,6 +244,23 @@ public class AccountControllerTest {
 		assertThat(((AccountDTO) b).getId()).isEqualTo(1);
 		
 	}
+	
+	public void listByFilters() {
+        log.debug("start list account by filters test");
+
+        ResponseEntity<?> resp = accC.findByFilters("admin", null, null);
+ 
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+
+        Object b = (AccountDTO) resp.getBody();
+        Assertions.assertThat(b).isInstanceOf(AccountDTO.class);
+        AccountDTO a = (AccountDTO) b;
+        assertNotNull(a);
+
+
+        assertNotNull(a.getId());
+        
+    }
 	
 	public void findByIdError() { 
 		log.debug("Begin findById TipoPagamento test error");

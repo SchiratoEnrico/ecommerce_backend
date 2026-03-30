@@ -84,6 +84,21 @@ public class AutoreController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
+	@GetMapping ("/findByFilters")
+	public ResponseEntity<Object> findByFilters(@RequestParam (required = false) String nome, 
+			@RequestParam (required = false) String cognome){
+		Object r = new Object();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			r =  autS.findByFilters(AutoreRequest.builder().nome(nome).cognome(cognome).build());
+		}catch (Exception e) {
+			r = e.getMessage();
+			status = HttpStatus.BAD_REQUEST;
+		}	
+		
+		return ResponseEntity.status(status).body(r);
+	}
+	
 	@DeleteMapping("/delete")
 	public ResponseEntity<Response> delete(@RequestParam(required = true) Integer id){
 	    Response r = new Response();

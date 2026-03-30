@@ -100,6 +100,22 @@ public class AccountController {
 		}
 		return ResponseEntity.status(status).body(r); 
 	}
+	
+	@GetMapping ("/findByFilters")
+	public ResponseEntity<Object> findByFilters(@RequestParam (required = false) String username, 
+			@RequestParam (required = false) String email,
+			@RequestParam (required = false) String ruolo){
+		Object r = new Object();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			r =  accS.findByFilters(AccountRequest.builder().username(username).email(email).ruolo(ruolo).build());
+		}catch (Exception e) {
+			r = e.getMessage();
+			status = HttpStatus.BAD_REQUEST;
+		}	
+		
+		return ResponseEntity.status(status).body(r);
+	}
 		
 	@PostMapping("/login")
 	public ResponseEntity<Object> login(@RequestBody (required = true) LoginRequest req){

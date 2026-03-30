@@ -36,6 +36,7 @@ public class AutoreControllerTest {
 	@Test
 	public void testAutoreController() throws Exception{
 		listById();
+		listByFilters();
 		create();
 		update();
 		delete();
@@ -65,7 +66,7 @@ public class AutoreControllerTest {
         log.debug("start list autore by id test");
 
         ResponseEntity<?> resp = autC.findById(1);
-
+ 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
 
         Object b = (AutoreDTO) resp.getBody();
@@ -83,6 +84,27 @@ public class AutoreControllerTest {
         // test errore id inesistente
         resp = autC.findById(99);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+    }
+    
+    public void listByFilters() {
+        log.debug("start list autore by filters test");
+
+        ResponseEntity<?> resp = autC.findByFilters("Akira", null);
+ 
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+
+        Object b = (AutoreDTO) resp.getBody();
+        Assertions.assertThat(b).isInstanceOf(AutoreDTO.class);
+        AutoreDTO a = (AutoreDTO) b;
+        assertNotNull(a);
+
+
+        assertNotNull(a.getId());
+        assertNotNull(a.getNome());
+        assertNotNull(a.getCognome());
+        assertNotNull(a.getDescrizione());
+        assertNotNull(a.getDataNascita());
+        
     }
 
     public void create() {

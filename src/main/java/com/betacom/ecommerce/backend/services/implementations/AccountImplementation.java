@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.betacom.ecommerce.backend.specification.AccountSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.ReqValidators;
 import com.betacom.ecommerce.backend.utilities.Utils;
@@ -184,6 +186,18 @@ public class AccountImplementation implements IAccountServices{
 	            .orElseThrow(() -> new MangaException("!exists_acc"));
 
 	    return DtoBuilders.buildAccountDTO(acc, Optional.ofNullable(acc.getCarrello()), Optional.ofNullable(acc.getAnagrafiche()));
+	}
+
+	@Override
+	public List<AccountDTO> findByFilters(AccountRequest req) throws MangaException {
+		
+		Specification<Account> spec = AccountSpecifications.usernameAndEmailAndRuolo(req.getUsername(), req.getEmail(), req.getRuolo());
+		
+		List<Account> lA = repAcc.findAll(spec);
+		
+		return lA.stream()
+	            .map(a -> DtoBuilders.buildAccountDTO(a, Optional.ofNullable(a.getCarrello()), Optional.ofNullable(a.getAnagrafiche())))
+	            .collect(Collectors.toList());
 	}
 
 	

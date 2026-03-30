@@ -24,5 +24,7 @@ public interface IAccountServices {
     AccountDTO findByUsername(String username) throws MangaException;
     
     LoginDTO login(LoginRequest req) throws MangaException;
+    
+    List<AccountDTO> findByFilters(AccountRequest req) throws MangaException;
 
 }

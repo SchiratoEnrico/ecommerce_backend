@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import com.betacom.ecommerce.backend.models.Autore;
 import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAutoreServices;
+import com.betacom.ecommerce.backend.specification.AutoreSpecifications;
 import com.betacom.ecommerce.backend.utilities.ReqValidators;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
@@ -106,14 +108,14 @@ public class AutoreImplementation implements IAutoreServices{
 		log.debug("Begin find all autori");
 		
 		List<Autore> lA = autRepo.findAll();
-		for (Autore a : lA) {
-			log.debug(a.toString());
-		}
+//		for (Autore a : lA) {
+//			log.debug(a.toString());
+//		}
 		return lA.stream().map(a -> DtoBuilders.buildAutoreDTO(a, Optional.ofNullable(mangaRepo.findAllByAutoriId(a.getId())))).toList();
 	}
 
 	@Override
-	public AutoreDTO findById(Integer id) throws Exception {
+	public AutoreDTO findById(Integer id) throws MangaException {
 		log.debug("Begin find autore by id: {}", id);
 		
 		Autore aut = autRepo.findById(id)
@@ -130,5 +132,16 @@ public class AutoreImplementation implements IAutoreServices{
 	            dataNascita,
 	            id
 	    );
+	}
+
+
+	@Override
+	public List<AutoreDTO> findByFilters(AutoreRequest req) throws MangaException {
+		
+		Specification<Autore> spec = AutoreSpecifications.nomeAndCognome(req.getNome(), req.getCognome());
+		
+		List<Autore> lA = autRepo.findAll(spec);
+		
+		return lA.stream().map(a -> DtoBuilders.buildAutoreDTO(a, Optional.ofNullable(mangaRepo.findAllByAutoriId(a.getId())))).toList();
 	}
 }

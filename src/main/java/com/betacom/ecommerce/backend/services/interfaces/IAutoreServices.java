@@ -17,4 +17,6 @@ public interface IAutoreServices {
 	List<AutoreDTO> list() throws Exception;
 	
 	AutoreDTO findById(Integer id) throws Exception;
+	
+	List<AutoreDTO> findByFilters(AutoreRequest req) throws MangaException;
 }
