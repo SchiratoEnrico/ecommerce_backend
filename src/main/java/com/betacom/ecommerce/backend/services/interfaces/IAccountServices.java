@@ -3,9 +3,7 @@ package com.betacom.ecommerce.backend.services.interfaces;
 import java.util.List;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
-import com.betacom.ecommerce.backend.dto.inputs.LoginRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
-import com.betacom.ecommerce.backend.dto.outputs.LoginDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 
 
@@ -22,8 +20,6 @@ public interface IAccountServices {
     AccountDTO findById(Integer id) throws MangaException;
     
     AccountDTO findByUsername(String username) throws MangaException;
-    
-    LoginDTO login(LoginRequest req) throws MangaException;
     
     List<AccountDTO> findByFilters(AccountRequest req) throws MangaException;
 

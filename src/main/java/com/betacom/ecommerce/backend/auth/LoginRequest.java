@@ -1,19 +1,15 @@
-package com.betacom.ecommerce.backend.dto.inputs;
+package com.betacom.ecommerce.backend.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class LoginRequest {
-	
-	private String password;
-	
 	private String username;
+	private String password;
 }

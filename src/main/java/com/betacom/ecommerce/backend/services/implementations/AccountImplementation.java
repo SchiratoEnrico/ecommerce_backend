@@ -6,14 +6,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
-import com.betacom.ecommerce.backend.dto.inputs.LoginRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
-import com.betacom.ecommerce.backend.dto.outputs.LoginDTO;
 import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
@@ -38,6 +37,7 @@ public class AccountImplementation implements IAccountServices{
 	private final IAccountRepository repAcc;
 	private final ICarrelloRepository carR;
 	private final IMessagesServices msgS;
+	private final PasswordEncoder passwordEncoder;
 	
 	
 	@Override
@@ -52,7 +52,7 @@ public class AccountImplementation implements IAccountServices{
 	    	throw new MangaException("null_pwd");
 	    
 	    ReqValidators.validatePassword(req.getPassword());
-
+ 
 	    if (req.getEmail() == null || req.getEmail().isBlank())
 	        throw new MangaException("null_ema");
 
@@ -66,8 +66,11 @@ public class AccountImplementation implements IAccountServices{
 	        throw new MangaException("exists_ema");
  
 	    Account acc = new Account();
+	    
+	    String encodedPassword = passwordEncoder.encode(req.getPassword().trim());
+	    
 	    acc.setUsername(req.getUsername().trim());
-	    acc.setPassword(req.getPassword().trim());
+	    acc.setPassword(encodedPassword);
 	    acc.setEmail(req.getEmail().trim());
 	    acc.setDataCreazione(LocalDateTime.now());
 	    
@@ -162,23 +165,6 @@ public class AccountImplementation implements IAccountServices{
 	    return DtoBuilders.buildAccountDTO(acc, Optional.ofNullable(acc.getCarrello()), Optional.ofNullable(acc.getAnagrafiche()));
 	}
 	
-	@Override
-	public LoginDTO login(LoginRequest req) throws MangaException {
-		log.debug("login {}", req);
-		
-		Account usr = repAcc.findByUsername(req.getUsername())
-				.orElseThrow(()-> new MangaException("!valid_log"));
-		
-		if(!usr.getPassword().equals(req.getPassword())) 
-			throw new MangaException("!valid_log");
-		
-		return LoginDTO.builder()
-				.id(usr.getId())
-				.username(usr.getUsername())
-				.ruolo(usr.getRuolo().toString())
-				.build();
-		
-	}
 
 	@Override
 	public AccountDTO findByUsername(String username) throws MangaException {
