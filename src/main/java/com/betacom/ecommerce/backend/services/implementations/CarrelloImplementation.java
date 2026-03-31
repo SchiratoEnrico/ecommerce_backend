@@ -179,4 +179,26 @@ public class CarrelloImplementation implements ICarrelloServices{
 				Optional.ofNullable(car.getRigheCarrello())
 				);
 	}
+
+	@Override
+	public boolean isCartOwnedByAccount(Integer chartId, Integer accountId) {
+		// Cerchiamo il carrello nel DB tramite il suo ID
+		var carrelloOpt = carR.findById(chartId);
+		
+		// 2. Se il carrello non esiste, ovviamente non è suo
+		if (carrelloOpt.isEmpty()) {
+			return false;
+		}
+		
+		//se c'è me lo prendo dall'optional
+		var carrello = carrelloOpt.get();
+		
+		// e il carrello esiste ma non ha un account associato (non dovrebbe succedere, ma sicurezza prima di tutto)
+		if (carrello.getAccount() == null) {
+			return false;
+		}
+		
+		//Confrontiamo l'ID dell'account proprietario del carrello con l'ID dell'utente loggato
+		return carrello.getAccount().getId().equals(accountId);
+	}
 }

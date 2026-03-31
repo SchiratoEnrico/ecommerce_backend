@@ -20,7 +20,7 @@ public class MangaSpecifications {
 	    return (root, query, cb) -> {
 	        query.distinct(true);
 	        return cb.conjunction();
-	    };
+	    }; 
 	}
 	
 	public static Specification<Manga> titoloLike(String titolo) {

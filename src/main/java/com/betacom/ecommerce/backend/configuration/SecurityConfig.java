@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.betacom.ecommerce.backend.security.JwtFilter;
 
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -27,13 +29,28 @@ public class SecurityConfig {
 	
 	private final JwtFilter jwtFilter;
 
-    @Bean
+	@Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
         	.cors(cors -> {})
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/login", "/rest/**", "/error").permitAll()
+                // Endpoint sempre pubblici per tutti (anche POST)
+                .requestMatchers(
+                    "/auth/login", 
+                    "/rest/account/create", 
+                    "/error",
+                    "/v3/api-docs/**", 
+                    "/swagger-ui/**", 
+                    "/swagger-ui.html"
+                ).permitAll()
+                // Rendiamo pubbliche TUTTE le GET (letture) relative al catalogo!
+                .requestMatchers(HttpMethod.GET, 
+                    "/rest/manga/list", 
+                    "/rest/manga/find_by_isbn"
+                    // Qui in futuro aggiungeremo anche "/rest/autori/list", "/rest/generi/list" ecc.
+                ).permitAll()
+                // Tutto il resto richiede di essere loggati
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
