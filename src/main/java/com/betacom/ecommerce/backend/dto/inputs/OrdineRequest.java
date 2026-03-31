@@ -20,5 +20,5 @@ public class OrdineRequest {
 	private String spedizione;
 	private String data;
 	private String stato;
-	private List<String> righeOrdineRequest;
+	private List<RigaOrdineRequest> righeOrdineRequest;
 }
