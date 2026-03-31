@@ -104,8 +104,7 @@ public class AccountImplementation implements IAccountServices{
 			if(lU.size()==1)
 				throw new MangaException("last_adm");
 		}
-        
-        
+         
         repAcc.delete(acc);	
 	}
 	
