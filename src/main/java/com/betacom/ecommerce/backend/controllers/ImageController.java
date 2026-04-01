@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,7 @@ public class ImageController {
 	private final IUploadServices uploS;
 	private final IMessagesServices msgS;
 	
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PostMapping(value="/upload", consumes="multipart/form-data")
 	public ResponseEntity<Response> uploadImage(
 			@RequestParam(required = true) MultipartFile file,

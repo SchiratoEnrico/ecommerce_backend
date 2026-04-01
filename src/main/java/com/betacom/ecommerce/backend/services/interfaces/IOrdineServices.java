@@ -29,7 +29,7 @@ public interface IOrdineServices {
 		    List<String> isbns) throws MangaException;
 	
 	OrdineDTO findById(Integer id) throws MangaException;
-	
-	
+
+	Boolean isOrdineOwnedByAccount(Integer ordineId, Integer accountId);
 
 }

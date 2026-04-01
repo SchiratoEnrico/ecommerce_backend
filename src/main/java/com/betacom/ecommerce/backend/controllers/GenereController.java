@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ public class GenereController {
 	private final IGenereServices genS;
 	private final IMessagesServices msgS;
 	
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PostMapping("/create")
 	public ResponseEntity<Response> create(@RequestBody (required = true) GenereRequest req){
 		Response r = new Response();
@@ -40,6 +42,7 @@ public class GenereController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PutMapping("/update")
 	public ResponseEntity<Response> update(@RequestBody (required = true) GenereRequest req){
 		Response r = new Response();
@@ -83,6 +86,7 @@ public class GenereController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@DeleteMapping("/delete")
 	public ResponseEntity<Response> delete(@RequestParam(required = true) Integer id){
 	    Response r = new Response();

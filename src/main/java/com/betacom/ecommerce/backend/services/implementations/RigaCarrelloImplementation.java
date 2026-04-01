@@ -122,4 +122,12 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 		Optional<Manga> m = manR.findByIsbn(rc.getManga().getIsbn());
 		return buildRigaCarrelloDTO(rc, m);
 	}
+	
+	public Boolean isRigaCarrelloOwnedByAccount(Integer rigaId, Integer accountId) {
+	    var rigaOpt = rcR.findById(rigaId);
+	    if (rigaOpt.isEmpty() || rigaOpt.get().getCarrello() == null || rigaOpt.get().getCarrello().getAccount() == null) {
+	        return false;
+	    }
+	    return rigaOpt.get().getCarrello().getAccount().getId().equals(accountId);
+	}
 }

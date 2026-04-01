@@ -120,8 +120,7 @@ public class OrdineImplemetation implements IOrdineServices{
 			    }
 		
 		}
-		return req.getId();
-		
+		return req.getId(); 
 	}
 
 	@Transactional (rollbackFor = Exception.class)
@@ -260,5 +259,17 @@ public class OrdineImplemetation implements IOrdineServices{
 				Optional.ofNullable(o.getStato()), 
 				Optional.ofNullable(o.getTipoSpedizione()), 
 				Optional.ofNullable(rowR.findAllByOrdineId(o.getId())));
+	}
+	
+	@Override
+	public Boolean isOrdineOwnedByAccount(Integer ordineId, Integer accountId) {
+	    var ordineOpt = ordeR.findById(ordineId);
+	    
+	    if (ordineOpt.isEmpty() || ordineOpt.get().getAccount() == null) {
+	        return false;
+	    }
+	    
+	    // Confronto tra l'ID dell'account dell'ordine e l'ID fornito
+	    return ordineOpt.get().getAccount().getId().equals(accountId);
 	}
 }
