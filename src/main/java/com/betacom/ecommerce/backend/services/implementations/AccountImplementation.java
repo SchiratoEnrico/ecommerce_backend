@@ -108,12 +108,11 @@ public class AccountImplementation implements IAccountServices{
         repAcc.delete(acc);	
 	}
 	
-	// Ricordati di iniettare il PasswordEncoder in cima alla classe!
-    // private final PasswordEncoder passwordEncoder;
+
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void update(AccountRequest req, boolean isAdmin) throws MangaException { // <-- Aggiunto isAdmin
+	public void update(AccountRequest req, boolean isAdmin) throws MangaException { 
 	    log.debug("Update Account, id: {}", req.getId());
 
 	    Account acc = repAcc.findById(req.getId())
