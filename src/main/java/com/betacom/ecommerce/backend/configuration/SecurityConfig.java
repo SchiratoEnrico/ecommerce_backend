@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+//abilito sicurezza dei metodi con annotazione @PreAuthorize
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 	
@@ -46,9 +49,25 @@ public class SecurityConfig {
                 ).permitAll()
                 // Rendiamo pubbliche TUTTE le GET (letture) relative al catalogo!
                 .requestMatchers(HttpMethod.GET, 
-                    "/rest/manga/list", 
-                    "/rest/manga/find_by_isbn"
-                    // Qui in futuro aggiungeremo anche "/rest/autori/list", "/rest/generi/list" ecc.
+                		// Manga
+                        "/rest/manga/list", 
+                        "/rest/manga/find_by_isbn",
+                        
+                        // Generi (Categorie per i filtri)
+                        "/rest/genere/list",
+                        "/rest/genere/findById",
+                        
+                        // Autori
+                        "/rest/autore/list",
+                        "/rest/autore/findById",
+                        
+                        // Case Editrici
+                        "/rest/casa_editrice/list",
+                        "/rest/casa_editrice/findById",
+                        
+                        // Saghe (se hai il controller per le saghe)
+                        "/rest/saga/list",
+                        "/rest/saga/findById"
                 ).permitAll()
                 // Tutto il resto richiede di essere loggati
                 .anyRequest().authenticated()

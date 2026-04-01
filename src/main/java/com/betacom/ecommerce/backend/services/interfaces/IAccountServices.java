@@ -13,7 +13,7 @@ public interface IAccountServices {
 	
     public void delete(Integer id) throws MangaException;
     
-    public void update(AccountRequest req) throws MangaException;
+    public void update(AccountRequest req, boolean isAdmin) throws MangaException;
     
     public List<AccountDTO> list();
     

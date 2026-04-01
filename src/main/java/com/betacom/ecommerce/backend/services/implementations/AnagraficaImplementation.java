@@ -160,4 +160,24 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 		return DtoBuilders.buildAnagraficaDTO(lA);
 	}
 	
+	@Override
+	public Boolean isAnagraficaOwnedByAccount(Integer anagraficaId, Integer accountId) {
+
+		var anagraficaOpt = repAna.findById(anagraficaId); 
+		
+		if (anagraficaOpt.isEmpty()) {
+			return false;
+		}
+		
+		var anagrafica = anagraficaOpt.get();
+		
+		// Se per qualche strano motivo l'anagrafica esiste ma non è collegata a nessun account
+		if (anagrafica.getAccount() == null) {
+			return false;
+		}
+		
+		// Confrontiamo l'id dell'account proprietario con l'id che stiamo verificando
+		return anagrafica.getAccount().getId().equals(accountId);
+	}
+	
 }

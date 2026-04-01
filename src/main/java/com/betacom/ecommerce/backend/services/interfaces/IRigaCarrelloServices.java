@@ -13,4 +13,6 @@ public interface IRigaCarrelloServices {
 	
 	List<RigaCarrelloDTO> list(Integer chartId, String isbn, Integer nCopie) throws Exception;
 	RigaCarrelloDTO findById(Integer id) throws Exception;
+	
+	Boolean isRigaCarrelloOwnedByAccount(Integer rigaId, Integer accountId);
 }

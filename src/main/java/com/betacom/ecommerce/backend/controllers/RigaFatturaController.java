@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ public class RigaFatturaController {
 	private final IRigaFatturaServices rowS;
 	private final IMessagesServices msgS;
 
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PostMapping("/create")
     public ResponseEntity<Response> create(@RequestBody(required = true) RigaFatturaRequest req) {
 		Response r = new Response();
@@ -42,7 +44,7 @@ public class RigaFatturaController {
         return ResponseEntity.status(status).body(r);
     }
    
-
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@DeleteMapping("/delete/{id}")
     public ResponseEntity<Response> delete(@PathVariable(required = true) Integer id) {
 		Response r = new Response();
@@ -57,6 +59,7 @@ public class RigaFatturaController {
         return ResponseEntity.status(status).body(r);
     }
 
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PutMapping("/update")
     public ResponseEntity<Response> update(@RequestBody(required = true) RigaFatturaRequest req) {
 		Response r = new Response();
@@ -71,6 +74,7 @@ public class RigaFatturaController {
         return ResponseEntity.status(status).body(r);
     }
 
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping ("/list")
 	public ResponseEntity<Object> list(){
 		Object r = new Object();
@@ -84,6 +88,7 @@ public class RigaFatturaController {
         return ResponseEntity.status(status).body(r);
 	}
 	
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/findById")
     public ResponseEntity<Object> findById(@RequestParam(required = true) Integer id) {
 		Object r = new Object();

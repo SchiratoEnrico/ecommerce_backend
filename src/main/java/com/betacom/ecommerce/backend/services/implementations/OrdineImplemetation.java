@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
+import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.OrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
@@ -30,6 +31,7 @@ import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoPagamentoRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoSpedizioneRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IOrdineServices;
+import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
 import com.betacom.ecommerce.backend.specification.OrdineSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
@@ -47,6 +49,7 @@ public class OrdineImplemetation implements IOrdineServices{
 	private final ITipoSpedizioneRepository speR;
 	private final IStatoOrdineRepository statR;
 	private final IRigaOrdineRepository rowR;
+	private final IRigaOrdineServices rowS;
 
 	@Override
 	@Transactional (rollbackFor = Exception.class)
@@ -100,9 +103,24 @@ public class OrdineImplemetation implements IOrdineServices{
 			throw new MangaException("null_sta");
 		}
 		
-		//righe ordine: gestione da implementazione di righe ordine 
+		Ordine savedOrdine = ordeR.save(o);
 		
-		return ordeR.save(o).getId();
+		if (req.getRigheOrdineRequest() != null && !req.getRigheOrdineRequest().isEmpty()) {
+		
+			 for (RigaOrdineRequest r : req.getRigheOrdineRequest()) {
+			        r.setIdOrdine(savedOrdine.getId());  // collega la riga all'ordine
+			        r.setNumeroCopie(
+			            r.getNumeroCopie() != null ? r.getNumeroCopie() : 1
+			        );
+			        try {
+			            rowS.create(r);    
+			        } catch (MangaException e) {
+			            throw new MangaException(e.getMessage());
+			        }
+			    }
+		
+		}
+		return req.getId(); 
 	}
 
 	@Transactional (rollbackFor = Exception.class)
@@ -241,5 +259,17 @@ public class OrdineImplemetation implements IOrdineServices{
 				Optional.ofNullable(o.getStato()), 
 				Optional.ofNullable(o.getTipoSpedizione()), 
 				Optional.ofNullable(rowR.findAllByOrdineId(o.getId())));
+	}
+	
+	@Override
+	public Boolean isOrdineOwnedByAccount(Integer ordineId, Integer accountId) {
+	    var ordineOpt = ordeR.findById(ordineId);
+	    
+	    if (ordineOpt.isEmpty() || ordineOpt.get().getAccount() == null) {
+	        return false;
+	    }
+	    
+	    // Confronto tra l'ID dell'account dell'ordine e l'ID fornito
+	    return ordineOpt.get().getAccount().getId().equals(accountId);
 	}
 }

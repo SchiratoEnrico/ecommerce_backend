@@ -19,4 +19,6 @@ public interface IAnagraficaServices {
 	  AnagraficaDTO findById(Integer id) throws MangaException;
 	  
 	  public List<AnagraficaDTO> findByAccountId(Integer id) throws MangaException;
+	  
+	  Boolean isAnagraficaOwnedByAccount(Integer anagraficaId, Integer accountId);
 }

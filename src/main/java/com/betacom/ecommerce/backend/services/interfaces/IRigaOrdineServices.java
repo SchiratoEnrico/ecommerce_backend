@@ -12,5 +12,5 @@ public interface IRigaOrdineServices {
 	void delete(Integer id) throws MangaException; 
 	List<RigaOrdineDTO> list(Integer idOrdine);
 	RigaOrdineDTO findById(Integer id) throws MangaException;
-
+	Boolean isRigaOrdineOwnedByAccount(Integer rigaId, Integer accountId);
 }

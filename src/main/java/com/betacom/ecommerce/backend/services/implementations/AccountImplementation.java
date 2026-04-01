@@ -108,38 +108,46 @@ public class AccountImplementation implements IAccountServices{
         repAcc.delete(acc);	
 	}
 	
+	// Ricordati di iniettare il PasswordEncoder in cima alla classe!
+    // private final PasswordEncoder passwordEncoder;
+
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void update(AccountRequest req) throws MangaException {
-	    log.debug("Update Account, id: {}", req);
+	public void update(AccountRequest req, boolean isAdmin) throws MangaException { // <-- Aggiunto isAdmin
+	    log.debug("Update Account, id: {}", req.getId());
 
 	    Account acc = repAcc.findById(req.getId())
 	            .orElseThrow(() -> new MangaException("null_acc"));
 
+	    
 	    if (!Utils.isBlank(req.getUsername())) {
 	        Optional<Account> byUsername = repAcc.findByUsername(req.getUsername().trim());
-
 	        if (byUsername.isPresent() && !byUsername.get().getId().equals(req.getId()))
 	            throw new MangaException("exists_usr");
 	        	
 	        acc.setUsername(req.getUsername().trim());
 	    }
 
+	    
 	    if (!Utils.isBlank(req.getEmail())) {
 	        Optional<Account> byEmail = repAcc.findByEmail(req.getEmail().trim().toLowerCase());
-
 	        if (byEmail.isPresent() && !byEmail.get().getId().equals(req.getId()))
 	            throw new MangaException("exists_ema");
 
 	        acc.setEmail(req.getEmail().trim().toLowerCase());
 	    }
 
-	    if (req.getPassword() != null && !req.getPassword().isBlank())
+	    
+	    if (req.getPassword() != null && !req.getPassword().isBlank()) { 
 	    	ReqValidators.validatePassword(req.getPassword());
-	    	acc.setPassword(req.getPassword().trim());
+            // Criptiamo la password prima di salvarla nel DB
+	    	acc.setPassword(passwordEncoder.encode(req.getPassword().trim()));
+        } 
 
-	    if (!Utils.isBlank(req.getRuolo()))
+	    // SICUREZZA: Aggiornamento ruolo soloO se chi chiama è admin
+	    if (!Utils.isBlank(req.getRuolo()) && isAdmin) {
 	    	acc.setRuolo(Ruoli.valueOf(Utils.normalize(req.getRuolo())));
+        }
 
 	    repAcc.save(acc);
 	}

@@ -116,4 +116,12 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 							new MangaException("!exists_row"));
 		return DtoBuilders.buildRigaOrdineDTO(r, Optional.ofNullable(r.getManga()));
 	}
+	
+	public Boolean isRigaOrdineOwnedByAccount(Integer rigaId, Integer accountId) {
+	    var rigaOpt = righR.findById(rigaId);
+	    if (rigaOpt.isEmpty() || rigaOpt.get().getOrdine() == null || rigaOpt.get().getOrdine().getAccount() == null) {
+	        return false;
+	    }
+	    return rigaOpt.get().getOrdine().getAccount().getId().equals(accountId);
+	}
 }
