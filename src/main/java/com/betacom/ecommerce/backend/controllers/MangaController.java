@@ -95,7 +95,7 @@ public class MangaController {
 		return ResponseEntity.status(status).body(r);
 	}
 
-	@GetMapping ("/find_by_isbn")
+	@GetMapping ("/findByIsbn")
 	public ResponseEntity<Object> findById(@RequestParam (required = true) String id){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
