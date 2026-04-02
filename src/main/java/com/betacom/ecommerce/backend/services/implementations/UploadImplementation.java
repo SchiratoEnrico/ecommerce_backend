@@ -59,7 +59,8 @@ public class UploadImplementation implements IUploadServices{
 		}
 	}
 	
-	private String controlUploadFile(MultipartFile file) {
+	
+	private String controlUploadFile(MultipartFile file, Boolean unique) {
 		Assert.isTrue(!file.isEmpty(), 
 				() -> msgS.get("!exists_up")
 		);
@@ -72,6 +73,11 @@ public class UploadImplementation implements IUploadServices{
 						.filter(name -> name.contains("."))
 						.map(name -> name.substring(name.lastIndexOf(".")))
 						.orElse("");
+		
+		if (!unique) {
+			// meaning we are setting the defalut image
+			return "default" + extension;
+		}
 		// Build unique name
 		String uniqueName = originalName.substring(0, originalName.lastIndexOf("."))
 				+ "-" + UUID.randomUUID().toString() + extension;
@@ -79,29 +85,39 @@ public class UploadImplementation implements IUploadServices{
 		return uniqueName;
 	} 
 	
-	private void setAndSave(String upName, String isbn, Integer id) {
+	// devo tenerlo public/default per avere transactional
+	@Transactional (rollbackFor = Exception.class)
+	public void setAndSave(String upName, String isbn, Integer id) {
+		String defaultImg = getDefaultFilename();
 		if (id != null && id > 0) {
 			Saga s = sagaR.findById(id).orElseThrow(() ->
 					new MangaException("!exists_sag"));
+			// rimuovo img preesistente se esiste 
+			if (s.getImmagine() != null && !s.getImmagine().equals(defaultImg)) {
+				removeImage(s.getImmagine());
+			}
+			
 			s.setImmagine(upName);
 			sagaR.save(s);
 		}
 		if (isbn != null && !isbn.isBlank()) {
 			Manga m = mangaR.findByIsbn(isbn).orElseThrow(() ->
 			new MangaException("!exists_man"));
+			if (m.getImmagine() != null && !m.getImmagine().equals(defaultImg)) {
+				removeImage(m.getImmagine());
+			}
 			m.setImmagine(upName);
 			mangaR.save(m);
 		}
 	}
 	
-	@Transactional (rollbackFor = Exception.class)
 	@Override
 	public String saveImage(MultipartFile file,  String isbn, Integer id) throws MangaException {
 		log.debug("saveImage req, id {}, isbn: {}", id, isbn);
-		if (id == null && (isbn.isEmpty())) {
+		if (id == null && (isbn == null || isbn.isBlank())) {
 			throw new MangaException("null_idxs");
 		}
-		String upName = controlUploadFile(file);
+		String upName = controlUploadFile(file, true);
 		Path destinationFile = uploadPath.resolve(upName);
 		
 		try {
@@ -112,18 +128,100 @@ public class UploadImplementation implements IUploadServices{
 		}
 		return upName;
 	}
+	
+		
+	private void removePrevDefault() {
+	    try {
+	        Files.list(uploadPath)
+	            .filter(p -> p.getFileName().toString().startsWith("default"))
+	            .forEach(p -> {
+	                try { Files.deleteIfExists(p); } 
+	                catch (IOException e) { log.warn("Could not delete previous default: {}", p); }
+	            });
+	    } catch (IOException e) {
+	        log.warn("Could not scan upload dir for default cleanup: {}", e.getMessage());
+	    }
+	}	
 
 	@Override
-	public void removeImage(String filename) throws MangaException {
-		// TODO Auto-generated method stub
+	public String saveDefaultImage(MultipartFile file) throws MangaException {
+		log.debug("saveDefaultImage req");
+
+		String upName = controlUploadFile(file, false);
+		Path destinationFile = uploadPath.resolve(upName);
+		removePrevDefault();
 		
+		try {
+			Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new MangaException("upsave_err");
+		}
+		return upName;
 	}
 
 	@Override
+	public void removeImage(String filename) throws MangaException {
+		if (filename == null || filename.isBlank()) return; 
+		String defaultImg = getDefaultFilename();
+		
+		// controllo per non rimuovere immagine di default
+		if (filename.equals(defaultImg)) return; 
+		try {
+			Path target = uploadPath.resolve(filename).normalize();
+			if (!target.startsWith(uploadPath))
+	            throw new MangaException("invalid_path");
+			Files.deleteIfExists(target);
+			
+		} catch (IOException e) {
+	        log.warn("Could not delete image {}: {}", filename, e.getMessage());
+	        // solo warning altrimenti blocco delete entries
+		}
+		
+	}
+
+	private String getDefaultFilename() {
+	    try {
+	        return Files.list(uploadPath)
+	                .filter(p -> p.getFileName().toString().startsWith("default"))
+	                .map(p -> p.getFileName().toString())
+	                .findFirst()
+	                .orElse(null);
+	    } catch (IOException e) {
+	        log.error("Error listing files in uploadPath", e);
+	        return null;
+	    }
+	}
+	
+	private String getFileName(String filename) {
+		// check to return null if img does not exist
+		if (filename == null || filename.isBlank()) {
+			String myDefault = getDefaultFilename();
+			
+			//log.info("filename: {} myDefault: {}", filename, myDefault);
+	        if (myDefault == null) {
+	        	return null;
+	        }
+	        filename = myDefault;
+	    }
+		return filename;
+	}
+	
+	@Override
 	public String buildUrl(String filename) {
 		
+		filename = getFileName(filename);
+		if (filename == null) {
+			return null;
+		}
+	    Path filePath = uploadPath.resolve(filename);
+
+	    if (!Files.isRegularFile(filePath)) {
+		    log.info("image file not found/valid: {}", filePath.toAbsolutePath());
+	        return null;
+	    }
+
 		return ServletUriComponentsBuilder.fromCurrentContextPath() // parte iniziale path: localhost ...
-				.path("/images/") // ci aspettiamo file in ./upload/images/
+				.path("/")
 				.path(filename) // aggiunta filename
 				.toUriString();
 	}

@@ -16,8 +16,9 @@ import com.betacom.ecommerce.backend.models.Saga;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.repositories.ISagaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ISagaServices;
+import com.betacom.ecommerce.backend.services.interfaces.IUploadServices;
 import com.betacom.ecommerce.backend.specification.SagaSpecifications;
-import com.betacom.ecommerce.backend.utilities.DtoBuilders;
+import com.betacom.ecommerce.backend.utilities.ImageDtoBuilders;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 public class SagaImplementation implements  ISagaServices {
 	private final ISagaRepository sagaRepo;
 	private final IMangaRepository mangaRepo;
+	private final ImageDtoBuilders imgB;
+	private final IUploadServices uploS;
 
 	/*
 	 * Throws:
@@ -53,7 +56,7 @@ public class SagaImplementation implements  ISagaServices {
 			throw new MangaException("null_snom");
 		}
 		
-		Optional<Saga> dup = sagaRepo.findByNome(myNome);
+		Optional<Saga> dup = sagaRepo.findByNomeIgnoreCase(myNome);
 		if (dup.isEmpty()) {
 			s.setNome(myNome); 
 		} else {
@@ -65,15 +68,24 @@ public class SagaImplementation implements  ISagaServices {
 		}
 		s.setDescrizione(req.getDescrizione());
 		
+		s.setProxy(false);
+		// salvo saga prima di aggiungere eventuali manga
+		// manga owner, mi serve sagaID
+
+		sagaRepo.save(s);
+		
 		if (req.getManga() != null && !req.getManga().isEmpty()) {
-			s.setManga(req.getManga().stream()
+			List<Manga> lM = req.getManga().stream()
 					.map(isbn -> mangaRepo.findById(isbn).orElseThrow(() ->
 						new MangaException("!exists_man"))
-						).toList()
-					);
+						)
+					.toList();
+			lM.forEach(m -> {
+				m.setSaga(s);
+				mangaRepo.save(m);
+			});
 		}
-		
-		return sagaRepo.save(s).getId();
+		return s.getId();
 	}
 	/*
 	 * Throws:
@@ -89,9 +101,9 @@ public class SagaImplementation implements  ISagaServices {
 					);
 
 		if (req.getNome() != null && !req.getNome().isEmpty()) {
-			String myNome = req.getNome().trim().toUpperCase();
-			Optional<Saga> dup = sagaRepo.findByNome(myNome);
-			if (dup.isEmpty() || dup.get().getId() == s.getId()) {
+			String myNome = req.getNome().trim();
+			Optional<Saga> dup = sagaRepo.findByNomeIgnoreCase(myNome);
+			if (dup.isEmpty() || dup.get().getId().equals(s.getId())) {
 				s.setNome(myNome);
 			}
 		}
@@ -111,7 +123,11 @@ public class SagaImplementation implements  ISagaServices {
 					.map(isbn -> mangaRepo.findById(isbn).orElseThrow(() ->
 						new MangaException("!exists_man"))
 						).toList();
-			toadd.forEach(m -> s.getManga().add(m));
+			toadd.forEach(m -> {
+				s.getManga().add(m);
+				m.setSaga(s);
+			    mangaRepo.save(m);
+				});
 		}
 		
 		if (req.getImmagine() != null && !req.getImmagine().isEmpty()) {
@@ -130,12 +146,8 @@ public class SagaImplementation implements  ISagaServices {
 		if (lM.size() > 0) {
 			throw new MangaException("exists_sagman");
 		}
+		uploS.removeImage(s.getImmagine());
 		sagaRepo.delete(s);
-	}
-
-	private SagaDTO callBuilder(Saga s) {
-		List<Manga> lM = mangaRepo.findAllBySagaId(s.getId());
-		return DtoBuilders.buildSagaDTO(s, Optional.ofNullable(lM));
 	}
 	
 	@Override
@@ -143,6 +155,7 @@ public class SagaImplementation implements  ISagaServices {
 			String sagaNome,
 			String casaEditriceNome,
 			String autoreNome,
+			String autoreCognome,
 			Integer sagaId,
 			Integer casaEditriceId,
 			Integer autoreId,
@@ -157,12 +170,13 @@ public class SagaImplementation implements  ISagaServices {
 				.and(SagaSpecifications.generiIdEqual(generiId))
 				.and(SagaSpecifications.casaEditriceNomeLike(casaEditriceNome))
 				.and(SagaSpecifications.autoreNomeLike(autoreNome))
+				.and(SagaSpecifications.autoreCognomeLike(autoreCognome))
 				.and(SagaSpecifications.sagaNomeLike(sagaNome))
 				;
 		List<Saga> lS = sagaRepo.findAll(spec);
 		
 		return lS.stream()
-				.map(s -> callBuilder(s))
+				.map(s -> imgB.buildSagaDTO(s, Optional.empty()))
 				.collect(Collectors.toList());
 	}
 
@@ -172,7 +186,7 @@ public class SagaImplementation implements  ISagaServices {
 		Saga s = sagaRepo.findById(id).orElseThrow(() ->
 					new MangaException("!exists_sag")
 					);
-		
-		return callBuilder(s);
+		List<Manga> lM = mangaRepo.findAllBySagaId(id);
+		return imgB.buildSagaDTO(s, Optional.ofNullable(lM));
 	}
 }

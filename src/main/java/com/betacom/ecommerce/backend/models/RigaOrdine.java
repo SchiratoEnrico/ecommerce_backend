@@ -24,7 +24,7 @@ public class RigaOrdine {
 	private Integer id;
 
 	
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ordine", nullable = false)
     private Ordine ordine;
 

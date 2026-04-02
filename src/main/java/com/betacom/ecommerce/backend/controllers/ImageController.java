@@ -50,6 +50,29 @@ public class ImageController {
 		}
 	}
 	
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@PostMapping(value="/upload_default_img", consumes="multipart/form-data")
+	public ResponseEntity<Response> uploadDefaultImage(
+			@RequestParam(required = true) MultipartFile file
+			) {
+		Response r = new Response();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
+				r.setMsg(msgS.get("upload_inv"));
+				return ResponseEntity.badRequest()
+						.body(r);
+			}
+			r.setMsg(uploS.saveDefaultImage(file));
+			return ResponseEntity.status(status)
+					.body(r);
+		} catch (Exception e) {
+			r.setMsg(msgS.get(e.getMessage()));
+			return ResponseEntity.internalServerError()
+					.body(r);
+		}
+
+	}
 	@GetMapping("/get_url")
 	public ResponseEntity<Response> getUrl(@RequestParam(required = true) String filename) {
 		Response r = new Response();

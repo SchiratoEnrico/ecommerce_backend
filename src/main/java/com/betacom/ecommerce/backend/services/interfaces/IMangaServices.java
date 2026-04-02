@@ -5,6 +5,8 @@ import java.util.List;
 import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
+import com.betacom.ecommerce.backend.models.Fattura;
+import com.betacom.ecommerce.backend.models.Ordine;
 
 public interface IMangaServices {
 	
@@ -26,5 +28,10 @@ public interface IMangaServices {
 			) throws MangaException;
 
 	void delete(String isbn) throws MangaException;
+	
+	void ripristinaNumeroCopie(Ordine o);
+	void ripristinaNumeroCopie(Fattura f);
+	void decrementaNumeroCopie(Ordine o) throws MangaException;
+	void decrementaNumeroCopie(Fattura f) throws MangaException;
 	
 }

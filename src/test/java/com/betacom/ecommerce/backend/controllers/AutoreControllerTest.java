@@ -113,7 +113,7 @@ public class AutoreControllerTest {
         AutoreRequest req = new AutoreRequest();
         req.setNome(" Hirohiko ");
         req.setCognome(" Araki ");
-        req.setDataNascita("1960-06-07");
+        req.setDataNascita(LocalDate.of(1960,06,07));
         req.setDescrizione(" Le bizzarre avventure di JoJo ");
 
         ResponseEntity<?> resp = autC.create(req);
@@ -143,7 +143,7 @@ public class AutoreControllerTest {
         AutoreRequest createReq = new AutoreRequest();
         createReq.setNome(" Naoki ");
         createReq.setCognome(" Urasawa ");
-        createReq.setDataNascita("1960-01-02");
+        createReq.setDataNascita(LocalDate.of(1960, 01, 02));
         createReq.setDescrizione(" autore seinen ");
         autC.create(createReq);
 
@@ -177,7 +177,7 @@ public class AutoreControllerTest {
         req.setId(1);
         req.setNome("NAOKI");
         req.setCognome("URASAWA");
-        req.setDataNascita("1960-01-02");
+        req.setDataNascita(LocalDate.of(1960, 01, 02));
 
         resp = autC.update(req);
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());

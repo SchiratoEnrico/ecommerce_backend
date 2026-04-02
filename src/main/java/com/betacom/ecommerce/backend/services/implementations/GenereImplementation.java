@@ -86,13 +86,11 @@ public class GenereImplementation implements IGenereServices{
 	            .orElseThrow(() -> new MangaException("!exists_gen"));
 
 	    // controllo se è collegato a manga
-	    if (mangaRepo.existsByAutoriId(id)) {
+	    if (mangaRepo.existsByGeneriId(id)) {
 	        log.debug("genere {} is linked to manga", id);
 	        throw new MangaException("linked_man");
 	    }
-
 	    genRepo.delete(aut);
-
 	    log.debug("genere deleted successfully");
 	}
 
@@ -104,10 +102,9 @@ public class GenereImplementation implements IGenereServices{
 		
 		  return lG.stream()
 		            .map(g -> {
-		                List<Manga> m = mangaRepo.findAllByGeneriId(g.getId());
 		                return DtoBuilders.buildGenereDTO(
 		                        g,
-		                        Optional.ofNullable(m)
+		                        Optional.empty()
 		                );
 		            })
 		            .toList();

@@ -16,6 +16,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -109,12 +111,18 @@ public class Fattura {
     private String note;
     
        
-    @OneToMany(mappedBy = "idFattura", 
+    @OneToMany(mappedBy = "fattura", 
     		cascade = CascadeType.ALL,
            orphanRemoval = true, 
            fetch = FetchType.LAZY)
     private List<RigaFattura> righe = new ArrayList<>();
-     
+        
+    @Column(name = "stato_fattura", length = 20, nullable = false)
+    private String statoFattura;
 
-	
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ordine", nullable = true)
+    private Ordine ordine;//probabilmente meglio storage come integer
+
+
 }

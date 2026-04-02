@@ -6,6 +6,7 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 
 public interface IUploadServices {
 	String saveImage(MultipartFile filename, String isbn, Integer id) throws MangaException;
+	String saveDefaultImage(MultipartFile filename) throws MangaException;
 	void removeImage(String filename) throws MangaException;
 	String buildUrl(String filename);
 }

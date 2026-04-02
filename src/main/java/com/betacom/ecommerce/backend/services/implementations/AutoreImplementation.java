@@ -16,9 +16,8 @@ import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAutoreServices;
 import com.betacom.ecommerce.backend.specification.AutoreSpecifications;
-import com.betacom.ecommerce.backend.utilities.ReqValidators;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
-import com.betacom.ecommerce.backend.utilities.Utils;
+import com.betacom.ecommerce.backend.utilities.ReqValidators;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +41,7 @@ public class AutoreImplementation implements IAutoreServices{
 		//check unicità autore
 	    if (checkDuplicateAutore(req.getNome(),
 	    		req.getCognome(),
-	    		Utils.stringToDate(req.getDataNascita()), 
+	    		req.getDataNascita(), 
 	    		null)) {
 	    	log.debug("autore already present");
 	        throw new MangaException("exists_aut");   
@@ -51,7 +50,6 @@ public class AutoreImplementation implements IAutoreServices{
 		autRepo.save(ReqValidators.buildAutore(new Autore(), req, true));
 		log.debug("autore saved in db succesfully");
 	}
-
 
 	@Transactional
 	@Override
@@ -111,7 +109,7 @@ public class AutoreImplementation implements IAutoreServices{
 //		for (Autore a : lA) {
 //			log.debug(a.toString());
 //		}
-		return lA.stream().map(a -> DtoBuilders.buildAutoreDTO(a, Optional.ofNullable(mangaRepo.findAllByAutoriId(a.getId())))).toList();
+		return lA.stream().map(a -> DtoBuilders.buildAutoreDTO(a, Optional.empty())).toList();
 	}
 
 	@Override

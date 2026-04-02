@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.models;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -27,7 +28,7 @@ public class Carrello {
 	
 
 	@OneToOne(
-			fetch = FetchType.EAGER		
+			fetch = FetchType.LAZY		
 			)
 	@JoinColumn(
 			name = "id_account",
@@ -37,7 +38,9 @@ public class Carrello {
 	
 	@OneToMany(
 			mappedBy = "carrello",
-			fetch = FetchType.EAGER
+			fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL,
+			orphanRemoval = true
 			)
 	private List<RigaCarrello> righeCarrello;
 }

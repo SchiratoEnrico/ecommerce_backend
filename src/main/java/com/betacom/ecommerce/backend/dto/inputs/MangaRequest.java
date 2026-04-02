@@ -1,7 +1,10 @@
 package com.betacom.ecommerce.backend.dto.inputs;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +25,8 @@ public class MangaRequest {
 	
 	private String titolo;
 	
-	private String dataPubblicazione;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate dataPubblicazione;
 	
 	private BigDecimal prezzo;
 	
@@ -38,7 +42,4 @@ public class MangaRequest {
 	private Integer casaEditrice;
 	private List<Integer> generi;
 	private List<Integer> autori;
-	
-	
-
 }

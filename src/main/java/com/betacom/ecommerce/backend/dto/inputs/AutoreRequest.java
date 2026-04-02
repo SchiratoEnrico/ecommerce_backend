@@ -1,5 +1,9 @@
 package com.betacom.ecommerce.backend.dto.inputs;
 
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +25,8 @@ public class AutoreRequest {
 	
 	private String cognome;
 	
-	private String dataNascita;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate dataNascita;
 	
 	private String descrizione;
 }

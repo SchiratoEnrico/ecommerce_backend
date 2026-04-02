@@ -1,7 +1,7 @@
 package com.betacom.ecommerce.backend.models;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,6 +39,9 @@ public class Autore {
 	@Column(nullable = false)
 	private String descrizione;
 	
-	@ManyToMany(mappedBy = "autori")
-	private List<Manga> manga;
+	@ManyToMany(
+			mappedBy = "autori",
+			fetch = FetchType.LAZY
+			)
+	private Set<Manga> manga;
 }

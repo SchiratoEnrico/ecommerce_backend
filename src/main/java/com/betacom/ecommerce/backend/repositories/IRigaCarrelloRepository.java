@@ -11,4 +11,5 @@ public interface IRigaCarrelloRepository extends
 JpaRepository<RigaCarrello, Integer>,
 JpaSpecificationExecutor<RigaCarrello>{
 	boolean existsByMangaIsbn(String isbn);
+	void deleteAllByMangaIsbn(String isbn);
 }

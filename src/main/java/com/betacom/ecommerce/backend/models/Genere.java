@@ -1,6 +1,6 @@
 package com.betacom.ecommerce.backend.models;
 
-import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,5 +30,5 @@ public class Genere {
     @ManyToMany(
     		mappedBy = "generi"
     		)
-	private List<Manga> manga;
+	private Set<Manga> manga; 
 }

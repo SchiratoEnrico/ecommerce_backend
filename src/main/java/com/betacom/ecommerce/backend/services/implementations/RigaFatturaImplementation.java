@@ -12,6 +12,7 @@ import com.betacom.ecommerce.backend.dto.outputs.RigaFatturaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Fattura;
 import com.betacom.ecommerce.backend.models.RigaFattura;
+import com.betacom.ecommerce.backend.models.RigaOrdine;
 import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaFatturaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaFatturaServices;
@@ -46,26 +47,26 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
         if (Utils.isBlank(req.getTitolo()))
             throw new MangaException("null_tit");
         
-        if (Utils.isBlank(req.getAutore()))
-            throw new MangaException("null_aut");
+//        if (Utils.isBlank(req.getAutore()))
+//            throw new MangaException("null_aut");
 
         if (req.getPrezzoUnitario() == null ||
             req.getPrezzoUnitario().compareTo(BigDecimal.ZERO) <= 0)
             throw new MangaException("null_pre");
 
-        if (req.getQuantita() == null || req.getQuantita() < 1)
+        if (req.getNumeroCopie() == null || req.getNumeroCopie() < 1)
             throw new MangaException("null_qua");
 
         RigaFattura r = new RigaFattura();
-        r.setIdFattura(fat);
+        r.setFattura(fat);
         r.setIsbn(Utils.normalize(req.getIsbn()));
         r.setTitolo(Utils.normalize(req.getTitolo()));
-        r.setAutore(Utils.normalize(req.getAutore()));
+//        r.setAutore(Utils.normalize(req.getAutore()));
         r.setPrezzoUnitario(req.getPrezzoUnitario());
-        r.setQuantita(req.getQuantita());
+        r.setNumeroCopie(req.getNumeroCopie());
         r.setTotaleRiga(
         	    req.getPrezzoUnitario()
-        	       .multiply(BigDecimal.valueOf(req.getQuantita()))
+        	       .multiply(BigDecimal.valueOf(req.getNumeroCopie()))
         	);
         fat.getRighe().add(r);
         Utils.ricalcolaTotale(fat);
@@ -86,7 +87,7 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
         if (req.getId() != null) {
             Fattura fat = fattR.findById(req.getIdFattura()).orElseThrow(() ->
                     new MangaException("!exists_fat"));
-            r.setIdFattura(fat);
+            r.setFattura(fat);
         }
 
         if (!Utils.isBlank(req.getTitolo()))
@@ -95,24 +96,25 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
         if (!Utils.isBlank(req.getIsbn()))
             r.setIsbn(Utils.normalize(req.getIsbn()));
 
-        if (!Utils.isBlank(req.getAutore()))
-            r.setAutore(Utils.normalize(req.getAutore()));
+//      non credo ci interessi avere autore in fattura, abbiamo isbn  
+//      if (!Utils.isBlank(req.getAutore()))
+//            r.setAutore(Utils.normalize(req.getAutore()));
 
         if (req.getPrezzoUnitario() != null &&
             req.getPrezzoUnitario().compareTo(BigDecimal.ZERO) > 0)
             r.setPrezzoUnitario(req.getPrezzoUnitario());
 
-        if (req.getQuantita() != null && req.getQuantita() >= 1)
-            r.setQuantita(req.getQuantita());
+        if (req.getNumeroCopie() != null && req.getNumeroCopie() >= 1)
+            r.setNumeroCopie(req.getNumeroCopie());
         
      //ricalcola totaleRiga solo se entrambi i valori sono presenti sulla entity
-        if (r.getPrezzoUnitario() != null && r.getQuantita() != null) {
+        if (r.getPrezzoUnitario() != null && r.getNumeroCopie() != null) {
             r.setTotaleRiga(
                 r.getPrezzoUnitario()
-                 .multiply(BigDecimal.valueOf(r.getQuantita()))
+                 .multiply(BigDecimal.valueOf(r.getNumeroCopie()))
             );
         }
-        Utils.ricalcolaTotale(r.getIdFattura());
+        Utils.ricalcolaTotale(r.getFattura());
         rigR.save(r);
     }
 	
@@ -127,7 +129,7 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
         RigaFattura r = rigR.findById(id).orElseThrow(() ->
                 new MangaException("!exists_rig_fat"));
 
-        Fattura fat = r.getIdFattura();
+        Fattura fat = r.getFattura();
         fat.getRighe().remove(r);         // orphanRemoval=true la cancella
         Utils.ricalcolaTotale(fat);
         fattR.saveAndFlush(fat);      
@@ -140,7 +142,7 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
 		log.debug("RigaFattura list()");
         List<RigaFattura> lR = rigR.findAll();
         return lR.stream()
-                .map(r -> DtoBuilders.buildRigaFatturaDTO(r, fattR.findById(r.getIdFattura().getId())))
+                .map(r -> DtoBuilders.buildRigaFatturaDTO(r, fattR.findById(r.getFattura().getId())))
                 .collect(Collectors.toList());
 	}
 	
@@ -154,7 +156,35 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
 
         RigaFattura r = rigR.findById(id).orElseThrow(() ->
                 new MangaException("!exists_rig"));
-        return DtoBuilders.buildRigaFatturaDTO(r, fattR.findById(r.getIdFattura().getId()));
+        return DtoBuilders.buildRigaFatturaDTO(r, fattR.findById(r.getFattura().getId()));
+	}
+	
+	private RigaFattura mirrorRigaOrdine(RigaOrdine ro) {
+		RigaFattura rf = new RigaFattura();
+
+		rf.setIsbn(ro.getManga().getIsbn());
+		rf.setTitolo(ro.getManga().getTitolo());
+		rf.setPrezzoUnitario(ro.getPrezzo());
+		rf.setNumeroCopie(ro.getNumeroCopie());
+		rf.setTotaleRiga(rf.getPrezzoUnitario()
+     	       .multiply(BigDecimal.valueOf(rf.getNumeroCopie())));
+		return rf;
+		
+	}
+	
+	@Transactional(rollbackFor = Exception.class)
+	public void righeFatturaFromRigheOrdine(List<RigaOrdine> lO, Fattura f) {
+		List<RigaFattura> lF = lO.stream()
+									.map(ro -> mirrorRigaOrdine(ro))
+									.toList();
+		lF.forEach(rf -> {
+			rf.setFattura(f);
+			rigR.save(rf);
+			f.getRighe().add(rf);
+		});
+		Utils.ricalcolaTotale(f);
+        fattR.saveAndFlush(f);
+		return;
 	}
 	
 }

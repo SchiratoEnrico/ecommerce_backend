@@ -19,6 +19,10 @@ public class Utils {
 	    return value == null || value.trim().isEmpty();
 	}
 	
+	public static Boolean isBlank(LocalDate value) {
+	    return value == null;
+	}
+
 	public static LocalDate stringToDate(String date) throws MangaException{
 	 try {
 		 	// sarà yyyy-MM-dd

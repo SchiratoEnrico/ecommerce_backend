@@ -1,8 +1,10 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -13,8 +15,10 @@ import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Autore;
 import com.betacom.ecommerce.backend.models.CasaEditrice;
+import com.betacom.ecommerce.backend.models.Fattura;
 import com.betacom.ecommerce.backend.models.Genere;
 import com.betacom.ecommerce.backend.models.Manga;
+import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.models.Saga;
 import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
 import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
@@ -24,8 +28,9 @@ import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ISagaRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
+import com.betacom.ecommerce.backend.services.interfaces.IUploadServices;
 import com.betacom.ecommerce.backend.specification.MangaSpecifications;
-import com.betacom.ecommerce.backend.utilities.DtoBuilders;
+import com.betacom.ecommerce.backend.utilities.ImageDtoBuilders;
 import com.betacom.ecommerce.backend.utilities.ReqValidators;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
@@ -44,12 +49,15 @@ public class MangaImplementation implements IMangaServices{
 	private final IRigaOrdineRepository rigaOrdineRepo;
 	private final IRigaCarrelloRepository rigaCarRepo;
 	private final ISagaRepository sagaRepo;
+	private final ImageDtoBuilders imgB;
+	private final IUploadServices uplS;
+	
 	
 	@Override
 	@Transactional
 	public void create(MangaRequest req) throws MangaException {
 		log.debug("Begin creating manga {}", req);
-		// da aggiungere null_sag
+
 		ReqValidators.validateMangaRequest(req, true); 
 		log.debug("Manga validated...");
 		
@@ -62,18 +70,27 @@ public class MangaImplementation implements IMangaServices{
 		log.debug("Generi -> " + req.getGeneri());
 		log.debug("Casa editrice -> " + req.getCasaEditrice());
 		List<Autore> lA = autRepo.findAllById(req.getAutori());
-		log.debug("Autori trovati -> " + lA);
-		m.setAutori(new ArrayList<Autore>(lA));
-		
 		if(lA.size()<req.getAutori().size()) 
 			throw new MangaException("!exists_aut");
+
+		log.debug("Autori trovati -> " + lA);
+		Set<Autore> sA = new HashSet<Autore>();
+		Boolean added = sA.addAll(lA);
+		if (added) {
+			m.setAutori(sA);
+		}
+		
 		
 		List<Genere> lG = genRepo.findAllById(req.getGeneri());
-		m.setGeneri(new ArrayList<Genere>(lG));
-		
-		if(lG.size()<req.getGeneri().size())
+		if (lG.size()<req.getGeneri().size())
 			throw new MangaException("!exists_gen");
-		
+
+		Set<Genere> sG = new HashSet<Genere>();
+		added = sG.addAll(lG);
+		if (added) {
+			m.setGeneri(sG);
+		}
+
 		CasaEditrice c = casRepo.findById(req.getCasaEditrice())
 				.orElseThrow(()-> new MangaException("!exists_ced"));
 		m.setCasaEditrice(c);
@@ -116,25 +133,13 @@ public class MangaImplementation implements IMangaServices{
 		log.debug("begin find manga by isbn {}", isbn);
 		Manga m = mangaRepo.findByIsbn(Utils.normalize(isbn))
 				.orElseThrow(()-> new MangaException("!exists_man"));
-		List<Autore> a = m.getAutori();
-		List<Genere> g = m.getGeneri();
+		Set<Autore> a = m.getAutori();
+		Set<Genere> g = m.getGeneri();
 		CasaEditrice c = m.getCasaEditrice();
 		Saga s = m.getSaga();
-		return DtoBuilders.buildMangaDTO(m, Optional.ofNullable(c), Optional.ofNullable(a), Optional.ofNullable(g), Optional.ofNullable(s));
+		return imgB.buildMangaDTO(m, Optional.ofNullable(c), Optional.ofNullable(a), Optional.ofNullable(g), Optional.ofNullable(s));
 	}
 
-	private MangaDTO callBuilder(Manga m) {
-		if (m.getSaga() == null) {
-			
-		}
-		return DtoBuilders.buildMangaDTO(m,  
-				Optional.ofNullable(m.getCasaEditrice()), 
-				Optional.ofNullable(m.getAutori()), 
-				Optional.ofNullable(m.getGeneri()),
-				Optional.ofNullable(m.getSaga())
-				);
-	}
-	
 	@Override
 	@Transactional(readOnly = true)
 	public List<MangaDTO> list(
@@ -162,7 +167,12 @@ public class MangaImplementation implements IMangaServices{
 				;
 		List<Manga> lM = mangaRepo.findAll(spec);
 		return lM.stream()
-				.map(m-> callBuilder(m))
+				.map(m-> imgB.buildMangaDTO(m,  
+						Optional.empty(), 
+						Optional.empty(), 
+						Optional.empty(),
+						Optional.empty()
+						))
 				.toList();
 	}
 	
@@ -180,10 +190,13 @@ public class MangaImplementation implements IMangaServices{
 	        throw new MangaException("linked_ord");
 	    }
 
-	    if (rigaCarRepo.existsByMangaIsbn(key)) {
-	        log.debug("manga {} linked to carrello", key);
-	        throw new MangaException("linked_car");
-	    }
+//	    if (rigaCarRepo.existsByMangaIsbn(key)) {
+//	        log.debug("manga {} linked to carrello", key);
+//	        throw new MangaException("linked_car");
+//	    }
+	    // delete manga azione admin => si riflette su righe carrello (User)
+	    rigaCarRepo.deleteAllByMangaIsbn(key);
+	    
 
 	    for (Autore a : new ArrayList<>(m.getAutori())) {
 	        a.getManga().remove(m);
@@ -194,9 +207,19 @@ public class MangaImplementation implements IMangaServices{
 	        g.getManga().remove(m);
 	        m.getGeneri().remove(g);
 	    }
-
+	    
 	    mangaRepo.saveAndFlush(m);
+	    Saga saga = m.getSaga();
+
+	    // cancello manga prima di saga: manga Owner
 	    mangaRepo.delete(m);
+	    uplS.removeImage(m.getImmagine());
+
+	    if (saga != null 
+	    	&& Boolean.TRUE.equals(saga.getProxy()) // controllo se sag proxy
+	        && mangaRepo.findAllBySagaId(saga.getId()).isEmpty()) {
+	        sagaRepo.delete(saga);
+	    }
 	    log.debug("manga deleted successfully");
 	}
 
@@ -210,6 +233,7 @@ public class MangaImplementation implements IMangaServices{
 		s.setNome(m.getTitolo());
 		s.setDescrizione(m.getTitolo());
 		s.setImmagine(m.getImmagine());
+		s.setProxy(true);
 		sagaRepo.save(s);
 		
 		return s;
@@ -219,7 +243,7 @@ public class MangaImplementation implements IMangaServices{
 		log.debug("checking validity of provided saga: {}", sagaId);
 		if (sagaId == null) {
 			if (vol != null) {
-				
+				throw new MangaException("!exists_sag");
 			}
 			Saga s = createProxySaga(m);
 			m.setSaga(s);
@@ -241,5 +265,53 @@ public class MangaImplementation implements IMangaServices{
 		m.setSaga(s);
 		m.setSagaVol(vol);
 		return m;
+	}
+	
+	@Transactional(rollbackFor = Exception.class)
+    public void ripristinaNumeroCopie(Ordine o) {
+        o.getRigheOrdine().forEach(r -> {
+            Manga m = r.getManga();
+            m.setNumeroCopie(m.getNumeroCopie() + r.getNumeroCopie());
+            mangaRepo.save(m);
+        });
+    }
+
+	@Transactional(rollbackFor = Exception.class)
+	public void ripristinaNumeroCopie(Fattura f) {
+        f.getRighe().forEach(rf -> {
+        	Manga m = mangaRepo.findById(rf.getIsbn()).orElseThrow(() 
+        			-> new MangaException("!exists_man"));
+        	m.setNumeroCopie(m.getNumeroCopie() + rf.getNumeroCopie());
+        	mangaRepo.save(m);
+           });
+		
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public void decrementaNumeroCopie(Ordine o) throws MangaException {
+        o.getRigheOrdine().forEach(r -> {
+        	Manga m = r.getManga();
+        	Integer left = m.getNumeroCopie() - r.getNumeroCopie();
+        	if (left < 0) {
+        		throw new MangaException("!exists_ncopie");
+        	}
+        	m.setNumeroCopie(left);
+        	mangaRepo.save(m);
+           });
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public void decrementaNumeroCopie(Fattura f) throws MangaException {
+		// TODO Auto-generated method stub
+		f.getRighe().forEach(rf -> {
+			Manga m = mangaRepo.findById(rf.getIsbn()).orElseThrow(() 
+        			-> new MangaException("!exists_man"));
+        	Integer left = m.getNumeroCopie() - rf.getNumeroCopie();
+        	if (left < 0) {
+        		throw new MangaException("!exists_ncopie");
+        	}
+        	m.setNumeroCopie(left);
+        	mangaRepo.save(m);
+           });
 	}
 }

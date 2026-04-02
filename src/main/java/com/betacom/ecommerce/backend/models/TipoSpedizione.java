@@ -1,5 +1,7 @@
 package com.betacom.ecommerce.backend.models;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,4 +25,9 @@ public class TipoSpedizione {
 			unique=true
 			)
 	private String tipoSpedizione;
+	
+    @Column(name = "costo_spedizione", 
+    		precision = 10, 
+    		scale = 2)
+    private BigDecimal costoSpedizione = BigDecimal.ZERO;
 }

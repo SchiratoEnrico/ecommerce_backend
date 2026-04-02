@@ -21,4 +21,5 @@ public class OrdineDTO {
 	private LocalDate data;
 	private StatoOrdineDTO stato;
 	private List<RigaOrdineDTO> righeOrdine;
+	private AnagraficaDTO anagrafica;
 }

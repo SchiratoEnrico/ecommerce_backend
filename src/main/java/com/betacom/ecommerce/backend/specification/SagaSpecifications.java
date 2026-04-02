@@ -77,6 +77,22 @@ public class SagaSpecifications {
 			};		
 	}
 
+	// autore cognome
+	public static Specification<Saga> autoreCognomeLike(String autoreCognome) {
+		//      tabella, query, CriteriaBuilder
+		return (root, query, cb) -> {
+			if (autoreCognome == null || autoreCognome.isBlank()) {
+				return cb.conjunction();
+			}
+			Join<Object, Object> mangaJoin= root.join("manga", JoinType.LEFT);
+			Join<Object, Object> autoriJoin= mangaJoin.join("autori", JoinType.LEFT);
+			return cb.like(
+					cb.lower(autoriJoin.get("nome")),
+					"%" + autoreCognome.toLowerCase() + "%"
+					);
+			};		
+	}
+
 	// genere
 	// genere id (es many to many)
 	public static Specification<Saga> generiIdEqual(List<Integer> generiId) {

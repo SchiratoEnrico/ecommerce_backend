@@ -17,7 +17,7 @@ import lombok.Setter;
 public class FatturaRequest {
 	
 	private Integer id;
-	private String numeroFattura;
+	//private String numeroFattura;
 	
 	//Snapshot Cliente
     private String clienteNome;
@@ -39,10 +39,6 @@ public class FatturaRequest {
     
     // Metadata
     private String note;
-    
+    private Integer ordineId;
     private List<String> righeFatturaRequest;
- 
-	
-	
-
 }
