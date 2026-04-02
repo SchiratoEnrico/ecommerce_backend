@@ -14,4 +14,5 @@ public class AuthResponse {
 	private String token;
 	private String ruolo;
 	private Integer id;
+	private String username;
 }
