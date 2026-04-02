@@ -10,11 +10,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
 import com.betacom.ecommerce.backend.models.Account; // Assicurati di importare la tua entità Account
 import com.betacom.ecommerce.backend.repositories.IAccountRepository; // Importa la tua repository
 import com.betacom.ecommerce.backend.response.Response;
@@ -205,6 +208,32 @@ public class CarrelloController {
 		try {
 			carS.deleteRow(chartId, rowId);
 			r.setMsg(msgS.get("rest_deleted"));
+		} catch (Exception e) {
+			r.setMsg(e.getMessage());
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(r);
+	}
+	
+	@PostMapping("/create")
+	public ResponseEntity<Response> create(@RequestBody(required=true) CarrelloRequest req,
+			Authentication auth, Principal principal){
+		Response r = new Response();
+		HttpStatus status = HttpStatus.OK;
+		
+		boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
+		
+		if (!isAdmin) {
+			Account loggedAccount = accountRepository.findByUsername(principal.getName()).orElse(null);
+			if (loggedAccount == null || !carS.isCartOwnedByAccount(req.getId_account(), loggedAccount.getId())) {
+				r.setMsg("Accesso negato: non puoi creare carrello per altri");
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+			}
+		}
+		
+		try {
+			carS.create(req);
+			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
 			r.setMsg(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
