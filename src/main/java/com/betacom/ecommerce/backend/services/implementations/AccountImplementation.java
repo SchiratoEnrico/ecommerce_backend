@@ -155,7 +155,7 @@ public class AccountImplementation implements IAccountServices{
 	    	acc.setPassword(passwordEncoder.encode(req.getPassword().trim()));
         } 
 
-	    // SICUREZZA: Aggiornamento ruolo soloO se chi chiama è admin
+	    // SICUREZZA: Aggiornamento ruolo solo se chi chiama è admin
 	    if (!Utils.isBlank(req.getRuolo()) && isAdmin) {
 	    	acc.setRuolo(Ruoli.valueOf(Utils.normalize(req.getRuolo())));
         }
@@ -196,9 +196,7 @@ public class AccountImplementation implements IAccountServices{
 	public List<AccountDTO> findByFilters(AccountRequest req) throws MangaException {
 		
 		Specification<Account> spec = AccountSpecifications.usernameAndEmailAndRuolo(req.getUsername(), req.getEmail(), req.getRuolo());
-		
 		List<Account> lA = repAcc.findAll(spec);
-		
 		return lA.stream()
 	            .map(a -> DtoBuilders.buildAccountDTO(a, Optional.ofNullable(a.getCarrello()), Optional.empty()))//ofNullable(a.getAnagrafiche())))
 	            .collect(Collectors.toList());
