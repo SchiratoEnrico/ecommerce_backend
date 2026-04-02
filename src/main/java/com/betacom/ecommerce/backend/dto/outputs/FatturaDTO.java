@@ -44,7 +44,9 @@ public class FatturaDTO {
 //    private String riferimentoAccount;
 
     private String note;
-
     private List<RigaFatturaDTO> righeFattura;
+    
+    private Integer   ordineId;      // nullable — null if created manually/account deleted
+    private String    statoFattura;  // null | APERTO | IN_CORSO | RISOLTO | RIFIUTATO
 
 }

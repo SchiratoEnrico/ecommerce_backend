@@ -2,10 +2,12 @@ package com.betacom.ecommerce.backend.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -36,36 +38,45 @@ public class Manga {
 	@Column(nullable = false)
 	private BigDecimal prezzo;
 	
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String immagine;
 	
 	@Column(nullable = false,
 			name = "numero_copie")
 	private Integer numeroCopie;
 	
-	@ManyToOne
-    @JoinColumn(name = "id_casa_editrice", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+    		name = "id_casa_editrice",
+    		nullable = false
+    		)
 	private CasaEditrice casaEditrice;
 	
 
-	@ManyToMany
+	@ManyToMany(
+			fetch = FetchType.LAZY, 
+			cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+			)
 	@JoinTable(
 	        name = "manga_autori",
 	        joinColumns = @JoinColumn(name = "isbn_manga"),
 	        inverseJoinColumns = @JoinColumn(name = "id_autore")
 	    )
-	private List<Autore> autori;
+	private Set<Autore> autori;
 	
 	
-	@ManyToMany
+	@ManyToMany(
+			fetch = FetchType.LAZY,
+			cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+			)
     @JoinTable(
         name = "manga_generi",
         joinColumns = @JoinColumn(name = "isbn_manga"),
         inverseJoinColumns = @JoinColumn(name = "id_genere")
     )
-	private List<Genere> generi;
+	private Set<Genere> generi;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY	)
 	@JoinColumn(name = "id_saga")
 	private Saga saga;
 

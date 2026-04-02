@@ -14,6 +14,7 @@ public interface ISagaServices {
 			String sagaNome,
 			String casaEditriceNome,
 			String autoreNome,
+			String autoreCognome,
 			Integer sagaId,
 			Integer casaEditriceId,
 			Integer autoreId,

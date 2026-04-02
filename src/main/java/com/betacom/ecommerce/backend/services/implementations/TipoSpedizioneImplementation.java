@@ -11,8 +11,8 @@ import com.betacom.ecommerce.backend.dto.inputs.TipoSpedizioneRequest;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.TipoSpedizione;
+import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoSpedizioneRepository;
-import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.ITipoSpedizioneServices;
 import com.betacom.ecommerce.backend.specification.SpedizioneSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
@@ -24,20 +24,22 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 	private final ITipoSpedizioneRepository speR;
-	private final IMessagesServices msgS;
+	private final IOrdineRepository ordeR;
 
 	@Transactional(rollbackFor=MangaException.class)
 	@Override
 	public Integer create(TipoSpedizioneRequest req) throws MangaException {
-		if(req.getTipoSpedizione()==null)
-			throw new MangaException("Tipo spedizione non caricata");
 		
-		if (speR.findByTipoSpedizione(req.getTipoSpedizione().trim().toUpperCase()).isPresent())
+		String mySpe = Utils.normalize(req.getTipoSpedizione());
+		if(mySpe == null || mySpe.isEmpty())
+			throw new MangaException("null_spe");
+		
+		
+		if (speR.findByTipoSpedizione(mySpe).isPresent())
 	        throw new MangaException("exists_spe");
 		
 		TipoSpedizione spe = new TipoSpedizione();
-		spe.setTipoSpedizione(Utils.normalize(req.getTipoSpedizione()));
-		
+		spe.setTipoSpedizione(mySpe);
 		return speR.save(spe).getId();
 	}
 
@@ -45,17 +47,16 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 	@Override
 	public void update(TipoSpedizioneRequest req) throws MangaException {
 		TipoSpedizione spe = speR.findById(req.getId())
-				.orElseThrow(() -> new MangaException(msgS.get("spedizione_ntfnd")));
-		
-		if (!Utils.isBlank(req.getTipoSpedizione())) {
-	        Optional<TipoSpedizione> byTipoSped = speR.findByTipoSpedizione(req.getTipoSpedizione().trim().toUpperCase());
-	        
-	        if (byTipoSped.isPresent() && !byTipoSped.get().getId().equals(req.getId()))
-	            throw new MangaException("exists_spe");
-	        	
-	        spe.setTipoSpedizione(req.getTipoSpedizione().trim().toUpperCase());
-	    }
-		
+				.orElseThrow(() -> new MangaException("!exists_spe"));
+		String mySpe = Utils.normalize(req.getTipoSpedizione());
+		if (mySpe == null || mySpe.isEmpty()) {
+			throw new MangaException("null_spe");
+		}
+		Optional<TipoSpedizione> byTipoSped = speR.findByTipoSpedizione(mySpe);
+	    if (byTipoSped.isPresent() && !byTipoSped.get().getId().equals(req.getId())) {
+	    	throw new MangaException("exists_spe");
+	    }    	
+	    spe.setTipoSpedizione(mySpe);
 		speR.save(spe);
 	}
 
@@ -63,8 +64,10 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 	@Override
 	public void delete(Integer id) throws MangaException {
 		TipoSpedizione spe = speR.findById(id)
-				.orElseThrow(() -> new MangaException(msgS.get("spedizione_ntfnd")));
-		
+				.orElseThrow(() -> new MangaException("!exists_spe"));
+		if (ordeR.existsByTipoSpedizioneId(id)) {
+			throw new MangaException("order_spe");
+		}
 		speR.delete(spe);
 	}
 
@@ -81,7 +84,7 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 	@Override
 	public TipoSpedizioneDTO findById(Integer id) throws Exception {
 		TipoSpedizione spe = speR.findById(id)
-				.orElseThrow(() -> new MangaException(msgS.get("spedizione_ntfnd")));
+				.orElseThrow(() -> new MangaException("!exists_spe"));
 		
 		return DtoBuilders.buildTipoSpedizioneDTO(spe);
 	}

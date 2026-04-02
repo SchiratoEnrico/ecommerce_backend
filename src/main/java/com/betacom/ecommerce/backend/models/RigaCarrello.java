@@ -23,7 +23,7 @@ public class RigaCarrello {
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn (name="id_carrello", nullable = false)
 	private Carrello carrello;
 	

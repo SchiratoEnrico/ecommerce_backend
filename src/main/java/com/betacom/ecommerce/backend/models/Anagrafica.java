@@ -55,6 +55,9 @@ public class Anagrafica {
 	private Boolean predefinito;
 	
 	@ManyToOne
-    @JoinColumn(name = "id_account", nullable = false)
+    @JoinColumn(
+    		name = "id_account", 
+    		nullable = false
+    		)
     private Account account;
 }

@@ -28,7 +28,7 @@ public class ReqValidators {
 	    req.setNome(Utils.normalize(req.getNome()));
 	    req.setCognome(Utils.normalize(req.getCognome()));
 	    req.setDescrizione(Utils.normalize(req.getDescrizione()));
-	    req.setDataNascita(Utils.normalize(req.getDataNascita()));
+	    req.setDataNascita(req.getDataNascita());
 
 	    // controlli obbligatorietà
 	    //in create tutto obbligatorio
@@ -48,11 +48,6 @@ public class ReqValidators {
 	        throw new MangaException("null_dtn");
 	    }
 
-	    // validazione data (solo se presente)
-	    if (!Utils.isBlank(req.getDataNascita())) {
-	    	
-	    	Utils.stringToDate(req.getDataNascita());
-	    }
 	}	
 
 	public static Autore buildAutore(Autore toReturn, AutoreRequest req, Boolean mode) {
@@ -61,7 +56,7 @@ public class ReqValidators {
 			toReturn.setNome(req.getNome());
 			toReturn.setCognome(req.getCognome());
 			toReturn.setDescrizione(req.getDescrizione());
-			toReturn.setDataNascita(Utils.stringToDate(req.getDataNascita()));
+			toReturn.setDataNascita(req.getDataNascita());
 		} else {
 			
 			if(!Utils.isBlank(req.getNome()))
@@ -74,7 +69,7 @@ public class ReqValidators {
 				toReturn.setDescrizione(req.getDescrizione());
 			
 			if(!Utils.isBlank(req.getDataNascita()))
-				toReturn.setDataNascita(Utils.stringToDate(req.getDataNascita()));
+				toReturn.setDataNascita(req.getDataNascita());
 		}
 		
 		return toReturn;
@@ -114,7 +109,7 @@ public class ReqValidators {
 		
 		if(mode) {
 			toReturn.setIsbn(req.getIsbn());
-			toReturn.setDataPubblicazione(Utils.stringToDate(req.getDataPubblicazione()));
+			toReturn.setDataPubblicazione(req.getDataPubblicazione());
 			toReturn.setImmagine(req.getImmagine());
 			toReturn.setNumeroCopie(req.getNumeroCopie());
 			toReturn.setTitolo(req.getTitolo());
@@ -125,10 +120,10 @@ public class ReqValidators {
 				toReturn.setIsbn(req.getIsbn());
 			
 			if(!Utils.isBlank(req.getDataPubblicazione()))
-				toReturn.setDataPubblicazione(Utils.stringToDate(req.getDataPubblicazione()));
+				toReturn.setDataPubblicazione(req.getDataPubblicazione());
 			
 			if(!Utils.isBlank(req.getImmagine()))
-				toReturn.setIsbn(req.getImmagine());
+				toReturn.setImmagine(req.getImmagine());
 			
 			if(req.getNumeroCopie()!=null)
 				toReturn.setNumeroCopie(req.getNumeroCopie());
@@ -154,17 +149,15 @@ public class ReqValidators {
 	        throw new MangaException("id_required");
 	    }
 	    
+	    req.setDataPubblicazione(req.getDataPubblicazione());
+	    
 	    //trim e uppercase
-	    req.setDataPubblicazione(Utils.normalize(req.getDataPubblicazione()));
 	    req.setImmagine(Utils.normalize(req.getImmagine()));
 	    req.setIsbn(Utils.normalize(req.getIsbn()));
 	    req.setTitolo(Utils.normalize(req.getTitolo()));
 	    
 	    if(create && Utils.isBlank(req.getDataPubblicazione()))
 	    	throw new MangaException("null_dtp");
-	    
-	    //if(create && Utils.isBlank(req.getImmagine()))
-	    //	throw new MangaException("null_img");
 	    
 	    if(create && Utils.isBlank(req.getIsbn()))
 	    	throw new MangaException("null_isb");
@@ -193,7 +186,7 @@ public class ReqValidators {
 
 	    // validazione data (solo se presente)
 	    if (!Utils.isBlank(req.getDataPubblicazione())) {
-	    	Utils.stringToDate(req.getDataPubblicazione());
+	    	req.getDataPubblicazione();
 	    }
 	}
 	

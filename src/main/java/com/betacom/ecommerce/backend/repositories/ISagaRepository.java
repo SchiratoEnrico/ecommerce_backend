@@ -12,5 +12,5 @@ public interface ISagaRepository extends
 JpaRepository<Saga, Integer>,
 JpaSpecificationExecutor<Saga>
 {
-	Optional<Saga> findByNome(String nome) throws MangaException;
+	Optional<Saga> findByNomeIgnoreCase(String nome) throws MangaException;
 }

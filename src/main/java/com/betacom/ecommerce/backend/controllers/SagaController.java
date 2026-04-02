@@ -67,6 +67,7 @@ public class SagaController {
 	public ResponseEntity<Object> list(
 			@RequestParam (required = false)  String casaEditriceNome,
 			@RequestParam (required = false)  String autoreNome,
+			@RequestParam (required = false)  String autoreCognome,
 			@RequestParam (required = false)  String sagaNome,
 			@RequestParam (required = false)  Integer sagaId,
 			@RequestParam (required = false)  Integer casaEditriceId,
@@ -80,6 +81,7 @@ public class SagaController {
 					sagaNome,
 					casaEditriceNome,
 					autoreNome,
+					autoreCognome,
 					sagaId,
 					casaEditriceId,
 					autoreId,

@@ -39,22 +39,18 @@ import com.betacom.ecommerce.backend.models.Saga;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
 import com.betacom.ecommerce.backend.models.TipoSpedizione;
-import com.betacom.ecommerce.backend.services.interfaces.IUploadServices;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-@RequiredArgsConstructor
+
 @Slf4j
 public class DtoBuilders {
 	
-	private final IUploadServices uploS;
-	
-    public SagaDTO buildSagaImgDTO(Saga s, Optional<List<Manga>> lM) {
+    public static SagaDTO buildSagaDTO(Saga s, Optional<List<Manga>> lM) {
     	return SagaDTO.builder()
     			.id(s.getId())
     			.nome(s.getNome())
     			.descrizione(s.getDescrizione())
-    			.immagine(uploS.buildUrl(s.getImmagine()))
+    			.immagine(s.getImmagine())
     			.manga(lM.isPresent()?
                 		lM.get().stream().map(
                 				r -> buildMangaDTO(r, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())
@@ -62,14 +58,14 @@ public class DtoBuilders {
                         : null)
     			.build();
     }
-
-	public MangaDTO buildMangaImgDTO(Manga m, Optional<CasaEditrice> c, Optional<List<Autore>> lA, Optional<List<Genere>> lG, Optional<Saga> s) {
+    
+	public static MangaDTO buildMangaDTO(Manga m, Optional<CasaEditrice> c, Optional<List<Autore>> lA, Optional<List<Genere>> lG, Optional<Saga> s) {
 		return MangaDTO.builder()
 				.isbn(m.getIsbn())
 				.titolo(m.getTitolo())
 				.dataPubblicazione(m.getDataPubblicazione())
 				.prezzo(m.getPrezzo())
-				.immagine(uploS.buildUrl(m.getImmagine()))
+				.immagine(m.getImmagine())
 				.numeroCopie(m.getNumeroCopie())
 				.casaEditrice(c.isPresent()?
 						buildCasaEditriceDTO(c.get()) : null)
@@ -90,7 +86,6 @@ public class DtoBuilders {
 				.sagaVol(m.getSagaVol())
 				.build();
 	}
-
 	
 	public static List<TipoSpedizioneDTO> buildSpedizioniDTO(List<TipoSpedizione> lS){
 		return lS.stream()
@@ -114,7 +109,6 @@ public class DtoBuilders {
 						.cap(a.getCap())
 						.via(a.getVia())
 						.predefinito(a.getPredefinito()) 
-						.idAccount(a.getAccount().getId())
 						.build()
 						)
 				.collect(Collectors.toList());
@@ -145,7 +139,7 @@ public class DtoBuilders {
 						.email(c.getEmail())
 						.id(c.getId())
 						.indirizzo(c.getIndirizzo())
-						.isbns(IsbnsSupport(c.getManga()))
+						.isbns(null)
 						.build()
 						).collect(Collectors.toList());
 	}
@@ -219,7 +213,6 @@ public class DtoBuilders {
 				.predefinito(a.getPredefinito())
 				.stato(a.getStato())
 				.via(a.getVia())
-				.idAccount(a.getAccount().getId())
 				.build();
 	}
 	
@@ -254,33 +247,6 @@ public class DtoBuilders {
 				.build();
 	}
 	
-	public static MangaDTO buildMangaDTO(Manga m, Optional<CasaEditrice> c, Optional<List<Autore>> lA, Optional<List<Genere>> lG, Optional<Saga> s) {
-		return MangaDTO.builder()
-				.isbn(m.getIsbn())
-				.titolo(m.getTitolo())
-				.dataPubblicazione(m.getDataPubblicazione())
-				.prezzo(m.getPrezzo())
-				.immagine(m.getImmagine())
-				.numeroCopie(m.getNumeroCopie())
-				.casaEditrice(c.isPresent()?
-						buildCasaEditriceDTO(c.get()) : null)
-				.autori(
-						lA.isPresent() ?
-						lA.get().stream()
-							.map(a -> buildAutoreDTO(a, Optional.empty())).toList() :
-								null
-						)
-				.generi(
-						lG.isPresent() ?
-								lG.get().stream()
-									.map(g -> buildGenereDTO(g, Optional.empty())).toList() :
-										null
-						)
-				.saga(s.isPresent()?
-						buildSagaDTO(s.get(), Optional.empty()):null )
-				.sagaVol(m.getSagaVol())
-				.build();
-	}
 	
 	@Transactional(readOnly = true)
 	public static OrdineDTO buildOrdineDTO(Ordine o,
@@ -288,7 +254,8 @@ public class DtoBuilders {
 			Optional<TipoPagamento> pag, 
 			Optional<StatoOrdine> sta, 
 			Optional<TipoSpedizione> spe,
-			Optional<List<RigaOrdine>> lR
+			Optional<List<RigaOrdine>> lR,
+			Optional<Anagrafica> ana
 			) {
 		return OrdineDTO.builder()
 			.id(o.getId())
@@ -313,6 +280,8 @@ public class DtoBuilders {
 					lR.get().stream().map(r -> buildRigaOrdineDTO(r, Optional.empty())).toList() : 
 						null
 				)
+			.anagrafica(ana.isPresent()?
+					buildAnagraficaDTO(ana.get()): null)
 			.build();
 	}
 	
@@ -358,15 +327,14 @@ public class DtoBuilders {
                 		)
                 .isbn(r.getIsbn())
                 .titolo(r.getTitolo())
-                .autore(r.getAutore())
                 .prezzoUnitario(r.getPrezzoUnitario())
-                .quantita(r.getQuantita())
+                .quantita(r.getNumeroCopie())
                 .totaleRiga(r.getTotaleRiga())
                 .build();
     }
 
     // build Fattura
-    public static FatturaDTO buildFatturaDTO(Fattura f, Optional<List<RigaFattura>> lR) {
+    public static FatturaDTO buildFatturaDTO(Fattura f, Optional<List<RigaFattura>> lR, Optional<Ordine> o) {
         return FatturaDTO.builder()
                 .id(f.getId())
                 .numeroFattura(f.getNumeroFattura())
@@ -393,21 +361,11 @@ public class DtoBuilders {
                 				r -> buildRigaFatturaDTO(r, Optional.empty())
                 		).collect(Collectors.toList())
                         : null)
+                .ordineId(o.isPresent() ? 
+                		o.get().getId() : null)
+                .statoFattura(f.getStatoFattura())
                 .build();
     }
-
-    public static SagaDTO buildSagaDTO(Saga s, Optional<List<Manga>> lM) {
-    	return SagaDTO.builder()
-    			.id(s.getId())
-    			.nome(s.getNome())
-    			.descrizione(s.getDescrizione())
-    			.immagine(s.getImmagine())
-    			.manga(lM.isPresent()?
-                		lM.get().stream().map(
-                				r -> buildMangaDTO(r, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())
-                		).collect(Collectors.toList())
-                        : null)
-    			.build();
-    }
 }
+
 

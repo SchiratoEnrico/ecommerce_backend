@@ -108,14 +108,18 @@ public class CarrelloImplementation implements ICarrelloServices{
 		Carrello car = carR.findById(chartId)
 				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
 		
-		List<RigaCarrello> lrC = car.getRigheCarrello();
+		car.getRigheCarrello().removeIf(r -> r.getId().equals(rowId)); // orphanremoval true
+		carR.save(car);
 		
-		lrC.forEach(c -> {
-			if(c.getId()==rowId) {
-				rcS.delete(rowId);
-				return;
-			}
-		});
+//		
+//		List<RigaCarrello> lrC = car.getRigheCarrello();
+//		
+//		lrC.forEach(c -> {
+//			if(c.getId()==rowId) {
+//				rcS.delete(rowId);
+//				return;
+//			}
+//		});
 	}
 	
 	@Transactional (rollbackFor = MangaException.class)
@@ -129,14 +133,19 @@ public class CarrelloImplementation implements ICarrelloServices{
 		
 		acc.setCarrello(null);
 		car.setAccount(null);
+		car.getRigheCarrello().clear(); //oR
 		
-		List<RigaCarrello> lrC = car.getRigheCarrello();
-		for(RigaCarrello c : lrC) {
-			rcS.delete(c.getId());
-		}
-	
-		accR.save(acc);		
+//		List<RigaCarrello> lrC = car.getRigheCarrello();
+//		for(RigaCarrello c : lrC) {
+//			rcS.delete(c.getId());
+//		}
+//	
+//		accR.save(acc);		
 		carR.delete(car);
+		car = new Carrello();
+		car.setAccount(acc);
+		carR.save(car);
+
 	}
 	 
 	@Override
@@ -149,7 +158,7 @@ public class CarrelloImplementation implements ICarrelloServices{
 				DtoBuilders.buildCarrelloDTO(
 						c,
 						Optional.ofNullable(c.getAccount()),
-						Optional.ofNullable(c.getRigheCarrello())
+						Optional.empty() //Optional.ofNullable(c.getRigheCarrello())
 						)
 				).toList();
 	}

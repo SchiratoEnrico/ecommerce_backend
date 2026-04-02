@@ -27,15 +27,15 @@ public class Ordine {
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_account", nullable = false)
 	private Account account;
 	
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_pagamento", nullable = false)
 	private TipoPagamento tipoPagamento;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_spedizione", nullable = false)
 	private TipoSpedizione tipoSpedizione;
 	
@@ -45,17 +45,19 @@ public class Ordine {
 			)
 	private LocalDate data;
 	
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_stato", nullable = false)
 	private StatoOrdine stato;
 	
-	
-//	cascade = CascadeType.REMOVE,
-//    orphanRemoval = true
-
 	@OneToMany(
 		    mappedBy = "ordine",
-		    orphanRemoval = true
+		    cascade = CascadeType.ALL,
+		    orphanRemoval = true,
+		    fetch = FetchType.LAZY
 		)
 	private List<RigaOrdine> righeOrdine;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_anagrafica", nullable = false)
+	private Anagrafica anagrafica;
 }

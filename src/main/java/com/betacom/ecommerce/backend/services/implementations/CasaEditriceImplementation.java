@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,10 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 		cas.setDescrizione(req.getDescrizione());
 		cas.setEmail(req.getEmail());
 		cas.setIndirizzo(req.getIndirizzo());
-		cas.setNome(req.getNome());
+		if (caseR.findByNomeIgnoreCase(req.getNome().trim()).isPresent()) {
+			throw new MangaException("exists_casa");
+		}
+		cas.setNome(req.getNome().trim());
 		
 		return caseR.save(cas).getId();
 	}
@@ -47,7 +51,7 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	@Override
 	public void update(CasaEditriceRequest req) throws MangaException {
 		CasaEditrice cas = caseR.findById(req.getId())
-				.orElseThrow(() -> new MangaException("case_ntfnd"));
+				.orElseThrow(() -> new MangaException("!exists_casa"));
 		
 		if(req.getDescrizione()!=null)
 			cas.setDescrizione(req.getDescrizione());
@@ -55,9 +59,13 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 			cas.setEmail(req.getEmail());
 		if(req.getIndirizzo()!=null)
 			cas.setIndirizzo(req.getIndirizzo());
-		if(req.getNome()!=null)
-			cas.setNome(req.getNome());
-		
+		if(req.getNome()!=null) {
+			Optional<CasaEditrice> dup = caseR.findByNomeIgnoreCase(req.getNome().trim());
+			if (dup.isPresent() && !dup.get().getId().equals(req.getId())) {
+			    throw new MangaException("exists_casa");
+			}
+			cas.setNome(req.getNome().trim());
+		}
 		caseR.save(cas);
 	}
 	
@@ -65,7 +73,7 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	@Override
 	public void delete(Integer id) throws MangaException {
 		CasaEditrice cas = caseR.findById(id)
-				.orElseThrow(() -> new MangaException("case_ntfnd"));
+				.orElseThrow(() -> new MangaException("!exists_casa"));
 		
 		if(caseR.existsByIdAndMangaIsNotEmpty(id))
 			throw new MangaException("casa_man");
@@ -88,7 +96,7 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 	@Transactional
 	public CasaEditriceDTO findById(Integer id) throws Exception {
 		CasaEditrice cas = caseR.findById(id)
-				.orElseThrow(() -> new MangaException("case_ntfnd"));
+				.orElseThrow(() -> new MangaException("!exists_casa"));
 
 		return DtoBuilders.buildCasaEditriceDTO(cas);
 	}

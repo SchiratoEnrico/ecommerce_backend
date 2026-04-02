@@ -20,7 +20,7 @@ public class RigaFatturaRequest {
     private String titolo;
     private String autore;
     private BigDecimal prezzoUnitario;
-    private Integer quantita;
+    private Integer numeroCopie;
     
 
 }

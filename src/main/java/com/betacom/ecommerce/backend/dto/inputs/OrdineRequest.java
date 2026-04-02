@@ -1,6 +1,9 @@
 package com.betacom.ecommerce.backend.dto.inputs;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +21,12 @@ public class OrdineRequest {
 	private Integer account;
 	private String pagamento;
 	private String spedizione;
-	private String data;
+	
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate data;
+
 	private String stato;
+	private Integer anagrafica;
+
 	private List<RigaOrdineRequest> righeOrdineRequest;
 }

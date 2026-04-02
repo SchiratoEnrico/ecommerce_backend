@@ -25,10 +25,15 @@ public class RigaFattura {
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_fattura", 
-    			nullable = false)
-    private Fattura idFattura;
+	@ManyToOne(
+			fetch = FetchType.LAZY,
+			optional = false
+			)
+    @JoinColumn(
+    		name = "id_fattura", 
+    		nullable = false
+    		)
+    private Fattura fattura;
 
     // Snapshot Manga 
 	@Column(name = "isbn")
@@ -39,9 +44,10 @@ public class RigaFattura {
     		length = 255)
     private String titolo;
 
-    @Column(name = "autore", 
-    		length = 150)
-    private String autore;
+    // non includerei, abbiamo isbn
+//    @Column(name = "autore", 
+//    		length = 150)
+//    private String autore;
 
     @Column(name = "prezzo_unitario", 
     		nullable = false, 
@@ -49,9 +55,9 @@ public class RigaFattura {
     		scale = 2)
     private BigDecimal prezzoUnitario;
 
-    @Column(name = "quantita", 
+    @Column(name = "numero_copie", 
     		nullable = false)
-    private Integer quantita;
+    private Integer numeroCopie;
 
     @Column(name = "totale_riga", 
     		nullable = false, 

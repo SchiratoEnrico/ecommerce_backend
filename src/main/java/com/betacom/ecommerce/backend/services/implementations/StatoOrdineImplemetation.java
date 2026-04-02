@@ -11,9 +11,11 @@ import com.betacom.ecommerce.backend.dto.inputs.StatoOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
+import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IStatoOrdineServices;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
+import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,17 +26,16 @@ import lombok.extern.slf4j.Slf4j;
 public class StatoOrdineImplemetation implements IStatoOrdineServices{
 
 	private final IStatoOrdineRepository statR;
+	private final IOrdineRepository ordeR;
 	
 	@Override
 	@Transactional (rollbackFor = Exception.class)
 	public Integer create(StatoOrdineRequest req) throws MangaException {
 		log.debug("creating stato ordine {}", req);
-		String myStato = null;
 		
 		StatoOrdine o = new StatoOrdine();
-		if (req.getStatoOrdine() != null && !req.getStatoOrdine().isEmpty()) {
-			myStato = req.getStatoOrdine().trim().toUpperCase();
-		} else {
+		String myStato = Utils.normalize(req.getStatoOrdine());
+		if (myStato == null || myStato.isEmpty()) {
 			throw new MangaException("null_sta");
 		}
 		Optional<StatoOrdine> dup = statR.findByStatoOrdine(myStato);
@@ -53,6 +54,10 @@ public class StatoOrdineImplemetation implements IStatoOrdineServices{
 
 		StatoOrdine stato = statR.findById(id).orElseThrow(() ->
 				new MangaException("!exists_sta"));
+		
+		if (ordeR.existsByStatoId(stato.getId())) {
+			throw new MangaException("order_sta");
+		}
 		statR.delete(stato);
 	}
 
@@ -64,14 +69,13 @@ public class StatoOrdineImplemetation implements IStatoOrdineServices{
 
 		StatoOrdine stato = statR.findById(req.getId()).orElseThrow(() ->
 			new MangaException("!exists_sta"));
-		String myStato = null;
+		String myStato = Utils.normalize(req.getStatoOrdine());
 		
-		if (req.getStatoOrdine() != null && !req.getStatoOrdine().isEmpty()) {
-			myStato = req.getStatoOrdine().trim().toUpperCase();
-		} else {
+		if (myStato == null || myStato.isEmpty()) {
 			throw new MangaException("null_sta");
 		}
 		Optional<StatoOrdine> dup = statR.findByStatoOrdine(myStato);
+		
 		if (dup.isEmpty()) {
 			stato.setStatoOrdine(myStato); 
 		} else {

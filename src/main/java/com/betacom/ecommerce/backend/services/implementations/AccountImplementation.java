@@ -17,9 +17,13 @@ import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Carrello;
+import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
+import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
+import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
+import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.specification.AccountSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
@@ -36,9 +40,11 @@ public class AccountImplementation implements IAccountServices{
 	private final CarrelloImplementation carI;
 	private final IAccountRepository repAcc;
 	private final ICarrelloRepository carR;
+	private final IFatturaRepository fattR;
+	private final IFatturaServices fattS;
 	private final IMessagesServices msgS;
 	private final PasswordEncoder passwordEncoder;
-	
+	private final IOrdineRepository ordeR;
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -80,15 +86,16 @@ public class AccountImplementation implements IAccountServices{
 	    	throw new MangaException("!valid_rol");
 	    }
 
-	    Integer id = repAcc.save(acc).getId();
-	    
-	    CarrelloRequest carReq = new CarrelloRequest();
-	    carReq.setId_account(id);
-	    Integer chartId = carI.create(carReq);
-	    Carrello car = carR.findById(chartId)
-	    		.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
-	    acc.setCarrello(car);
 	    repAcc.save(acc);
+	    //Integer id = repAcc.save(acc).getId();
+	    
+//	    CarrelloRequest carReq = new CarrelloRequest();
+//	    carReq.setId_account(id);
+//	    Integer chartId = carI.create(carReq);
+//	    Carrello car = carR.findById(chartId)
+//	    		.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
+//	    acc.setCarrello(car);
+//	    repAcc.save(acc);
 	}
 
 	@Override
@@ -104,8 +111,13 @@ public class AccountImplementation implements IAccountServices{
 			if(lU.size()==1)
 				throw new MangaException("last_adm");
 		}
-         
+        
+        // controllo ordini
+        ordeR.findAllByAccountId(id).stream()
+        	.forEach(o -> fattS.updateFromOrdine(o, true));
+        
         repAcc.delete(acc);	
+        // cascad su carrello, righecarrello, anagrafiche
 	}
 	
 
@@ -157,7 +169,7 @@ public class AccountImplementation implements IAccountServices{
 
 	    return repAcc.findAll()
 	            .stream()
-	            .map(a -> DtoBuilders.buildAccountDTO(a, Optional.ofNullable(a.getCarrello()), Optional.ofNullable(a.getAnagrafiche())))
+	            .map(a -> DtoBuilders.buildAccountDTO(a, Optional.ofNullable(a.getCarrello()), Optional.empty()))//ofNullable(a.getAnagrafiche())))
 	            .collect(Collectors.toList());
 	}
 
@@ -188,7 +200,7 @@ public class AccountImplementation implements IAccountServices{
 		List<Account> lA = repAcc.findAll(spec);
 		
 		return lA.stream()
-	            .map(a -> DtoBuilders.buildAccountDTO(a, Optional.ofNullable(a.getCarrello()), Optional.ofNullable(a.getAnagrafiche())))
+	            .map(a -> DtoBuilders.buildAccountDTO(a, Optional.ofNullable(a.getCarrello()), Optional.empty()))//ofNullable(a.getAnagrafiche())))
 	            .collect(Collectors.toList());
 	}
 

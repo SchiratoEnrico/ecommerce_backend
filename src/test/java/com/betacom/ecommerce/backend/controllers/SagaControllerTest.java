@@ -43,6 +43,7 @@ public class SagaControllerTest {
 	private List<SagaDTO> getLoadedList(
 			String casaEditriceNome,
 			String autoreNome,
+			String autoreCognome,
 			String sagaNome,
 			Integer sagaId,
 			Integer casaEditriceId,
@@ -53,6 +54,7 @@ public class SagaControllerTest {
     	ResponseEntity<?> resp = sagaC.list(
 				casaEditriceNome,
 				autoreNome,
+				autoreCognome,
 				sagaNome,
 				sagaId,
 				casaEditriceId,
@@ -73,6 +75,7 @@ public class SagaControllerTest {
         log.debug("start list saga test");
 		String casaEditriceNome = "";
 		String autoreNome = "";
+		String autoreCognome = "";
 		String sagaNome = "";
 		Integer sagaId = null;
 		Integer casaEditriceId = null;
@@ -80,47 +83,47 @@ public class SagaControllerTest {
 		List<Integer> generiId = new ArrayList<Integer>();
 
 		// test vuoto
-		List<SagaDTO> lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+		List<SagaDTO> lS = getLoadedList(casaEditriceNome, autoreNome, autoreCognome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
 		
     	// sagaNome
     	sagaNome = "piec";
-    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	lS = getLoadedList(casaEditriceNome, autoreNome, autoreCognome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
     	sagaNome = "";
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 
     	// sagaNome
     	casaEditriceNome = "Shueis";
-    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	lS = getLoadedList(casaEditriceNome, autoreNome, autoreCognome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
     	casaEditriceNome = "";
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 
     	// autoreNome
     	autoreNome = "iich";
-    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	lS = getLoadedList(casaEditriceNome, autoreNome, autoreCognome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
     	autoreNome = "";
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 
     	// sagaId
     	sagaId= 1;
-    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	lS = getLoadedList(casaEditriceNome, autoreNome, autoreCognome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
     	sagaId = null;
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 
     	// autoreId
     	autoreId= 1;
-    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	lS = getLoadedList(casaEditriceNome, autoreNome, autoreCognome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
     	autoreId = null;
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 
     	// casaEditriceId
     	casaEditriceId= 1;
-    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	lS = getLoadedList(casaEditriceNome, autoreNome, autoreCognome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
     	casaEditriceId = null;
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 
     	// generiId
     	generiId.add(2);
-    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, sagaId, casaEditriceId, autoreId, generiId);
+    	lS = getLoadedList(casaEditriceNome, autoreNome, sagaNome, autoreCognome, sagaId, casaEditriceId, autoreId, generiId);
     	casaEditriceId = null;
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 	}

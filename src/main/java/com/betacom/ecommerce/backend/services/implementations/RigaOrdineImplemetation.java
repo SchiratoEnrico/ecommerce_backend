@@ -84,6 +84,17 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 				new MangaException("!exists_man"));
 			r.setManga(m);
 		}
+		
+		if (req.getNumeroCopie() != null) {
+		    // update inventory delta: difference between old and new
+		    Integer toAdd = r.getNumeroCopie() - req.getNumeroCopie();
+		    m = r.getManga();
+		    Integer left = m.getNumeroCopie() - toAdd; // negative delta = more copies locked
+		    if (left < 0) throw new MangaException("insufficiente_copie");
+		    m.setNumeroCopie(left);
+		    mangR.save(m);
+		    r.setNumeroCopie(req.getNumeroCopie());
+		}
 		righR.save(r);
 	}
 
@@ -95,9 +106,9 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 						new MangaException("!exists_row"));
 		
 		Ordine o = r.getOrdine();
-		
-		righR.delete(r);
 		o.getRigheOrdine().remove(r);
+		righR.delete(r);
+		ordeR.save(o);
 	}
 
 	@Override
