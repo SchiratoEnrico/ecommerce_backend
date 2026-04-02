@@ -34,6 +34,6 @@ public class AuthServices {
         Account acc = accountRepository.findByUsername(request.getUsername()).orElseThrow();
         log.debug(acc.getRuolo().name());
         // Restituisci sia token che ruolo
-        return new AuthResponse(token, acc.getRuolo().name()); 
+        return new AuthResponse(token, acc.getRuolo().name(), acc.getId()); 
     }
 }
