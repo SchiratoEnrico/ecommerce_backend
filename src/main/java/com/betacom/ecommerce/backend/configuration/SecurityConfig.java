@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.configuration;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -45,7 +46,8 @@ public class SecurityConfig {
                     "/error",
                     "/v3/api-docs/**", 
                     "/swagger-ui/**", 
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    "/uploads/**"
                 ).permitAll()
                 // Rendiamo pubbliche TUTTE le GET (letture) relative al catalogo!
                 .requestMatchers(HttpMethod.GET, 
@@ -96,7 +98,7 @@ public class SecurityConfig {
 
         return source;
     }
-    
+        
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

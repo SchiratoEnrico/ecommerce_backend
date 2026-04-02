@@ -35,7 +35,7 @@ public class UploadImplementation implements IUploadServices{
 	private final IMangaRepository mangaR;
 
 	public UploadImplementation(
-			@Value("${app.upload.dir:uploads}") String uploadDir,
+			@Value("${app.upload.dir}") String uploadDir,
 			IMessagesServices msgS,
 			ISagaRepository sagaR,
 			IMangaRepository mangaR
@@ -221,7 +221,7 @@ public class UploadImplementation implements IUploadServices{
 	    }
 
 		return ServletUriComponentsBuilder.fromCurrentContextPath() // parte iniziale path: localhost ...
-				.path("/")
+				.path("uploads/")
 				.path(filename) // aggiunta filename
 				.toUriString();
 	}

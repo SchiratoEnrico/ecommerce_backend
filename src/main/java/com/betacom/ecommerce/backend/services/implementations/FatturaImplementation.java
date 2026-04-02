@@ -337,7 +337,7 @@ public class FatturaImplementation implements IFatturaServices{
     }
     
     // Admin: 
-    public void confermaPresa(Integer fatturaId) {
+    public void confermaReso(Integer fatturaId) {
         Fattura fat = load(fatturaId);
         validateTransition(fat, "RICHIESTA_RESO");
         fat.setStatoFattura("RESTITUITO");

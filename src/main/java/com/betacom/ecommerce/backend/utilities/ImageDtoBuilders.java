@@ -21,16 +21,19 @@ import com.betacom.ecommerce.backend.repositories.IGenereRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IUploadServices;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImageDtoBuilders {
 	private final IUploadServices uploS;
 	private final IAutoreRepository autoR;
 	private final IGenereRepository geneR;
 	
 	public MangaDTO buildMangaDTO(Manga m, Optional<CasaEditrice> c, Optional<Set<Autore>> lA, Optional<Set<Genere>> lG, Optional<Saga> s) {
-        return MangaDTO.builder()
+        log.debug(uploS.buildUrl(m.getImmagine()));
+		return MangaDTO.builder()
                 .isbn(m.getIsbn())
                 .titolo(m.getTitolo())
                 .immagine(uploS.buildUrl(m.getImmagine()))

@@ -1269,3 +1269,750 @@ Caused by: org.springframework.data.core.PropertyReferenceException: No property
 2026-04-02T16:28:38.877+02:00  INFO 87157 --- [ecommerce_backend] [RMI TCP Connection(8)-127.0.0.1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2026-04-02T16:28:38.883+02:00  INFO 87157 --- [ecommerce_backend] [RMI TCP Connection(8)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 2026-04-02T16:28:38.895+02:00  INFO 87157 --- [ecommerce_backend] [RMI TCP Connection(8)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-04-02T18:09:27.340+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 93826 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T18:09:27.345+02:00 DEBUG 93826 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T18:09:27.346+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T18:09:27.484+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-04-02T18:09:27.484+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-04-02T18:09:29.652+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T18:09:29.897+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 225 ms. Found 17 JPA repository interfaces.
+2026-04-02T18:09:31.386+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T18:09:31.414+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T18:09:31.415+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T18:09:31.480+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 3995 ms
+2026-04-02T18:09:31.766+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-02T18:09:32.345+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@13445f96
+2026-04-02T18:09:32.349+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-02T18:09:32.402+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T18:09:32.527+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-04-02T18:09:33.558+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T18:09:33.725+02:00  WARN 93826 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T18:09:33.766+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T18:09:36.346+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T18:09:36.404+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T18:09:36.518+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-02T18:09:36.952+02:00 DEBUG 93826 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T18:09:37.064+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T18:09:38.160+02:00  WARN 93826 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T18:09:38.930+02:00  WARN 93826 --- [ecommerce_backend] [restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+2026-04-02T18:09:38.937+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T18:09:38.942+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-04-02T18:09:38.967+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-04-02T18:09:38.971+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-04-02T18:09:39.002+02:00  INFO 93826 --- [ecommerce_backend] [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-04-02T18:09:39.024+02:00 ERROR 93826 --- [ecommerce_backend] [restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1817) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:603) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:994) ~[spring-context-7.0.5.jar:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-7.0.5.jar:7.0.5]
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143) ~[spring-boot-web-server-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-4.0.3.jar:4.0.3]
+	at com.betacom.ecommerce.backend.EcommerceBackendApplication.main(EcommerceBackendApplication.java:12) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:52) ~[spring-boot-devtools-4.0.3.jar:4.0.3]
+Caused by: java.lang.IllegalStateException: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry.validateMethodMapping(AbstractHandlerMethodMapping.java:646) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry.register(AbstractHandlerMethodMapping.java:606) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.registerHandlerMethod(AbstractHandlerMethodMapping.java:327) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.registerHandlerMethod(RequestMappingHandlerMapping.java:459) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.registerHandlerMethod(RequestMappingHandlerMapping.java:80) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.lambda$detectHandlerMethods$1(AbstractHandlerMethodMapping.java:294) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at java.base/java.util.LinkedHashMap.forEach(LinkedHashMap.java:987) ~[na:na]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.detectHandlerMethods(AbstractHandlerMethodMapping.java:292) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.processCandidateBean(AbstractHandlerMethodMapping.java:261) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.initHandlerMethods(AbstractHandlerMethodMapping.java:220) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.afterPropertiesSet(AbstractHandlerMethodMapping.java:208) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.afterPropertiesSet(RequestMappingHandlerMapping.java:158) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1864) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1813) ~[spring-beans-7.0.5.jar:7.0.5]
+	... 21 common frames omitted
+
+2026-04-02T18:54:18.223+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 9355 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T18:54:18.228+02:00 DEBUG 9355 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T18:54:18.231+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T18:54:18.393+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-04-02T18:54:18.394+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-04-02T18:54:23.282+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T18:54:23.569+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 256 ms. Found 17 JPA repository interfaces.
+2026-04-02T18:54:25.473+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T18:54:25.506+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T18:54:25.507+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T18:54:25.587+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 7191 ms
+2026-04-02T18:54:25.915+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-02T18:54:26.547+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7c68b238
+2026-04-02T18:54:26.550+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-02T18:54:26.626+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T18:54:26.818+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-04-02T18:54:27.931+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T18:54:28.092+02:00  WARN 9355 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T18:54:28.127+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T18:54:30.434+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T18:54:30.495+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T18:54:30.633+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-02T18:54:31.129+02:00 DEBUG 9355 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T18:54:31.259+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T18:54:32.612+02:00  WARN 9355 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T18:54:33.461+02:00  WARN 9355 --- [ecommerce_backend] [restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+2026-04-02T18:54:33.471+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T18:54:33.480+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-04-02T18:54:33.505+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-04-02T18:54:33.511+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-04-02T18:54:33.531+02:00  INFO 9355 --- [ecommerce_backend] [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-04-02T18:54:33.556+02:00 ERROR 9355 --- [ecommerce_backend] [restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1817) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:603) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:994) ~[spring-context-7.0.5.jar:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-7.0.5.jar:7.0.5]
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143) ~[spring-boot-web-server-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-4.0.3.jar:4.0.3]
+	at com.betacom.ecommerce.backend.EcommerceBackendApplication.main(EcommerceBackendApplication.java:12) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:52) ~[spring-boot-devtools-4.0.3.jar:4.0.3]
+Caused by: java.lang.IllegalStateException: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry.validateMethodMapping(AbstractHandlerMethodMapping.java:646) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry.register(AbstractHandlerMethodMapping.java:606) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.registerHandlerMethod(AbstractHandlerMethodMapping.java:327) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.registerHandlerMethod(RequestMappingHandlerMapping.java:459) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.registerHandlerMethod(RequestMappingHandlerMapping.java:80) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.lambda$detectHandlerMethods$1(AbstractHandlerMethodMapping.java:294) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at java.base/java.util.LinkedHashMap.forEach(LinkedHashMap.java:987) ~[na:na]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.detectHandlerMethods(AbstractHandlerMethodMapping.java:292) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.processCandidateBean(AbstractHandlerMethodMapping.java:261) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.initHandlerMethods(AbstractHandlerMethodMapping.java:220) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.afterPropertiesSet(AbstractHandlerMethodMapping.java:208) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.afterPropertiesSet(RequestMappingHandlerMapping.java:158) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1864) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1813) ~[spring-beans-7.0.5.jar:7.0.5]
+	... 21 common frames omitted
+
+2026-04-02T19:25:04.334+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10575 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T19:25:04.338+02:00 DEBUG 10575 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T19:25:04.339+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T19:25:04.417+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-04-02T19:25:04.418+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-04-02T19:25:05.861+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T19:25:05.975+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 103 ms. Found 17 JPA repository interfaces.
+2026-04-02T19:25:06.839+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T19:25:06.857+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T19:25:06.857+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T19:25:06.893+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2474 ms
+2026-04-02T19:25:07.033+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-02T19:25:07.335+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@196ff78f
+2026-04-02T19:25:07.337+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-02T19:25:07.365+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T19:25:07.407+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-04-02T19:25:07.897+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T19:25:07.978+02:00  WARN 10575 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T19:25:07.997+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T19:25:09.570+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T19:25:09.621+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T19:25:09.759+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-02T19:25:10.057+02:00 DEBUG 10575 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T19:25:10.163+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T19:25:11.102+02:00  WARN 10575 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T19:25:11.544+02:00  WARN 10575 --- [ecommerce_backend] [restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+2026-04-02T19:25:11.548+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T19:25:11.552+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-04-02T19:25:11.566+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-04-02T19:25:11.569+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-04-02T19:25:11.579+02:00  INFO 10575 --- [ecommerce_backend] [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-04-02T19:25:11.592+02:00 ERROR 10575 --- [ecommerce_backend] [restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1817) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:603) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:994) ~[spring-context-7.0.5.jar:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-7.0.5.jar:7.0.5]
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143) ~[spring-boot-web-server-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365) ~[spring-boot-4.0.3.jar:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-4.0.3.jar:4.0.3]
+	at com.betacom.ecommerce.backend.EcommerceBackendApplication.main(EcommerceBackendApplication.java:12) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:52) ~[spring-boot-devtools-4.0.3.jar:4.0.3]
+Caused by: java.lang.IllegalStateException: Ambiguous mapping. Cannot map 'fatturaController' method 
+com.betacom.ecommerce.backend.controllers.FatturaController#confermaReso(Integer)
+to {PUT [/rest/fattura/reso/rifiuta]}: There is already 'fatturaController' bean method
+com.betacom.ecommerce.backend.controllers.FatturaController#rifiutaReso(Integer) mapped.
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry.validateMethodMapping(AbstractHandlerMethodMapping.java:646) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping$MappingRegistry.register(AbstractHandlerMethodMapping.java:606) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.registerHandlerMethod(AbstractHandlerMethodMapping.java:327) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.registerHandlerMethod(RequestMappingHandlerMapping.java:459) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.registerHandlerMethod(RequestMappingHandlerMapping.java:80) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.lambda$detectHandlerMethods$1(AbstractHandlerMethodMapping.java:294) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at java.base/java.util.LinkedHashMap.forEach(LinkedHashMap.java:987) ~[na:na]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.detectHandlerMethods(AbstractHandlerMethodMapping.java:292) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.processCandidateBean(AbstractHandlerMethodMapping.java:261) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.initHandlerMethods(AbstractHandlerMethodMapping.java:220) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.afterPropertiesSet(AbstractHandlerMethodMapping.java:208) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.afterPropertiesSet(RequestMappingHandlerMapping.java:158) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1864) ~[spring-beans-7.0.5.jar:7.0.5]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1813) ~[spring-beans-7.0.5.jar:7.0.5]
+	... 21 common frames omitted
+
+2026-04-02T19:29:31.931+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T19:29:31.934+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T19:29:31.935+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T19:29:31.999+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-04-02T19:29:31.999+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-04-02T19:29:33.170+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T19:29:33.277+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 95 ms. Found 17 JPA repository interfaces.
+2026-04-02T19:29:34.069+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T19:29:34.083+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T19:29:34.084+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T19:29:34.130+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2130 ms
+2026-04-02T19:29:34.305+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-02T19:29:34.616+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7c4bedaa
+2026-04-02T19:29:34.618+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-02T19:29:34.652+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T19:29:34.707+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-04-02T19:29:35.209+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T19:29:35.281+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T19:29:35.302+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T19:29:36.524+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T19:29:36.560+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T19:29:36.640+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-02T19:29:36.870+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T19:29:36.950+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T19:29:37.736+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T19:29:38.277+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T19:29:38.618+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T19:29:38.710+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T19:29:38.721+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 7.269 seconds (process running for 8.137)
+2026-04-02T19:29:38.725+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T19:29:38.725+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T19:29:58.443+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-02T19:29:58.443+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-02T19:29:58.445+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-04-02T19:29:59.288+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.ecommerce.backend.auth.AuthServices  : ADMIN
+2026-04-02T19:30:10.683+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-9] c.b.e.b.s.i.AccountImplementation        : findById Account
+2026-04-02T19:30:10.753+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.s.i.AnagraficaImplementation     : findind anagrafiche di account 5
+2026-04-02T19:30:25.710+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-3] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:30:25.760+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-7] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T19:30:25.781+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T19:30:25.850+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:31:34.795+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-3] c.b.e.b.s.i.MangaImplementation          : begin updating manga  isbn MangaRequest(isbn=ISBN001, titolo=One Piece Vol.1, dataPubblicazione=1996-10-24, prezzo=9.99, immagine=http://localhost:9090/default.png, numeroCopie=8, saga=1, sagaVol=null, casaEditrice=1, generi=[2, 4], autori=[2])
+2026-04-02T19:31:34.797+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-3] c.b.e.backend.utilities.ReqValidators    : checking  manga parameters
+2026-04-02T19:31:34.801+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-3] c.b.e.b.s.i.MangaImplementation          : checking validity of provided saga: 1
+2026-04-02T19:31:34.807+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-3] c.b.e.b.s.i.MangaImplementation          : checking validity of new volume saga insertion, vol 1
+2026-04-02T19:31:58.623+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:32:00.570+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-8] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:32:01.749+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-3] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:35:12.118+02:00  INFO 10941 --- [ecommerce_backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-02T19:35:12.123+02:00  INFO 10941 --- [ecommerce_backend] [Thread-1] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T19:35:12.126+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T19:35:12.135+02:00  INFO 10941 --- [ecommerce_backend] [Thread-1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T19:35:12.139+02:00  INFO 10941 --- [ecommerce_backend] [Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-04-02T19:35:12.145+02:00  INFO 10941 --- [ecommerce_backend] [Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-04-02T19:35:12.418+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T19:35:12.418+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T19:35:12.418+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T19:35:12.907+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T19:35:12.957+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 47 ms. Found 17 JPA repository interfaces.
+2026-04-02T19:35:13.259+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T19:35:13.263+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T19:35:13.263+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T19:35:13.278+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 853 ms
+2026-04-02T19:35:13.377+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-04-02T19:35:13.444+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@36959aaa
+2026-04-02T19:35:13.445+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-04-02T19:35:13.447+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T19:35:13.495+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T19:35:13.505+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T19:35:13.510+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T19:35:14.186+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T19:35:14.200+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T19:35:14.394+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T19:35:14.462+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T19:35:15.200+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T19:35:15.496+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T19:35:15.671+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T19:35:15.730+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T19:35:15.736+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 3.361 seconds (process running for 345.151)
+2026-04-02T19:35:15.738+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T19:35:15.738+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T19:35:15.740+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-02T19:35:25.340+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-02T19:35:25.340+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-02T19:35:25.344+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-04-02T19:35:25.471+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-4] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:35:25.488+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-4] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/default.png
+2026-04-02T19:35:25.489+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-4] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/default.png
+2026-04-02T19:35:25.634+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-8] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T19:35:25.657+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T19:35:25.700+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:35:25.724+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/default.png
+2026-04-02T19:35:25.731+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/default.png
+2026-04-02T19:42:12.708+02:00  INFO 10941 --- [ecommerce_backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-02T19:42:12.726+02:00  INFO 10941 --- [ecommerce_backend] [Thread-5] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T19:42:12.730+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T19:42:12.754+02:00  INFO 10941 --- [ecommerce_backend] [Thread-5] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T19:42:12.756+02:00  INFO 10941 --- [ecommerce_backend] [Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-04-02T19:42:12.790+02:00  INFO 10941 --- [ecommerce_backend] [Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+2026-04-02T19:42:13.107+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T19:42:13.113+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T19:42:13.114+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T19:42:13.559+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T19:42:13.608+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 47 ms. Found 17 JPA repository interfaces.
+2026-04-02T19:42:13.836+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T19:42:13.837+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T19:42:13.837+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T19:42:13.849+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 728 ms
+2026-04-02T19:42:13.929+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-04-02T19:42:13.961+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@61fd4a71
+2026-04-02T19:42:13.962+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-04-02T19:42:13.965+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T19:42:14.003+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T19:42:14.013+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T19:42:14.022+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T19:42:14.548+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T19:42:14.574+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T19:42:14.795+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T19:42:14.845+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T19:42:15.560+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T19:42:15.842+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T19:42:16.011+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T19:42:16.068+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T19:42:16.074+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 3.038 seconds (process running for 765.489)
+2026-04-02T19:42:16.078+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T19:42:16.080+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T19:42:16.082+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-02T19:42:18.605+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-02T19:42:18.606+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-02T19:42:18.610+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
+2026-04-02T19:42:22.852+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:42:22.879+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:42:22.887+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:42:22.991+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:42:23.020+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:42:23.021+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:42:23.023+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-5] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T19:42:23.040+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-4] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T19:54:04.662+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:54:04.676+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:54:04.678+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:54:04.758+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-3] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T19:54:04.773+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T19:54:04.845+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:54:04.863+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:54:04.866+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:08.957+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-8] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:56:08.972+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-8] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:08.982+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-8] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:09.011+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:56:09.019+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-7] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T19:56:09.023+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T19:56:09.025+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:09.026+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:17.679+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-4] c.b.e.b.s.i.AccountImplementation        : findById Account
+2026-04-02T19:56:17.737+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.s.i.AnagraficaImplementation     : findind anagrafiche di account 5
+2026-04-02T19:56:21.208+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-5] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:56:21.215+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-5] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:21.217+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-5] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:21.283+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-7] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T19:56:21.302+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T19:56:21.304+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T19:56:21.328+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T19:56:21.329+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:00:31.027+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-4] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T20:00:31.054+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-9] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T20:00:31.063+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T20:00:31.076+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:00:31.082+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:00:44.791+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-10] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T20:00:44.821+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T20:00:44.880+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T20:00:44.886+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:00:44.887+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:14:53.711+02:00  INFO 10941 --- [ecommerce_backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-02T20:14:53.713+02:00  INFO 10941 --- [ecommerce_backend] [Thread-9] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T20:14:53.714+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T20:14:53.720+02:00  INFO 10941 --- [ecommerce_backend] [Thread-9] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:14:53.721+02:00  INFO 10941 --- [ecommerce_backend] [Thread-9] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-04-02T20:14:53.734+02:00  INFO 10941 --- [ecommerce_backend] [Thread-9] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+2026-04-02T20:14:53.899+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T20:14:53.899+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T20:14:53.899+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T20:14:54.302+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T20:14:54.337+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 33 ms. Found 17 JPA repository interfaces.
+2026-04-02T20:14:54.542+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T20:14:54.544+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T20:14:54.544+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T20:14:54.554+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 652 ms
+2026-04-02T20:14:54.633+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-04-02T20:14:54.655+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@5ec6b833
+2026-04-02T20:14:54.656+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-04-02T20:14:54.657+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T20:14:54.700+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T20:14:54.710+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T20:14:54.713+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T20:14:55.099+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T20:14:55.114+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:14:55.267+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T20:14:55.317+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T20:14:55.898+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T20:14:56.162+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T20:14:56.346+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T20:14:56.391+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T20:14:56.395+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 2.548 seconds (process running for 2725.811)
+2026-04-02T20:14:56.397+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T20:14:56.397+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T20:14:56.398+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-02T20:15:10.785+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-02T20:15:10.786+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-02T20:15:10.793+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 6 ms
+2026-04-02T20:15:11.356+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T20:15:11.397+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-8] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T20:15:11.434+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T20:15:11.458+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:15:11.459+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:15:41.358+02:00  INFO 10941 --- [ecommerce_backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-02T20:15:41.362+02:00  INFO 10941 --- [ecommerce_backend] [Thread-13] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T20:15:41.365+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T20:15:41.382+02:00  INFO 10941 --- [ecommerce_backend] [Thread-13] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:15:41.384+02:00  INFO 10941 --- [ecommerce_backend] [Thread-13] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-04-02T20:15:41.401+02:00  INFO 10941 --- [ecommerce_backend] [Thread-13] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+2026-04-02T20:15:41.536+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T20:15:41.536+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T20:15:41.536+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T20:15:41.782+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T20:15:41.815+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 31 ms. Found 17 JPA repository interfaces.
+2026-04-02T20:15:41.963+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T20:15:41.964+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T20:15:41.964+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T20:15:41.974+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 433 ms
+2026-04-02T20:15:42.041+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-04-02T20:15:42.062+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection org.postgresql.jdbc.PgConnection@6af61b14
+2026-04-02T20:15:42.062+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-04-02T20:15:42.063+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T20:15:42.093+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T20:15:42.101+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T20:15:42.105+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T20:15:42.389+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T20:15:42.395+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:15:42.504+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T20:15:42.543+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T20:15:43.256+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T20:15:43.478+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T20:15:43.658+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T20:15:43.694+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T20:15:43.698+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 2.195 seconds (process running for 2773.114)
+2026-04-02T20:15:43.699+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T20:15:43.700+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T20:15:43.701+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-02T20:16:08.294+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-02T20:16:08.295+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-02T20:16:08.298+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-04-02T20:16:09.144+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-6] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T20:16:09.167+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T20:16:09.208+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T20:16:09.232+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:16:09.240+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:18:26.645+02:00  INFO 10941 --- [ecommerce_backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-02T20:18:26.647+02:00  INFO 10941 --- [ecommerce_backend] [Thread-17] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T20:18:26.648+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T20:18:26.655+02:00  INFO 10941 --- [ecommerce_backend] [Thread-17] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:18:26.656+02:00  INFO 10941 --- [ecommerce_backend] [Thread-17] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2026-04-02T20:18:26.674+02:00  INFO 10941 --- [ecommerce_backend] [Thread-17] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.
+2026-04-02T20:18:26.816+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T20:18:26.816+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T20:18:26.816+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T20:18:27.086+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T20:18:27.119+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 32 ms. Found 17 JPA repository interfaces.
+2026-04-02T20:18:27.272+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T20:18:27.272+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T20:18:27.273+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T20:18:27.282+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 464 ms
+2026-04-02T20:18:27.342+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-04-02T20:18:27.362+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection org.postgresql.jdbc.PgConnection@67d38675
+2026-04-02T20:18:27.363+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-04-02T20:18:27.364+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T20:18:27.389+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T20:18:27.395+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T20:18:27.399+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T20:18:27.619+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T20:18:27.624+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:18:27.781+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T20:18:27.847+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T20:18:28.470+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T20:18:28.723+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T20:18:28.853+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T20:18:28.889+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T20:18:28.893+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 2.101 seconds (process running for 2938.309)
+2026-04-02T20:18:28.894+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T20:18:28.894+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T20:18:28.895+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-02T20:18:57.643+02:00  INFO 10941 --- [ecommerce_backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-02T20:18:57.647+02:00  INFO 10941 --- [ecommerce_backend] [Thread-21] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T20:18:57.651+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T20:18:57.672+02:00  INFO 10941 --- [ecommerce_backend] [Thread-21] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:18:57.675+02:00  INFO 10941 --- [ecommerce_backend] [Thread-21] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown initiated...
+2026-04-02T20:18:57.705+02:00  INFO 10941 --- [ecommerce_backend] [Thread-21] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown completed.
+2026-04-02T20:18:57.843+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T20:18:57.843+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T20:18:57.843+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T20:18:58.098+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T20:18:58.129+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 29 ms. Found 17 JPA repository interfaces.
+2026-04-02T20:18:58.335+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T20:18:58.336+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T20:18:58.337+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T20:18:58.345+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 499 ms
+2026-04-02T20:18:58.444+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-04-02T20:18:58.471+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@6b20bc36
+2026-04-02T20:18:58.472+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-04-02T20:18:58.473+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T20:18:58.513+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T20:18:58.521+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T20:18:58.526+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T20:18:58.939+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T20:18:58.947+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:18:59.133+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T20:18:59.172+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T20:18:59.747+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T20:18:59.984+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T20:19:00.112+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T20:19:00.165+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T20:19:00.168+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 2.35 seconds (process running for 2969.584)
+2026-04-02T20:19:00.169+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T20:19:00.170+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T20:19:00.170+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-02T20:19:03.537+02:00  INFO 10941 --- [ecommerce_backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-02T20:19:03.539+02:00  INFO 10941 --- [ecommerce_backend] [Thread-25] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T20:19:03.540+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T20:19:03.548+02:00  INFO 10941 --- [ecommerce_backend] [Thread-25] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:19:03.549+02:00  INFO 10941 --- [ecommerce_backend] [Thread-25] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown initiated...
+2026-04-02T20:19:03.561+02:00  INFO 10941 --- [ecommerce_backend] [Thread-25] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown completed.
+2026-04-02T20:19:03.735+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Starting EcommerceBackendApplication using Java 25.0.1 with PID 10941 (/home/davide/git/ProjectEcommerce/ecommerce_backend/target/classes started by davide in /home/davide/git/ProjectEcommerce/ecommerce_backend)
+2026-04-02T20:19:03.735+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-04-02T20:19:03.736+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-04-02T20:19:03.981+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-02T20:19:04.013+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 31 ms. Found 17 JPA repository interfaces.
+2026-04-02T20:19:04.184+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9090 (http)
+2026-04-02T20:19:04.185+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-02T20:19:04.185+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-04-02T20:19:04.193+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 455 ms
+2026-04-02T20:19:04.264+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Starting...
+2026-04-02T20:19:04.285+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@76ce204d
+2026-04-02T20:19:04.285+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Start completed.
+2026-04-02T20:19:04.286+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-02T20:19:04.313+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-02T20:19:04.323+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 12.22.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 13.0.0. Check the community dialects project for available legacy versions.
+2026-04-02T20:19:04.327+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/ecommerce_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 12.22
+	Default catalog/schema: ecommerce_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-02T20:19:04.626+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-02T20:19:04.634+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:19:04.746+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.backend.security.JwtFilter         : Filter 'jwtFilter' configured for use
+2026-04-02T20:19:04.799+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-02T20:19:05.507+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-02T20:19:05.783+02:00 DEBUG 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.configuration.WebImgConfig       : uploadLocation
+2026-04-02T20:19:05.918+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/ecommerce_db'
+2026-04-02T20:19:05.964+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 9090 (http) with context path '/'
+2026-04-02T20:19:05.969+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] c.b.e.b.EcommerceBackendApplication      : Started EcommerceBackendApplication in 2.263 seconds (process running for 2975.384)
+2026-04-02T20:19:05.970+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-04-02T20:19:05.971+02:00  WARN 10941 --- [ecommerce_backend] [restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-04-02T20:19:05.971+02:00  INFO 10941 --- [ecommerce_backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-02T20:19:55.223+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-02T20:19:55.223+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-02T20:19:55.228+02:00  INFO 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 5 ms
+2026-04-02T20:19:55.815+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-9] c.b.e.b.s.i.AutoreImplementation         : Begin find all autori
+2026-04-02T20:19:55.831+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-1] c.b.e.b.s.i.GenereImplementation         : Begin find all generi
+2026-04-02T20:19:55.838+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.s.i.MangaImplementation          : begin userlist manga
+2026-04-02T20:19:55.891+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:19:55.902+02:00 DEBUG 10941 --- [ecommerce_backend] [http-nio-9090-exec-2] c.b.e.b.utilities.ImageDtoBuilders       : http://localhost:9090/uploads/default.png
+2026-04-02T20:20:23.999+02:00  INFO 10941 --- [ecommerce_backend] [RMI TCP Connection(54)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2026-04-02T20:20:24.000+02:00  INFO 10941 --- [ecommerce_backend] [RMI TCP Connection(54)-127.0.0.1] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-02T20:20:24.002+02:00  INFO 10941 --- [ecommerce_backend] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-02T20:20:24.008+02:00  INFO 10941 --- [ecommerce_backend] [RMI TCP Connection(54)-127.0.0.1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-02T20:20:24.009+02:00  INFO 10941 --- [ecommerce_backend] [RMI TCP Connection(54)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown initiated...
+2026-04-02T20:20:24.025+02:00  INFO 10941 --- [ecommerce_backend] [RMI TCP Connection(54)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown completed.

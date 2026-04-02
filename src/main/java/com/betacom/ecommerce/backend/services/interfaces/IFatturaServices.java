@@ -17,4 +17,7 @@ public interface IFatturaServices {
 	void updateFromOrdine(Ordine o, Boolean toDel) throws MangaException;
 	void checkRefund(Ordine o, Boolean delete) throws MangaException;
 	public void iniziaReso(Integer fatturaId, Integer accountId) throws MangaException;
+	public void rifiutaReso(Integer fatturaId) throws MangaException;
+	public void confermaReso(Integer fatturaId);
+	public void rimborsa(Integer fatturaId, Boolean ripristina);
 }
