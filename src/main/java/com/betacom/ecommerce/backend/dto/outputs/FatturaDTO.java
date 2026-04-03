@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +21,8 @@ public class FatturaDTO {
 	
 	private Integer id;
     private String numeroFattura;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataEmissione;
 
     //Snapshot Cliente 

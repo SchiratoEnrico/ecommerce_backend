@@ -1,13 +1,10 @@
 package com.betacom.ecommerce.backend.services.interfaces;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
-import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
 import com.betacom.ecommerce.backend.dto.outputs.OrdineDTO;
-import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;

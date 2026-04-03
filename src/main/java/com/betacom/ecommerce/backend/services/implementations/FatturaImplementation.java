@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaFatturaServices;
+import com.betacom.ecommerce.backend.specification.FatturaSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.Utils;
 
@@ -215,13 +217,35 @@ public class FatturaImplementation implements IFatturaServices{
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<FatturaDTO> list() {
+	public List<FatturaDTO> list(
+			String numeroFattura,
+			LocalDate from,
+			LocalDate to,
+			String clienteNome,
+			String clienteCognome,
+			String clienteEmail,
+			String tipoPagamento,
+			String tipoSpedizione,
+			String statoFattura,
+			Integer idOrdine,
+			List<String> isbns
+			) {
 		log.debug("Fattura list()");
-        List<Fattura> lF = fattR.findAll();
+		Specification<Fattura> spec = Specification
+				.where(FatturaSpecifications.dataEmissioneBetween(from, to))
+				.or(FatturaSpecifications.numeroFatturaLike(numeroFattura))
+				.or(FatturaSpecifications.clienteNomeLike(clienteNome))
+				.or(FatturaSpecifications.clienteEmailLike(clienteEmail))
+				.or(FatturaSpecifications.tipoPagamentoEquals(tipoPagamento))
+				.or(FatturaSpecifications.tipoSpedizioneEquals(tipoSpedizione))
+				.or(FatturaSpecifications.statoFatturaEquals(statoFattura))
+				.or(FatturaSpecifications.idOrdineEquals(idOrdine))
+				.or(FatturaSpecifications.idOrdineEquals(idOrdine))
+				.or(FatturaSpecifications.anyMangaIsbns(isbns));
+        List<Fattura> lF = fattR.findAll(spec);
         return lF.stream()
                 .map(f -> DtoBuilders.buildFatturaDTO(f, Optional.empty(), Optional.empty()))
                 .collect(Collectors.toList());
-
 	}
 
 	@Override
@@ -248,6 +272,8 @@ public class FatturaImplementation implements IFatturaServices{
 		return f;
 	}
 
+	// Trigger automatici quando statoOrdine SPEDITO -> CONSEGATO
+	// 					e quando ordine viene rimosso
 	@Transactional(rollbackFor = Exception.class)
 	public void createFromOrdine(Ordine o, Boolean toDel) throws MangaException {
 		Fattura f = new Fattura();
@@ -282,6 +308,7 @@ public class FatturaImplementation implements IFatturaServices{
 		rigfS.righeFatturaFromRigheOrdine(lR, f);
 	}
 
+	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void updateFromOrdine(Ordine o, Boolean toDel) throws MangaException {
@@ -292,7 +319,7 @@ public class FatturaImplementation implements IFatturaServices{
 		
 		if (fattR.existsByOrdineId(id)) {
             // fattura pre-created (account deleted before delivery)
-            // just update the emission date
+            // update the emission date
 			// check get new eventual account id
 			
             Fattura f = fattR.findByOrdineId(o.getId())
@@ -361,20 +388,9 @@ public class FatturaImplementation implements IFatturaServices{
         fattR.save(fat);
     }
 
-    private Fattura load(Integer id) {
-        return fattR.findById(id)
-            .orElseThrow(() -> new MangaException("!exists_fat"));
-    }
-
-    private void validateTransition(Fattura fat, String allowedFrom) {
-        String current = fat.getStatoFattura();
-        if (!Objects.equals(current, allowedFrom))
-            throw new MangaException("stato_fat_invalid");
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void checkRefund(Ordine o, Boolean toDel) throws MangaException {
+    public void rimborsaNonConsegnato(Ordine o, Boolean toDel) throws MangaException {
     	String current = o.getStato().getStatoOrdine();
     	// arrivo con update stato ordine-> cancellato
         // QUI ripristino copie solo se non spedito/consegnato
@@ -395,4 +411,16 @@ public class FatturaImplementation implements IFatturaServices{
         }
         // rimborso
     }
+
+    private Fattura load(Integer id) {
+        return fattR.findById(id)
+            .orElseThrow(() -> new MangaException("!exists_fat"));
+    }
+
+    private void validateTransition(Fattura fat, String allowedFrom) {
+        String current = fat.getStatoFattura();
+        if (!Objects.equals(current, allowedFrom))
+            throw new MangaException("stato_fat_invalid");
+    }
+
 }
