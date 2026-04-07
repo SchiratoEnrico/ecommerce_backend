@@ -42,7 +42,7 @@ public class AccountController {
 		Account loggedAccount = accountRepository.findByUsername(auth.getName()).orElse(null);
 		return loggedAccount != null && loggedAccount.getId().equals(targetAccountId);
 	}
-
+ 
 	//come il metodo sopra ma utilizza l'username piuttosto che l'id
 	private boolean isAdminOrOwnerByUsername(Authentication auth, String targetUsername) {
 		boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));

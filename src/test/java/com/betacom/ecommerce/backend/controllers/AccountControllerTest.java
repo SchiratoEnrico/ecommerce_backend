@@ -30,14 +30,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional // FONDAMENTALE: Fa il rollback del DB H2 dopo ogni test per evitare sovrapposizioni
+@Transactional //Fa il rollback del DB dopo ogni test 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AccountControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
-	// I servizi reali che ci servono per creare il Token
+	// I servizi  che ci servono per creare il Token
 	@Autowired
 	private JwtService jwtService; 
 
@@ -55,20 +55,16 @@ public class AccountControllerTest {
 				.build();
 	}
 
-	// ==========================================
-	// METODO MAGICO PER IL TOKEN
-	// ==========================================
+
+	// METODO  PER IL TOKEN
 	private String getBearerToken(String username) {
 		UserDetails user = userDetailsService.loadUserByUsername(username);
-		// Se il tuo metodo si chiama diversamente da "generateToken", cambialo qui:
 		String token = jwtService.generateToken(user.getUsername()); 
 		return "Bearer " + token;
 	}
 
 
-	// ==========================================
 	// TEST ENDPOINT PUBBLICI (Senza Autenticazione)
-	// ==========================================
 
 	@Test
 	public void createSuccess() throws Exception {
@@ -108,9 +104,8 @@ public class AccountControllerTest {
 	}
 
 
-	// ==========================================
-	// TEST ENDPOINT PRIVATI (Solo ADMIN)
-	// ==========================================
+
+	// TEST ENDPOINT PRIVATI ( ADMIN)
 
 	@Test
 	public void listSuccessAsAdmin() throws Exception {
