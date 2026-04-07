@@ -36,7 +36,7 @@ public class AutoreController {
 			autS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		
@@ -52,7 +52,7 @@ public class AutoreController {
 			autS.update(req);
 			r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		
@@ -112,7 +112,7 @@ public class AutoreController {
 	        autS.delete(id);
 	        r.setMsg(msgS.get("rest_deleted"));
 	    } catch (Exception e) {
-	        r.setMsg(e.getMessage());
+	    	r.setMsg(msgS.get(e.getMessage()));
 	        status = HttpStatus.BAD_REQUEST;
 	    }
 

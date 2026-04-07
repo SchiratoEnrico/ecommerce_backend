@@ -45,9 +45,12 @@ public class CarrelloImplementation implements ICarrelloServices{
 		Carrello car = new Carrello();
 		Account acc = accR.findById(req.getId_account())
 				.orElseThrow(() -> new MangaException("account_ntfnd"));
+		
 		acc.setCarrello(car);
 		car.setAccount(acc);
-		accR.save(acc);
+		
+		// basta salvare la relazione dal lato proprietario e siamo apposto
+		
 		return carR.save(car).getId();
 	}
 	
@@ -126,26 +129,21 @@ public class CarrelloImplementation implements ICarrelloServices{
 	@Override
 	public void delete(Integer id) throws MangaException {		
 		Carrello car = carR.findById(id)
-				.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
+				.orElseThrow(() -> new MangaException("carrello_ntfnd")); 
 		
 		Account acc = accR.findById(car.getAccount().getId())
 				.orElseThrow();
 		
 		acc.setCarrello(null);
 		car.setAccount(null);
-		car.getRigheCarrello().clear(); //oR
+		car.getRigheCarrello().clear(); 
 		
-//		List<RigaCarrello> lrC = car.getRigheCarrello();
-//		for(RigaCarrello c : lrC) {
-//			rcS.delete(c.getId());
-//		}
-//	
-//		accR.save(acc);		
 		carR.delete(car);
-		car = new Carrello();
-		car.setAccount(acc);
-		carR.save(car);
-
+		carR.flush(); // forza la delete nel db subito
+		
+		Carrello nuovoCarrello = new Carrello();
+		nuovoCarrello.setAccount(acc);
+		carR.save(nuovoCarrello);
 	}
 	 
 	@Override

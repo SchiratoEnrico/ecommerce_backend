@@ -85,7 +85,7 @@ public class AnagraficaController {
 		} catch (Exception e) {
 			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
-		}
+		} 
 		return ResponseEntity.status(status).body(r);
 	}
 

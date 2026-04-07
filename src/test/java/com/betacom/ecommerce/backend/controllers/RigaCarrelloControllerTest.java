@@ -1,207 +1,303 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+
+import com.betacom.ecommerce.backend.security.JwtService; 
 import com.betacom.ecommerce.backend.dto.inputs.RigaCarrelloRequest;
-import com.betacom.ecommerce.backend.dto.outputs.RigaCarrelloDTO;
-import com.betacom.ecommerce.backend.response.Response;
-import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
+@AutoConfigureMockMvc
+@Transactional // Rollback automatico del DB H2 dopo ogni test
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RigaCarrelloControllerTest {
+
 	@Autowired
-	private RigaCarrelloController rowC;
+	private MockMvc mockMvc;
+
 	@Autowired
-	private IMessagesServices msgS;
-	
+	private JwtService jwtService; 
+
+	@Autowired
+	private UserDetailsService userDetailsService;
+
+	private ObjectMapper objectMapper = new ObjectMapper();
+
+	// UTILITIES
+	private String getBearerToken(String username) {
+		UserDetails user = userDetailsService.loadUserByUsername(username);
+		String token = jwtService.generateToken(user.getUsername()); 
+		return "Bearer " + token;
+	}
+
+	private RigaCarrelloRequest buildRigaCarrelloRequest() {
+		RigaCarrelloRequest r = new RigaCarrelloRequest();
+		r.setCarrelloId(1); // Il carrello 1 appartiene a Mario Rossi nel data.sql
+		r.setManga("ISBN002");
+		r.setNumeroCopie(1);
+		return r;
+	}
+
+	// TEST ENDPOINT: CREATE
+
 	@Test
-	public void testRigaCarrelloController() {
-		createTest();
-		updateTest();
-		listTest();
-		findByIdTest();
-		deleteTest();
+	public void createSuccessOwner() throws Exception {
+		log.debug("Begin create RigaCarrello Test - Success");
+		String token = getBearerToken("MarioRossi"); 
+
+		RigaCarrelloRequest req = buildRigaCarrelloRequest();
+
+		mockMvc.perform(post("/rest/riga_carrello/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento creato con successo"));
 	}
 
-    private RigaCarrelloRequest getProva() {
-    	RigaCarrelloRequest r = new RigaCarrelloRequest();
-        r.setCarrelloId(1);
-        r.setManga("ISBN002");
-        r.setNumeroCopie(1);
-        return r;
-    }
-    	
-	public void listTest() {
-		log.debug("Start RigaCarrelloControllerTest.listTest()");
-		
-		ResponseEntity<?> resp = rowC.list(null, null, null);
+	@Test
+	public void createForbiddenNotOwner() throws Exception {
+		log.debug("Begin create RigaCarrello Test - Forbidden");
+		String token = getBearerToken("MarioRossi"); 
 
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isInstanceOf(List.class);
-		List<?> body = (List<?>) resp.getBody();
-		if (body.size() > 0) {
-			Assertions.assertThat(body.getFirst()).isInstanceOf(RigaCarrelloDTO.class);
-		}
+		RigaCarrelloRequest req = buildRigaCarrelloRequest();
+		req.setCarrelloId(99); // Mario non possiede il carrello 99
+
+		mockMvc.perform(post("/rest/riga_carrello/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.msg").value("Accesso negato."));
 	}
-	
-	public void findByIdTest() {
-		// Id error
-		Integer id = 99;
-		log.debug("Start RigaCarrelloControllerTest.findByIdTest(), error expected");
-		ResponseEntity<?> resp = rowC.findById(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get("!exists_rcr"), resp.getBody());
 
-		// Normal workflow
-		id = 1;
-		log.debug("Start RigaCarrelloControllerTest.findByIdTest()");
-		resp = rowC.findById(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isInstanceOf(RigaCarrelloDTO.class);
-		}
+	@Test
+	public void createErrorsCatch() throws Exception {
+		log.debug("Begin create RigaCarrello Test - Catch Errors");
+		String token = getBearerToken("AdminUser"); // Admin per bypassare il blocco controller e testare il service
 
-	public void createTest() {
-		// Normal workflow
-		String msg = "rest_created";
-		log.debug("Start RigaCarrelloControllerTest.createTest()");
-		RigaCarrelloRequest req = getProva();
-		ResponseEntity<Response> resp = rowC.create(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
-		
-		// null request: null_crq
-		msg = "null_crq";
-		resp = rowC.create(null);
-		log.debug("Start RigaCarrelloControllerTest.createTest(): error expected, RigaCarrelloRequest null");
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
-
-		// errore: id Carrello null
-		msg = "null_cri";
-		req = getProva();
+		// 1. Errore: CarrelloId null
+		RigaCarrelloRequest req = buildRigaCarrelloRequest();
 		req.setCarrelloId(null);
-		resp = rowC.create(req);
-		log.debug("Start RigaCarrelloControllerTest.createTest(): error expected, RigaCarrelloRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
-		
-		// errore: manga null
-		msg = "null_man";
-		req = getProva();
+		mockMvc.perform(post("/rest/riga_carrello/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Id carrello non può essere null"));
+
+		// 2. Errore: Manga null
+		req = buildRigaCarrelloRequest();
 		req.setManga(null);
-		resp = rowC.create(req);
-		log.debug("Start RigaCarrelloControllerTest.createTest(): error expected, RigaCarrelloRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+		mockMvc.perform(post("/rest/riga_carrello/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Manga assente"));
 
-		// errore: manga null
-		msg = "null_qua";
-		req = getProva();
-		req.setNumeroCopie(null);
-		resp = rowC.create(req);
-		log.debug("Start RigaCarrelloControllerTest.createTest(): error expected, RigaCarrelloRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
-
-		// errore: id Ordine non esistente
-		msg = "!exists_car";
-		req = getProva();
+		// 3. Errore: Carrello inesistente
+		req = buildRigaCarrelloRequest();
 		req.setCarrelloId(99);
-		resp = rowC.create(req);
-		log.debug("Start RigaCarrelloControllerTest.createTest(): error expected, RigaCarrelloRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
-		
-		// errore: ISBN invalido, !exsits_man
-		msg = "!exists_man";
-		req = getProva();
-		req.setManga("AAABBBB");
-		log.debug("Start RigaCarrelloControllerTest.createTest(): error expected, RigaCarrelloRequest\n\t\t\t{}", req);
-		resp = rowC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+		mockMvc.perform(post("/rest/riga_carrello/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Carrello non trovato")); 
+
+		// 4. Errore: Numero Copie 0
+		req = buildRigaCarrelloRequest();
+		req.setNumeroCopie(0);
+		mockMvc.perform(post("/rest/riga_carrello/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Quantità assente")); 
 	}
 
-	public void updateTest() {
-		// Normal workflow
-		String msg = "rest_updated";
-		RigaCarrelloRequest req = getProva();
-		req.setId(1);
-		req.setCarrelloId(null);
-		log.debug("Start RigaCarrelloControllerTest.updateTest(), req: {}", req);
-		ResponseEntity<Response> resp = rowC.update(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
 
-		// errore: id carrello != null
-		msg = "id_chng";
-		req = getProva();
-		req.setId(1);
-		log.debug("Start RigaCarrelloControllerTest.updateTest(): error expected, RigaCarrelloRequest {}", req);
-		resp = rowC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+	// TEST ENDPOINT: UPDATE
 
-		// errore: id sbagliato
-		msg = "!exists_rcr";
-		req = new RigaCarrelloRequest();
-		req.setId(100);
-		req.setCarrelloId(null);
-		resp = rowC.update(req);
-		log.debug("Start RigaCarrelloControllerTest.updateTest(): error expected, RigaCarrelloRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+	@Test
+	public void updateSuccessOwner() throws Exception {
+		log.debug("Begin update RigaCarrello Test - Success");
+		String token = getBearerToken("MarioRossi"); 
 
-		// errore: isbn non valido
-		msg = "!exists_man";
-		req = new RigaCarrelloRequest();
+		// La riga 1 appartiene al carrello 1 (Mario Rossi)
+		RigaCarrelloRequest req = buildRigaCarrelloRequest();
 		req.setId(1);
-		req.setCarrelloId(null);
-		req.setManga("WEWEWEW");
-		resp = rowC.update(req);
-		log.debug("Start RigaCarrelloControllerTest.updateTest(): error expected, RigaCarrelloRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get(msg));
+		req.setCarrelloId(null); // Importante per l'update del carrello, deve essere null
+		req.setNumeroCopie(5);
+
+		mockMvc.perform(put("/rest/riga_carrello/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento aggiornato con successo"));
 	}
-	
-	public void deleteTest() {
-		// errore: id non trovato in db/non valido
-		Integer id = 99;
-		log.debug("Start RigaCarrelloControllerTest.deleteTest(): error expected, invalid id: {}", id);
-		ResponseEntity<Response> resp = rowC.delete(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_rcr"));
+
+	@Test
+	public void updateZeroCopieTriggersDelete() throws Exception {
+		log.debug("Begin update RigaCarrello Test - Zero Copie (Delete)");
+		String token = getBearerToken("MarioRossi"); 
+
+		// Se passiamo copie = 0, il Service elimina la riga e il controller restituisce "rest_deleted"
+		RigaCarrelloRequest req = buildRigaCarrelloRequest();
+		req.setId(1);
+		req.setCarrelloId(null);
+		req.setNumeroCopie(0);
+
+		mockMvc.perform(put("/rest/riga_carrello/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento eliminato con successo"));
+	}
+
+	@Test
+	public void updateForbiddenNotOwner() throws Exception {
+		log.debug("Begin update RigaCarrello Test - Forbidden");
+		String token = getBearerToken("MarioRossi"); 
+
+		RigaCarrelloRequest req = buildRigaCarrelloRequest();
+		req.setId(99); // Riga inesistente / di un altro
+		req.setCarrelloId(null);
+
+		mockMvc.perform(put("/rest/riga_carrello/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.msg").value("Accesso negato."));
+	}
+
+	@Test
+	public void updateErrorsCatch() throws Exception {
+		log.debug("Begin update RigaCarrello Test - Catch Errors");
+		String token = getBearerToken("AdminUser"); 
+
+		// 1. Errore: Modifica del Carrello ID non permessa
+		RigaCarrelloRequest req = buildRigaCarrelloRequest();
+		req.setId(1);
+		req.setCarrelloId(2); // Farà scattare l'eccezione "id_chng"
 		
-		// Normal workflow
-		id = 1;
-		log.debug("Start RigaCarrelloControllerTest.deleteTest(), id: {}", id);
-		resp = rowC.delete(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
+		mockMvc.perform(put("/rest/riga_carrello/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Impossibile cambiare il carrello di una riga"));
+	}
+
+
+	// TEST ENDPOINT: DELETE
+
+	@Test
+	public void deleteSuccessOwner() throws Exception {
+		log.debug("Begin delete RigaCarrello Test - Success");
+		String token = getBearerToken("MarioRossi"); 
+
+		// Eliminiamo la riga 2 dal DB 
+		mockMvc.perform(delete("/rest/riga_carrello/delete/2").with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento eliminato con successo"));
+	}
+
+	@Test
+	public void deleteForbiddenNotOwner() throws Exception {
+		log.debug("Begin delete RigaCarrello Test - Forbidden");
+		String token = getBearerToken("MarioRossi"); 
+
+		mockMvc.perform(delete("/rest/riga_carrello/delete/99").with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.msg").value("Accesso negato."));
+	}
+
+	@Test
+	public void deleteErrorNotExists() throws Exception {
+		log.debug("Begin delete RigaCarrello Test - Error Not Exists");
+		String token = getBearerToken("AdminUser"); // Usiamo Admin per arrivare al catch
+
+		mockMvc.perform(delete("/rest/riga_carrello/delete/99").with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Riga carrello non trovata"));
+	}
+
+
+	// TEST ENDPOINT: RECUPERO DATI
+
+	@Test
+	public void findByIdSuccessOwner() throws Exception {
+		log.debug("Begin findById RigaCarrello test - Success");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/riga_carrello/findById").param("id", "1")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(1));
+	}
+
+	@Test
+	public void findByIdForbiddenNotOwner() throws Exception {
+		log.debug("Begin findById RigaCarrello test - Forbidden");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/riga_carrello/findById").param("id", "99")
+				.header("Authorization", token))
+				.andExpect(status().isForbidden())
+				.andExpect(content().string("Accesso negato."));
+	}
+
+	@Test
+	public void listSuccessOwner() throws Exception {
+		log.debug("Begin list RigaCarrello test - Success");
+		String token = getBearerToken("MarioRossi"); 
+
+		// Mario può listare le righe solo se passa esplicitamente il SUO chartId
+		mockMvc.perform(get("/rest/riga_carrello/list").param("chartId", "1")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray());
+	}
+
+	@Test
+	public void listForbiddenMissingChartId() throws Exception {
+		log.debug("Begin list RigaCarrello test - Forbidden (Missing chartId)");
+		String token = getBearerToken("MarioRossi"); 
+
+		// Mario prova a fare list senza chartId (potenziale rischio dati altrui)
+		mockMvc.perform(get("/rest/riga_carrello/list")
+				.header("Authorization", token))
+				.andExpect(status().isForbidden())
+				.andExpect(content().string("Accesso negato.")); 
 	}
 }

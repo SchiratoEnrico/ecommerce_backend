@@ -1,207 +1,266 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.betacom.ecommerce.backend.security.JwtService; 
 import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
-import com.betacom.ecommerce.backend.dto.outputs.AutoreDTO;
-import com.betacom.ecommerce.backend.services.interfaces.IAutoreServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional // FONDAMENTALE: Fa il rollback del DB H2 dopo ogni test
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AutoreControllerTest {
-	@Autowired
-    private AutoreController autC;
-	
-	@MockitoSpyBean
-	private IAutoreServices	autS;
 
-	@Test
-	public void testAutoreController() throws Exception{
-		listById();
-		listByFilters();
-		create();
-		update();
-		delete();
-		list();
+	@Autowired
+	private MockMvc mockMvc;
+
+	@Autowired
+	private JwtService jwtService; 
+ 
+	@Autowired
+	private UserDetailsService userDetailsService;
+
+	// Inizializziamo l'ObjectMapper col modulo per le date (LocalDate), essenziale per Autore
+	private ObjectMapper objectMapper = new ObjectMapper()
+			.registerModule(new JavaTimeModule())
+			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+
+	// UTILITIES
+
+	private String getBearerToken(String username) {
+		UserDetails user = userDetailsService.loadUserByUsername(username);
+		String token = jwtService.generateToken(user.getUsername()); 
+		return "Bearer " + token;
 	}
 
-	public void list() throws Exception{
-        log.debug("start list autori test");
-
-        ResponseEntity<?> resp = autC.list();
-		Assertions.assertThat(resp.getBody()).isInstanceOf(List.class);
-
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        Object b = resp.getBody();
-		Assertions.assertThat(b).isInstanceOf(List.class);
-		assertThat(((List<?>) b).size()).isGreaterThan(0);
-		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(AutoreDTO.class);
-        assertNotNull(resp.getBody());
-        
-        String error = "generic error";
-        doThrow(new RuntimeException(error)).when(autS).list();
-        resp = autC.list();
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-    }
-
-    public void listById() {
-        log.debug("start list autore by id test");
-
-        ResponseEntity<?> resp = autC.findById(1);
- 
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-
-        Object b = (AutoreDTO) resp.getBody();
-        Assertions.assertThat(b).isInstanceOf(AutoreDTO.class);
-        AutoreDTO a = (AutoreDTO) b;
-        assertNotNull(a);
+	private AutoreRequest buildAutoreRequest() {
+		return AutoreRequest.builder()
+				.nome("Hajime")
+				.cognome("Isayama")
+				.dataNascita(LocalDate.of(1986, 8, 29))
+				.descrizione("Autore di Attack on Titan")
+				.build();
+	}
 
 
-        assertNotNull(a.getId());
-        assertNotNull(a.getNome());
-        assertNotNull(a.getCognome());
-        assertNotNull(a.getDescrizione());
-        assertNotNull(a.getDataNascita());
+	// TEST ENDPOINT: CREATE (Solo ADMIN)
 
-        // test errore id inesistente
-        resp = autC.findById(99);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-    }
-    
-    public void listByFilters() {
-        log.debug("start list autore by filters test");
+	@Test
+	public void createSuccessAsAdmin() throws Exception {
+		log.debug("Begin create Autore Test - Success as Admin");
+		String token = getBearerToken("AdminUser"); 
 
-        ResponseEntity<?> resp = autC.findByFilters("Akira", null);
- 
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
+		AutoreRequest req = buildAutoreRequest();
 
-        Object b = (AutoreDTO) resp.getBody();
-        Assertions.assertThat(b).isInstanceOf(AutoreDTO.class);
-        AutoreDTO a = (AutoreDTO) b;
-        assertNotNull(a);
+		mockMvc.perform(post("/rest/autore/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento creato con successo"));
+	}
+
+	@Test
+	public void createForbiddenAsUser() throws Exception {
+		log.debug("Begin create Autore Test - Forbidden as User");
+		String token = getBearerToken("MarioRossi"); 
+
+		AutoreRequest req = buildAutoreRequest();
+
+		mockMvc.perform(post("/rest/autore/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	public void createErrorDuplicateCatch() throws Exception {
+		log.debug("Begin create Autore Test - Error Duplicate");
+		String token = getBearerToken("AdminUser"); 
+
+		// 1. Creiamo un nuovo autore tramite API 
+		AutoreRequest req = AutoreRequest.builder()
+				.nome("Kentaro")
+				.cognome("Miura")
+				.dataNascita(LocalDate.of(1966, 7, 11))
+				.descrizione("Autore di Berserk")
+				.build();
+
+		mockMvc.perform(post("/rest/autore/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk()); // La prima volta deve funzionare
+
+		// 2. Ripetiamo ESATTAMENTE la stessa chiamata
+		mockMvc.perform(post("/rest/autore/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Autore già presente")); 
+	}
 
 
-        assertNotNull(a.getId());
-        assertNotNull(a.getNome());
-        assertNotNull(a.getCognome());
-        assertNotNull(a.getDescrizione());
-        assertNotNull(a.getDataNascita());
-        
-    }
+	// TEST ENDPOINT: UPDATE (Solo ADMIN)
 
-    public void create() {
-        log.debug("start create autore test");
+	@Test
+	public void updateSuccessAsAdmin() throws Exception {
+		log.debug("Begin update Autore test - Success as Admin");
+		String token = getBearerToken("AdminUser");
 
-        AutoreRequest req = new AutoreRequest();
-        req.setNome(" Hirohiko ");
-        req.setCognome(" Araki ");
-        req.setDataNascita(LocalDate.of(1960,06,07));
-        req.setDescrizione(" Le bizzarre avventure di JoJo ");
+		// Modifichiamo l'autore 1 (Akira Toriyama)
+		AutoreRequest req = AutoreRequest.builder()
+				.id(1)
+				.nome("Akira")
+				.cognome("Toriyama")
+				.dataNascita(LocalDate.of(1955, 4, 5))
+				.descrizione("Nuova descrizione aggiornata")
+				.build();
 
-        ResponseEntity<?> resp = autC.create(req);
+		mockMvc.perform(put("/rest/autore/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento aggiornato con successo"));
+	}
 
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
+	@Test
+	public void updateForbiddenAsUser() throws Exception {
+		log.debug("Begin update Autore test - Forbidden as User");
+		String token = getBearerToken("MarioRossi");
 
-        // assumendo che l'autore creato prenda id=3
-        resp = autC.findById(3);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
+		AutoreRequest req = buildAutoreRequest();
+		req.setId(1);
 
-        AutoreDTO a = (AutoreDTO) resp.getBody();
-        assertNotNull(a);
-        assertEquals("HIROHIKO", a.getNome());
-        assertEquals("ARAKI", a.getCognome());
-        assertEquals("LE BIZZARRE AVVENTURE DI JOJO", a.getDescrizione());
-        assertEquals(LocalDate.of(1960, 6, 7), a.getDataNascita());
+		mockMvc.perform(put("/rest/autore/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isForbidden());
+	}
 
-        // errore duplicazione
-        ResponseEntity<?> resp1 = autC.create(req);
-        assertEquals(HttpStatus.BAD_REQUEST, resp1.getStatusCode());
-    }
+	
+	// TEST ENDPOINT: DELETE (Solo ADMIN)
 
-    public void update() {
-        log.debug("start update autore test");
+	@Test
+	public void deleteSuccessReal() throws Exception {
+		log.debug("Begin delete Autore test - Real Lifecycle");
+		String adminToken = getBearerToken("AdminUser");
 
-        // creo prima un autore che userò per il test di duplicazione
-        AutoreRequest createReq = new AutoreRequest();
-        createReq.setNome(" Naoki ");
-        createReq.setCognome(" Urasawa ");
-        createReq.setDataNascita(LocalDate.of(1960, 01, 02));
-        createReq.setDescrizione(" autore seinen ");
-        autC.create(createReq);
+		// 1. Creiamo un autore  (senza manga collegati)
+		AutoreRequest req = buildAutoreRequest();
+		mockMvc.perform(post("/rest/autore/create").with(csrf())
+				.header("Authorization", adminToken)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk());
 
-        // update corretto sull'autore con id=1
-        AutoreRequest req = new AutoreRequest();
-        req.setId(1);
-        req.setNome(" Akira ");
-        req.setDescrizione(" autore aggiornato ");
+		// 2. Lo cerchiamo tramite findByFilters per ottenerne l'ID
+		String responseBody = mockMvc.perform(get("/rest/autore/findByFilters")
+				.param("nome", "Hajime")
+				.param("cognome", "Isayama")
+				.header("Authorization", adminToken))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+				
+		com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(responseBody);
+		Integer idDaCancellare = rootNode.get(0).path("id").asInt();
 
-        ResponseEntity<?> resp = autC.update(req);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
+		// 3. Eseguiamo la DELETE 
+		mockMvc.perform(delete("/rest/autore/delete").param("id", idDaCancellare.toString()).with(csrf())
+				.header("Authorization", adminToken))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento eliminato con successo"));
+	}
 
-        resp = autC.findById(1);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
+	@Test
+	public void deleteForbiddenAsUser() throws Exception {
+		log.debug("Begin delete Autore test - Forbidden as User");
+		String token = getBearerToken("MarioRossi");
 
-        AutoreDTO a = (AutoreDTO) resp.getBody();
-        assertNotNull(a);
-        assertEquals("AKIRA", a.getNome());
-        assertEquals("AUTORE AGGIORNATO", a.getDescrizione());
+		mockMvc.perform(delete("/rest/autore/delete").param("id", "1").with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isForbidden());
+	}
 
-        // update errore id inesistente
-        req = new AutoreRequest();
-        req.setId(99);
-        req.setNome(" Test ");
-        resp = autC.update(req);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+	@Test
+	public void deleteErrorLinkedMangaCatch() throws Exception {
+		log.debug("Begin delete Autore test - Linked Manga Error");
+		String token = getBearerToken("AdminUser");
 
-        // update errore duplicato
-        // supponendo che l'autore creato sopra abbia id=3
-        req = new AutoreRequest();
-        req.setId(1);
-        req.setNome("NAOKI");
-        req.setCognome("URASAWA");
-        req.setDataNascita(LocalDate.of(1960, 01, 02));
+		// Proviamo a cancellare l'Autore 1 che ha un manga collegato (ISBN002 nel data.sql)
+		mockMvc.perform(delete("/rest/autore/delete").param("id", "1").with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Elemento collegato a manga: eliminazione bloccata")); 
+	}
 
-        resp = autC.update(req);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 
-        // update errore request null
-        resp = autC.update(null);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-    }
+	// TEST ENDPOINT: RECUPERO DATI (Pubblici/Utenti Autenticati)
 
-    public void delete() {
-        log.debug("start delete autore test");
+	@Test
+	public void listSuccess() throws Exception {
+		log.debug("Begin list() Autore test - Success");
+		String token = getBearerToken("MarioRossi"); // Accessibile a tutti 
 
-        // delete a buon fine
-        // assumendo che id=3 sia l'autore creato in update e non collegato a manga
-        ResponseEntity<?> resp = autC.delete(3);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
+		mockMvc.perform(get("/rest/autore/list")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray());
+	}
 
-        // delete id inesistente
-        resp = autC.delete(99);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+	@Test
+	public void findByIdSuccess() throws Exception {
+		log.debug("Begin findById Autore test - Success");
+		String token = getBearerToken("MarioRossi");
 
-        // delete autore collegato a manga
-        // assumendo che id=1 sia collegato a un manga nel db di test
-        resp = autC.delete(1);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-    }
+		mockMvc.perform(get("/rest/autore/findById").param("id", "1")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(1))
+				.andExpect(jsonPath("$.nome").value("Akira"));
+	}
+
+	@Test
+	public void findByFiltersSuccess() throws Exception {
+		log.debug("Begin findByFilters Autore test - Success");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/autore/findByFilters")
+				.param("nome", "Eiichiro")
+				.param("cognome", "Oda")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray())
+				.andExpect(jsonPath("$[0].nome").value("Eiichiro"));
+	}
 }

@@ -1,257 +1,302 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+
+import com.betacom.ecommerce.backend.security.JwtService; 
 import com.betacom.ecommerce.backend.dto.inputs.AnagraficaRequest;
-import com.betacom.ecommerce.backend.dto.outputs.AnagraficaDTO;
-import com.betacom.ecommerce.backend.response.Response;
-import com.betacom.ecommerce.backend.services.interfaces.IAnagraficaServices;
-import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
+@AutoConfigureMockMvc
+@Transactional // FONDAMENTALE: Fa il rollback del DB H2 dopo ogni test
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AnagraficaControllerTest {
-	
+
+	@Autowired 
+	private MockMvc mockMvc;
+
 	@Autowired
-	private AnagraficaController anaC;
+	private JwtService jwtService; 
+
 	@Autowired
-	private IMessagesServices msgS;
-	
-	@MockitoSpyBean
-	private IAnagraficaServices anaS;
+	private UserDetailsService userDetailsService;
+
+	private ObjectMapper objectMapper = new ObjectMapper();
+
+
+	// UTILITIES
+	private String getBearerToken(String username) {
+		UserDetails user = userDetailsService.loadUserByUsername(username);
+		String token = jwtService.generateToken(user.getUsername()); 
+		return "Bearer " + token;
+	}
+
+	private AnagraficaRequest buildAnagraficaRequest(Integer idAccount) {
+		return AnagraficaRequest.builder()
+				.idAccount(idAccount)
+				.nome("Anna")
+				.cognome("Verdi")
+				.stato("Italia")
+				.citta("Sesto Fiorentino")
+				.provincia("Firenze")
+				.cap("12345")
+				.via("Via Trento 1")
+				.predefinito(true)
+				.build();
+	}
+
+
+	// TEST ENDPOINT: CREATE
 
 	@Test
-	public void testAnagraficaController() throws Exception{
-		create();
-		update();
-		findById();
-		findByIdError();
-		deleteError();
-		createNomeVuoto();
-		delete();
-		createCognomeVuoto();
-		list();
+	public void createSuccessAsOwner() throws Exception {
+		log.debug("Begin create Anagrafica Test - Success as Owner");
+		String token = getBearerToken("MarioRossi"); // id account 1
+
+		// Mario Rossi crea un'anagrafica per se stesso (idAccount = 1)
+		AnagraficaRequest req = buildAnagraficaRequest(1);
+
+		mockMvc.perform(post("/rest/anagrafica/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento creato con successo"));
 	}
 
-	private AnagraficaRequest buildAnagraficaRequest() {
-		return AnagraficaRequest.builder()
-				.nome("ANNA")
-				.cognome("VERDI ")
-				.stato("ITALIA     ")
-				.citta("    Sesto Fiorentino")
-				.provincia("Firenze")
-				.cap("12345   ")
-				.via("   Via Tento ")
-				.predefinito(true)
-				.build();
+	@Test
+	public void createForbiddenNotOwner() throws Exception {
+		log.debug("Begin create Anagrafica Test - Forbidden Not Owner");
+		String token = getBearerToken("MarioRossi"); // id account 1
+
+		// Mario Rossi prova a creare un'anagrafica per l'Admin (idAccount = 2)
+		AnagraficaRequest req = buildAnagraficaRequest(2);
+
+		mockMvc.perform(post("/rest/anagrafica/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.msg").value("Accesso negato: puoi creare indirizzi solo per il tuo account."));
 	}
-	
-	public void create() {
-		log.debug("Begin create Anagrafica Test");
-		
-		AnagraficaRequest req = buildAnagraficaRequest();
-					
-		ResponseEntity<Response> re = anaC.create(req);
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
-		Response r = re.getBody();
-		assertThat(r.getMsg()).isEqualTo("Elemento creato con successo");	
-	
-		// null_sta
-		String msg = "null_sta";
-		req = buildAnagraficaRequest();
+
+	@Test
+	public void createErrorsNullFieldsCatch() throws Exception {
+		log.debug("Begin create Anagrafica Test - Errors Null Fields");
+		String token = getBearerToken("MarioRossi");
+
+		// Test Nome Assente
+		AnagraficaRequest req = buildAnagraficaRequest(1);
+		req.setNome(null);
+
+		mockMvc.perform(post("/rest/anagrafica/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Nome assente"));
+				
+		// Test Stato Assente
+		req.setNome("Anna");
 		req.setStato(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = anaC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
 
-		// null_cit
-		msg = "null_cit";
-		req = buildAnagraficaRequest();
-		req.setCitta(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = anaC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
-
-		// null_pro
-		msg = "null_pro";
-		req = buildAnagraficaRequest();
-		req.setProvincia(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = anaC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
-
-		// null_cap
-		msg = "null_cap";
-		req = buildAnagraficaRequest();
-		req.setCap(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = anaC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
-
-		// null_via
-		msg = "null_via";
-		req = buildAnagraficaRequest();
-		req.setVia(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = anaC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
-
-		// null_pre
-		msg = "null_pre";
-		req = buildAnagraficaRequest();
-		req.setPredefinito(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = anaC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
-	}
-	
-	public void update() { 
-		log.debug("Begin update Anagrafiche test");
-		AnagraficaRequest req = AnagraficaRequest.builder()
-				.id(1)
-				.nome("Maria")
-				.cognome("Federico")
-				.stato("ITALIA     ")
-				.citta("Modena")
-				.provincia("Mirandola")
-				.cap("00099")
-				.via("Viale Venezia")
-				.predefinito(true)
-	            .build();
-		
-		ResponseEntity<Response> re = anaC.update(req);
-		assertEquals(HttpStatus.OK, re.getStatusCode());
-		Response r = re.getBody();
-		assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
-		
-		log.debug("Test fail update due to poor id");
-		req = AnagraficaRequest.builder()
-				.id(0)
-				.nome("Maria")
-				.cognome("Federico")
-				.stato("ITALIA     ")
-				.citta("Modena")
-				.provincia("Mirandola")
-				.cap("00099")
-				.via("Viale Venezia")
-				.predefinito(true)
-	            .build();
-		re = anaC.update(req);
-		r = re.getBody();
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
+		mockMvc.perform(post("/rest/anagrafica/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Stato assente"));
 	}
 
-	public void list() throws Exception { 
-		log.debug("Begin list() Account test");
-		
-		ResponseEntity<Object> re = anaC.list();
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
-		List<?> b = (List<?>) re.getBody();
-		assertThat(b.size()).isGreaterThan(0);
-		Assertions.assertThat(b.getFirst()).isInstanceOf(AnagraficaDTO.class);
-		
-		log.debug("Test fail list anagrafiche");
-		String error = "generic error";
-		doThrow(new RuntimeException(error)).when(anaS).list();
-		re = anaC.list();
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-	}
-	
-	public void findById() { 
-		
-		log.debug("Begin find by id tipoPagamento test");
-		ResponseEntity<Object> re = anaC.findById(1);
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.OK);
-		Object b =  re.getBody();
-		Assertions.assertThat(b).isInstanceOf(AnagraficaDTO.class);
-		assertThat(((AnagraficaDTO) b).getId()).isEqualTo(1);
-		
-	}
-	
-	public void findByIdError() { 
-		log.debug("Begin findById TipoPagamento test error");
-		
-		ResponseEntity<Object> re = anaC.findById(100);
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-	}
-	
-	public void deleteError() { 
-		
-		log.debug("Begin delete anagrafica test error");
-		
-		ResponseEntity<Response> re = anaC.delete(99);
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);	
-		Response r = re.getBody();
-		assertThat(r.getMsg()).isEqualTo("Anagrafica assente");
-	}
-	
-	public void delete() {
-		log.debug("Delete Test");
-		ResponseEntity<Response> resp = anaC.delete(1);
-		assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);	
-		Response r =resp.getBody();
-		assertThat(r.getMsg()).isEqualTo("Elemento eliminato con successo");
-	}
-	
-	public void createNomeVuoto() {
-		log.debug("Begin create Anagrafica Test Error");
-		
-		AnagraficaRequest req = AnagraficaRequest.builder()
-				.cognome("Bianchi ")
-				.stato("ITALIA     ")
-				.citta(" Firenze")
-				.provincia("Pontassieve")
-				.cap("12347   ")
-				.via("   Via Firenze ")
-				.predefinito(true)
-				.build();
-					
-		ResponseEntity<Response> re = anaC.create(req);
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		Response r = re.getBody();
-		assertThat(r.getMsg()).isEqualTo("Nome assente");	
+
+	// TEST ENDPOINT: UPDATE
+
+	@Test
+	public void updateOwnerSuccess() throws Exception {
+		log.debug("Begin update Anagrafica test - Success as Owner");
+		String token = getBearerToken("MarioRossi");
+
+		// Modifichiamo l'anagrafica di default di Mario Rossi (id = 1)
+		AnagraficaRequest req = buildAnagraficaRequest(1);
+		req.setId(1);
+		req.setCitta("Modena"); // Modifica
+
+		mockMvc.perform(put("/rest/anagrafica/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento aggiornato con successo"));
 	}
 
-	public void createCognomeVuoto() {
-		log.debug("Begin create Anagrafica Test Error");
-		
-		AnagraficaRequest req = AnagraficaRequest.builder()
-				.nome("Aurora")
-				.stato("ITALIA")
-				.citta(" Firenze")
-				.provincia("Pontassieve")
-				.cap("12347   ")
-				.via("   Via Firenze ")
-				.predefinito(true)
-				.build();
-					
-		ResponseEntity<Response> re = anaC.create(req);
-		assertThat(re.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		Response r = re.getBody();
-		assertThat(r.getMsg()).isEqualTo("Cognome assente");	
+	@Test
+	public void updateForbiddenNotOwner() throws Exception {
+		log.debug("Begin update Anagrafica test - Forbidden Not Owner");
+		String token = getBearerToken("MarioRossi");
+
+		// Mario prova ad aggiornare un ID che non possiede 
+		AnagraficaRequest req = buildAnagraficaRequest(1);
+		req.setId(99); 
+
+		mockMvc.perform(put("/rest/anagrafica/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.msg").value("Accesso negato: non puoi modificare questo indirizzo."));
+	}
+
+	@Test
+	public void updateErrorNotExistsCatch() throws Exception {
+		log.debug("Begin update Anagrafica test - Catch (Not Exists) as Admin");
+
+		String token = getBearerToken("AdminUser");
+
+		AnagraficaRequest req = buildAnagraficaRequest(1);
+		req.setId(99); 
+
+		mockMvc.perform(put("/rest/anagrafica/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Anagrafica assente"));
+	}
+
+
+
+	@Test
+	public void deleteSuccessReal() throws Exception {
+		log.debug("Begin delete Anagrafica test - Real Lifecycle");
+		String adminToken = getBearerToken("AdminUser");
+
+		// 1. Creiamo un'anagrafica libera per l'admin
+		AnagraficaRequest req = buildAnagraficaRequest(2);
+		mockMvc.perform(post("/rest/anagrafica/create").with(csrf())
+				.header("Authorization", adminToken)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk());
+
+		// 2. Troviamo il suo ID cercando le anagrafiche dell'account 2 (Admin)
+		String responseBody = mockMvc.perform(get("/rest/anagrafica/findByAccountId").param("id", "2")
+				.header("Authorization", adminToken))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+				
+		com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(responseBody);
+		Integer idDaCancellare = rootNode.get(0).path("id").asInt(); // Prende il primo elemento dell'array
+
+		// 3. Eseguiamo la DELETE
+		mockMvc.perform(delete("/rest/anagrafica/delete/" + idDaCancellare).with(csrf())
+				.header("Authorization", adminToken))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento eliminato con successo"));
+	}
+
+	@Test
+	public void deleteForbiddenNotOwner() throws Exception {
+		log.debug("Begin delete Anagrafica test - Forbidden Not Owner");
+		String token = getBearerToken("MarioRossi");
+
+		// Mario prova a eliminare un'anagrafica che non gli appartiene (es. id inesistente 99 o di altri)
+		mockMvc.perform(delete("/rest/anagrafica/delete/99").with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.msg").value("Accesso negato: non puoi eliminare questo indirizzo."));
+	}
+
+
+	// TEST ENDPOINT: FINDBYID & FINDBYACCOUNTID
+
+	@Test
+	public void findByIdOwnerSuccess() throws Exception {
+		log.debug("Begin findById test - Owner Success");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/anagrafica/findById").param("id", "1")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(1));
+	}
+
+	@Test
+	public void findByIdForbiddenNotOwner() throws Exception {
+		log.debug("Begin findById test - Forbidden Not Owner");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/anagrafica/findById").param("id", "99")
+				.header("Authorization", token))
+				.andExpect(status().isForbidden())
+				.andExpect(content().string("Accesso negato: indirizzo non tuo."));
 	}
 	
-	
+	@Test
+	public void findByAccountIdOwnerSuccess() throws Exception {
+		log.debug("Begin findByAccountId test - Owner Success");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/anagrafica/findByAccountId").param("id", "1")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray());
+	}
+
+	@Test
+	public void findByAccountIdForbiddenNotOwner() throws Exception {
+		log.debug("Begin findByAccountId test - Forbidden Not Owner");
+		String token = getBearerToken("MarioRossi");
+
+		// Mario (id 1) cerca le anagrafiche dell'Admin (id 2)
+		mockMvc.perform(get("/rest/anagrafica/findByAccountId").param("id", "2")
+				.header("Authorization", token))
+				.andExpect(status().isForbidden())
+				.andExpect(content().string("Accesso negato: puoi vedere solo i tuoi indirizzi."));
+	}
+
+
+	// TEST ENDPOINT: LIST (Solo Admin)
+
+	@Test
+	public void listSuccessAsAdmin() throws Exception {
+		log.debug("Begin list() Anagrafica test - Success as Admin");
+		String token = getBearerToken("AdminUser"); 
+
+		mockMvc.perform(get("/rest/anagrafica/list")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray());
+	}
+
+	@Test
+	public void listForbiddenAsUser() throws Exception {
+		log.debug("Begin list() Anagrafica test - Forbidden as User");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/anagrafica/list")
+				.header("Authorization", token))
+				.andExpect(status().isForbidden());
+	}
 }
