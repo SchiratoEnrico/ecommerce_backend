@@ -1,6 +1,8 @@
 package com.betacom.ecommerce.backend.controllers;
 
 import java.security.Principal;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.RequiredArgsConstructor;
+
+// Qui tutti endpoint admin-only tranne findById
 
 @RequiredArgsConstructor
 @RestController
@@ -81,33 +85,42 @@ public class FatturaController {
 	
 	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping ("/list")
-	public ResponseEntity<Object> list(){
+	public ResponseEntity<Object> list(
+			String numeroFattura,
+			LocalDate from,
+			LocalDate to,
+			String clienteNome,
+			String clienteCognome,
+			String clienteEmail,
+			String tipoPagamento,
+			String tipoSpedizione,
+			String statoFattura,
+			Integer idOrdine,
+			List<String> isbns
+			){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-            r = fattS.list();
+            r = fattS.list(
+        			numeroFattura,
+        			from,
+        			to,
+        			clienteNome,
+        			clienteCognome,
+        			clienteEmail,
+        			tipoPagamento,
+        			tipoSpedizione,
+        			statoFattura,
+        			idOrdine,
+        			isbns
+            		);
         } catch (Exception e) {
             r = msgS.get(e.getMessage());
             status = HttpStatus.BAD_REQUEST;
         }
         return ResponseEntity.status(status).body(r);
 	}
-	
-	@PreAuthorize("hasAuthority('ADMIN')")
-	@GetMapping("/findById")
-    public ResponseEntity<Object> findById(@RequestParam(required = true) Integer id) {
-		Object r = new Object();
-        HttpStatus status = HttpStatus.OK;
-
-        try {
-            r = fattS.findById(id);
-        } catch (Exception e) {
-            r = msgS.get(e.getMessage());
-            status = HttpStatus.BAD_REQUEST;
-        }
-        return ResponseEntity.status(status).body(r);
-    }
-	
+		
 	//ENDPOINT SOLO ADMIN
 
 	@PreAuthorize("hasAuthority('ADMIN')")
@@ -199,6 +212,30 @@ public class FatturaController {
         }
         return ResponseEntity.status(status).body(r);
     }
+	
+	@GetMapping("/findById")
+    public ResponseEntity<Object> findById(@RequestParam(required = true) Integer idFattura, @RequestParam(required = true) Integer accountId, Authentication auth, Principal principal) {
+		Object r = new Object();
+        HttpStatus status = HttpStatus.OK;
+
+        // BLOCCO DI SICUREZZA
+        //qui l'id che arriva dal frontend è l'id dell'account
+        //bisogna controllare che quindi questo id corrisponda all'id dell'utente loggato che sta facendo la richiesta
+        // msg: !auth_fat: Accesso negato: puoi visualizzare solo le fatture del tuo account.
+        if (!isAdminOrOwner(auth, principal, accountId)) {
+        	((Response) r).setMsg(msgS.get("!auth_fat"));
+        		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+        }
+
+        try {
+            r = fattS.findById(idFattura);
+        } catch (Exception e) {
+            r = msgS.get(e.getMessage());
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(r);
+    }
+
 
 	private boolean isAdminOrOwner(Authentication auth, Principal principal, Integer targetAccountId) {
 		// Se ha il ruolo ADMIN, passa sempre

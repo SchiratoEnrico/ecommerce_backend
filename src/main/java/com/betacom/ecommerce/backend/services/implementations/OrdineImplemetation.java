@@ -169,7 +169,7 @@ public class OrdineImplemetation implements IOrdineServices{
                 fattS.updateFromOrdine(o, true);
             	}
             case "CANCELLATO"  -> {
-                	fattS.checkRefund(o, false);
+                	fattS.rimborsaNonConsegnato(o, null);
             	}
             case "RICHIESTA_RESO" -> {
                 assertTransition(current, "CONSEGNATO");

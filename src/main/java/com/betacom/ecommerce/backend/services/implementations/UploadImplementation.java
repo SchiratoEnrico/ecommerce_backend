@@ -219,7 +219,6 @@ public class UploadImplementation implements IUploadServices{
 		    log.info("image file not found/valid: {}", filePath.toAbsolutePath());
 	        return null;
 	    }
-
 		return ServletUriComponentsBuilder.fromCurrentContextPath() // parte iniziale path: localhost ...
 				.path("uploads/")
 				.path(filename) // aggiunta filename
