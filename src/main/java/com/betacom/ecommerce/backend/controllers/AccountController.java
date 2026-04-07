@@ -158,7 +158,7 @@ public class AccountController {
 		// Blocco Sicurezza
 		if (!isAdminOrOwnerById(auth, id)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accesso negato: non puoi vedere i dati di altri utenti.");
-		}
+		} 
 
 		try {
 			r = accS.findById(id);
