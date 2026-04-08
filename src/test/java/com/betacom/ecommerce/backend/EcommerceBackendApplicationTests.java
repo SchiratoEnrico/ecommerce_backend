@@ -12,6 +12,7 @@ import com.betacom.ecommerce.backend.controllers.CarrelloControllerTest;
 import com.betacom.ecommerce.backend.controllers.CasaEditriceControllerTest;
 import com.betacom.ecommerce.backend.controllers.FatturaControllerTest;
 import com.betacom.ecommerce.backend.controllers.GenereControllerTest;
+import com.betacom.ecommerce.backend.controllers.ImageControllerTest;
 import com.betacom.ecommerce.backend.controllers.MangaControllerTest;
 import com.betacom.ecommerce.backend.controllers.OrdineControllerTest;
 import com.betacom.ecommerce.backend.controllers.RigaCarrelloControllerTest;
@@ -40,7 +41,8 @@ import com.betacom.ecommerce.backend.controllers.TipoSpedizioneControllerTest;
 	FatturaControllerTest.class,
 	RigaFatturaControllerTest.class,
 	RigaCarrelloControllerTest.class,
-	SagaControllerTest.class
+	SagaControllerTest.class,
+	ImageControllerTest.class
 })
 
 

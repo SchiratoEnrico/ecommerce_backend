@@ -25,10 +25,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
 import com.betacom.ecommerce.backend.dto.inputs.StatoOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
-import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.fasterxml.jackson.databind.ObjectMapper;

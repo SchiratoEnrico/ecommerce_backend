@@ -225,10 +225,21 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
 		if (lO.size()>0) {
 			List<RigaFattura> lF =  lO.stream()
 				.map(ro -> saveOrUpdateFromRigaOrdine(ro, f))
-				.toList();
-			f.setRighe(lF);			
-			Utils.ricalcolaTotale(f);
-			fattR.saveAndFlush(f);
+				.collect(Collectors.toList());
+
+			List<String> newIsbns = lF.stream()
+		            .map(rf -> rf.getIsbn())
+		            .toList();
+	        List<RigaFattura> toKeep = f.getRighe().stream()
+	                .filter(rf -> !newIsbns.contains(rf.getIsbn()))
+	                .collect(Collectors.toList());
+
+	        f.getRighe().clear();
+	        f.getRighe().addAll(toKeep);
+	        f.getRighe().addAll(lF);
+
+	        Utils.ricalcolaTotale(f);
+	        fattR.saveAndFlush(f);
 		}
 		return;
 	}
