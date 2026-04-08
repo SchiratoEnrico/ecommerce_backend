@@ -356,7 +356,7 @@ public class FatturaImplementation implements IFatturaServices{
 		if (toDel) {
 			f.setOrdine(null);
 			f.setNote("Order deleted");
-		} else {
+		} else {    
 			f.setOrdine(o);
 			f.setNote("Created from ordine");
 		}	
