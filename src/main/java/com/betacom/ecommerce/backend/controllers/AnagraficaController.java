@@ -27,7 +27,7 @@ public class AnagraficaController {
 	private final IMessagesServices msgS;
 	private final IAccountRepository accountRepository; // Per trovare l'utente loggato
 
-	//METODI DI SUPPORTO PER LA SICUREZZA
+	//METODI DI SUPPORTO PER LA SICUREZZA 
 
 	private boolean isAdmin(Authentication auth) {
 		return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
@@ -129,7 +129,7 @@ public class AnagraficaController {
 		try {
 			r = anaS.findById(id);
 		} catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -151,7 +151,7 @@ public class AnagraficaController {
 		try {
 			r = anaS.findByAccountId(id);
 		} catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);

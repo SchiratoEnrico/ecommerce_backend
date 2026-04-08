@@ -60,7 +60,7 @@ public class AccountControllerTest {
 	private String getBearerToken(String username) {
 		UserDetails user = userDetailsService.loadUserByUsername(username);
 		String token = jwtService.generateToken(user.getUsername()); 
-		return "Bearer " + token;
+		return "Bearer " + token; 
 	}
 
 
@@ -283,6 +283,19 @@ public class AccountControllerTest {
 					.andExpect(status().isOk())
 					.andExpect(jsonPath("$.username").value("MarioRossi"));
 		}
+		
+		@Test
+		public void findByUsernameAdminFail() throws Exception {
+			log.debug("Begin findByUsername test - Admin doesnt find User");
+			
+			String token = getBearerToken("AdminUser");
+
+			mockMvc.perform(get("/rest/account/findByUsername")
+					.param("username", "asdrobalo")
+					.header("Authorization", token))
+					.andExpect(status().isBadRequest())
+					.andExpect(content().string("Account non trovato"));
+		}
 
 		@Test
 		public void findByUsernameForbiddenNotOwner() throws Exception {
@@ -395,7 +408,7 @@ public class AccountControllerTest {
 			mockMvc.perform(get("/rest/account/findById").param("id", "999")
 					.header("Authorization", adminToken))
 					.andExpect(status().isBadRequest())
-					.andExpect(content().string("!exists_acc")); // O l'esatto codice/messaggio che lancia il tuo Service
+					.andExpect(content().string("Account non trovato"));
 		}
 
 		@Test
@@ -428,4 +441,73 @@ public class AccountControllerTest {
 					.andExpect(status().isBadRequest())
 					.andExpect(jsonPath("$.msg").value("Username già presente"));
 		}
+		
+		
+
+		// TEST ERRORI: DELETE ULTIMO ADMIN
+
+		@Test
+		public void deleteErrorLastAdminCatch() throws Exception {
+			log.debug("Begin delete Account Test - Error Last Admin");
+			
+			// Otteniamo il token dell'unico Admin presente nel DB 
+			String adminToken = getBearerToken("AdminUser");
+
+			// L'Admin prova a cancellare se stesso
+			mockMvc.perform(delete("/rest/account/delete/2").with(csrf())
+					.header("Authorization", adminToken))
+					.andExpect(status().isBadRequest())
+					.andExpect(jsonPath("$.msg").value("Impossibile eliminare l ultimo amministratore")); 
+		}
+		
+		
+		
+		// ==========================================
+		// TEST SICUREZZA: GESTIONE RUOLI
+		// ==========================================
+
+		@Test
+		public void adminPromotesUserToAdminSuccess() throws Exception {
+			log.debug("Begin update Account test - Admin promotes a User to ADMIN");
+			
+			String adminToken = getBearerToken("AdminUser");
+
+			// L'Admin promuove MarioRossi (ID 1) ad ADMIN
+			AccountRequest req = AccountRequest.builder()
+					.id(1)
+					.username("MarioRossi")
+					.ruolo("ADMIN") // Cambio ruolo
+					.build();
+
+			mockMvc.perform(put("/rest/account/update").with(csrf())
+					.header("Authorization", adminToken)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(req)))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.msg").value("Elemento aggiornato con successo"));
+		}
+
+		@Test
+		public void userTriesToEscalatePrivilegesError() throws Exception {
+			log.debug("Begin update Account test - User tries to make himself ADMIN (Forbidden)");
+			
+			String userToken = getBearerToken("MarioRossi");
+
+			// MarioRossi prova a diventare ADMIN da solo
+			AccountRequest req = AccountRequest.builder()
+					.id(1)
+					.username("MarioRossi")
+					.ruolo("ADMIN") // Tentativo di escalation
+					.build();
+
+			// Il controller lo lascia passare (perché è il proprietario), 
+			// ma il Service riceve isAdmin = false e deve bloccarlo con un 400
+			mockMvc.perform(put("/rest/account/update").with(csrf())
+					.header("Authorization", userToken)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(req)))
+					.andExpect(status().isBadRequest())
+					.andExpect(jsonPath("$.msg").value("Non puoi cambiare ruolo"));
+		}
+
 }

@@ -52,7 +52,7 @@ public class AccountController {
 		return auth.getName().equals(targetUsername);
 	}
 
-	
+	 
 	//ENDPOINT PUBBLICI
 
 	@PostMapping("/create")
@@ -96,7 +96,7 @@ public class AccountController {
 		try {
 			r = accS.findByFilters(AccountRequest.builder().username(username).email(email).ruolo(ruolo).build());
 		} catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -163,7 +163,7 @@ public class AccountController {
 		try {
 			r = accS.findById(id);
 		} catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -182,7 +182,7 @@ public class AccountController {
 		try {
 			r = accS.findByUsername(username);
 		} catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);

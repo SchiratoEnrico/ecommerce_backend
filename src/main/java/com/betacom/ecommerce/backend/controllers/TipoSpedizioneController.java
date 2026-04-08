@@ -36,7 +36,7 @@ public class TipoSpedizioneController {
 			speS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -51,7 +51,7 @@ public class TipoSpedizioneController {
 			speS.update(req);
 			r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -66,7 +66,7 @@ public class TipoSpedizioneController {
 			speS.delete(id);
 			r.setMsg(msgS.get("rest_deleted"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);		
@@ -85,7 +85,7 @@ public class TipoSpedizioneController {
 		try {
 			r= speS.list(tipoSpedizione);
 		} catch (Exception e) {
-			r=e.getMessage();
+			r=msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -96,9 +96,9 @@ public class TipoSpedizioneController {
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
 		try {
-			r= speS.findById(id);
+			r= speS.findById(id); 
 		} catch (Exception e) {
-			r=e.getMessage();
+			r=msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST; 
 		}
 		return ResponseEntity.status(status).body(r);

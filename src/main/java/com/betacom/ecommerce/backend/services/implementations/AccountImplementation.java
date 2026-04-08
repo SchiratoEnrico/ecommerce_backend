@@ -146,7 +146,7 @@ public class AccountImplementation implements IAccountServices{
 	            throw new MangaException("exists_ema");
 
 	        acc.setEmail(req.getEmail().trim().toLowerCase());
-	    }
+	    } 
 
 	    
 	    if (req.getPassword() != null && !req.getPassword().isBlank()) { 
@@ -155,10 +155,23 @@ public class AccountImplementation implements IAccountServices{
 	    	acc.setPassword(passwordEncoder.encode(req.getPassword().trim()));
         } 
 
-	    // SICUREZZA: Aggiornamento ruolo solo se chi chiama è admin
-	    if (!Utils.isBlank(req.getRuolo()) && isAdmin) {
-	    	acc.setRuolo(Ruoli.valueOf(Utils.normalize(req.getRuolo())));
-        }
+	 // SICUREZZA: Aggiornamento ruolo
+	    if (!Utils.isBlank(req.getRuolo())) {
+	    	
+	    	Ruoli nuovoRuolo = Ruoli.valueOf(Utils.normalize(req.getRuolo()));
+	    	
+	    	// Se sta effettivamente cercando di CAMBIARE il ruolo rispetto a quello che ha già...
+	    	if (!acc.getRuolo().equals(nuovoRuolo)) {
+	    		
+	    		// deve essere per forza un Admin
+	    		if (!isAdmin) {
+	    			// Se non è Admin, blocchiamo l'intera operazione con un errore esplicito
+	    			throw new MangaException("privilege_denied"); 
+	    		}	    		
+	    		// Se è Admin, procediamo con la modifica
+	    		acc.setRuolo(nuovoRuolo);
+	    	}
+	    }
 
 	    repAcc.save(acc);
 	}

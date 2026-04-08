@@ -71,12 +71,12 @@ public class TipoPagamentoImplemetation implements ITipoPagamentoServices{
 		}
 
 		Optional<TipoPagamento> dup = repPag.findByTipoPagamento(myPag);
-		
-		if (dup.isEmpty()) {
-			pag.setTipoPagamento(myPag); 
-		} else {
-			throw new MangaException("exists_pag");
+
+		if (dup.isPresent() && !dup.get().getId().equals(req.getId())) {
+		    throw new MangaException("exists_pag");
 		}
+		pag.setTipoPagamento(myPag);
+		
 		repPag.save(pag);
 	}
 

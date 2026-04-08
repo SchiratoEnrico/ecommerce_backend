@@ -32,7 +32,7 @@ public class AutoreController {
 	public ResponseEntity<Response> create(@RequestBody (required = true) AutoreRequest req){
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
-		try { 
+		try {  
 			autS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
@@ -66,7 +66,7 @@ public class AutoreController {
 		try {
 			r =  autS.list();
 		}catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}	
 		
@@ -80,7 +80,7 @@ public class AutoreController {
 		try {
 			r =  autS.findById(id);
 		}catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}	
 		
@@ -95,7 +95,7 @@ public class AutoreController {
 		try {
 			r =  autS.findByFilters(AutoreRequest.builder().nome(nome).cognome(cognome).build());
 		}catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}	
 		

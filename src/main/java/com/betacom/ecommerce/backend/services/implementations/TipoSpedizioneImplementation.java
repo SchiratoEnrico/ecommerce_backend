@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,12 +35,22 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 		if(mySpe == null || mySpe.isEmpty())
 			throw new MangaException("null_spe");
 		
-		
+		// --- NUOVO CONTROLLO COSTO SPEDIZIONE ---
+		if (req.getCostoSpedizione() == null) {
+			throw new MangaException("null_pre"); 
+		}
+		if (req.getCostoSpedizione().compareTo(BigDecimal.ZERO) < 0) {
+		    throw new MangaException("null_pre"); 
+		}
+		// ----------------------------------------
+
 		if (speR.findByTipoSpedizione(mySpe).isPresent())
 	        throw new MangaException("exists_spe");
 		
 		TipoSpedizione spe = new TipoSpedizione();
 		spe.setTipoSpedizione(mySpe);
+		spe.setCostoSpedizione(req.getCostoSpedizione());
+		
 		return speR.save(spe).getId();
 	}
 
@@ -48,18 +59,29 @@ public class TipoSpedizioneImplementation implements ITipoSpedizioneServices{
 	public void update(TipoSpedizioneRequest req) throws MangaException {
 		TipoSpedizione spe = speR.findById(req.getId())
 				.orElseThrow(() -> new MangaException("!exists_spe"));
+		
 		String mySpe = Utils.normalize(req.getTipoSpedizione());
 		if (mySpe == null || mySpe.isEmpty()) {
 			throw new MangaException("null_spe");
 		}
+		
 		Optional<TipoSpedizione> byTipoSped = speR.findByTipoSpedizione(mySpe);
 	    if (byTipoSped.isPresent() && !byTipoSped.get().getId().equals(req.getId())) {
 	    	throw new MangaException("exists_spe");
 	    }    	
 	    spe.setTipoSpedizione(mySpe);
+
+
+		if (req.getCostoSpedizione() != null) {
+			if (req.getCostoSpedizione().compareTo(BigDecimal.ZERO) < 0) {
+			    throw new MangaException("null_pre"); 
+			}
+			spe.setCostoSpedizione(req.getCostoSpedizione());
+		}
+
 		speR.save(spe);
 	}
-
+	
 	@Transactional(rollbackFor=MangaException.class)
 	@Override
 	public void delete(Integer id) throws MangaException {

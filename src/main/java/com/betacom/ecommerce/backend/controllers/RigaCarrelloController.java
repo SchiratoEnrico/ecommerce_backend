@@ -35,7 +35,7 @@ public class RigaCarrelloController {
 	private final IAccountRepository accountRepository; 
 
 	private boolean isAdmin(Authentication auth) {
-		return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
+		return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN")); 
 	}
 
 	private Account getLoggedAccount(Principal principal) {

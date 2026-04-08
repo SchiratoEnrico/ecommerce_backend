@@ -71,6 +71,7 @@ INSERT INTO system_messages VALUES ('!exists_casa',    'Casa editrice non trovat
 INSERT INTO system_messages VALUES ('!exists_up',      'File upload vuoto');
 INSERT INTO system_messages VALUES ('!exists_ncopie',  'Copie disponibili insufficienti');
 INSERT INTO system_messages VALUES ('carrello_ntfnd',  'Carrello non trovato');
+INSERT INTO system_messages VALUES ('manga_ntfnd',  'Manga non trovato');
 
 -- already exists
 INSERT INTO system_messages VALUES ('exists_usr',    'Username già presente');
@@ -113,6 +114,7 @@ INSERT INTO system_messages VALUES ('reso_scad',         'Termine di 30 giorni p
 -- auth
 INSERT INTO system_messages VALUES ('!valid_log',  'Credenziali non valide');
 INSERT INTO system_messages VALUES ('!valid_rol',  'Ruolo non valido');
+INSERT INTO system_messages VALUES ('privilege_denied',  'Non puoi cambiare ruolo');
 
 -- password
 INSERT INTO system_messages VALUES ('pwd_short',   'Password troppo corta (minimo 6 caratteri)');

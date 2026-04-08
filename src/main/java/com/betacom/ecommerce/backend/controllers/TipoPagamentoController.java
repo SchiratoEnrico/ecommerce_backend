@@ -33,7 +33,7 @@ public class TipoPagamentoController {
 	@PostMapping("/create")
     public ResponseEntity<Response> create(@RequestBody(required = true) TipoPagamentoRequest req) {
         Response r = new Response();
-        HttpStatus status = HttpStatus.OK;
+        HttpStatus status = HttpStatus.OK; 
         try {
            pagS.create(req);
             r.setMsg(msgS.get("rest_created"));
@@ -98,7 +98,7 @@ public class TipoPagamentoController {
 		try {
 			r = pagS.findById(id);
 		}catch(Exception e ) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r); 
