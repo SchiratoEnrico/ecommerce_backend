@@ -49,6 +49,8 @@ public class UploadImplementation implements IUploadServices{
 		init();
 	}
 	
+	
+	
 	private void init() {
 		try {
 			if (Files.notExists(uploadPath)) {
@@ -129,7 +131,6 @@ public class UploadImplementation implements IUploadServices{
 		return upName;
 	}
 	
-		
 	private void removePrevDefault() {
 	    try {
 	        Files.list(uploadPath)
@@ -176,7 +177,6 @@ public class UploadImplementation implements IUploadServices{
 	        log.warn("Could not delete image {}: {}", filename, e.getMessage());
 	        // solo warning altrimenti blocco delete entries
 		}
-		
 	}
 
 	private String getDefaultFilename() {

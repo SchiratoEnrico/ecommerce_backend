@@ -1,6 +1,5 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -86,17 +85,17 @@ public class FatturaController {
 	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping ("/list")
 	public ResponseEntity<Object> list(
-			String numeroFattura,
-			LocalDate from,
-			LocalDate to,
-			String clienteNome,
-			String clienteCognome,
-			String clienteEmail,
-			String tipoPagamento,
-			String tipoSpedizione,
-			String statoFattura,
-			Integer idOrdine,
-			List<String> isbns
+			@RequestParam(required=false) String numeroFattura,
+			@RequestParam(required=false) LocalDate from,
+			@RequestParam(required=false) LocalDate to,
+			@RequestParam(required=false) String clienteNome,
+			@RequestParam(required=false) String clienteCognome,
+			@RequestParam(required=false) String clienteEmail,
+			@RequestParam(required=false) String tipoPagamento,
+			@RequestParam(required=false) String tipoSpedizione,
+			@RequestParam(required=false) String statoFattura,
+			@RequestParam(required=false) Integer idOrdine,
+			@RequestParam(required=false) List<String> isbns
 			){
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
@@ -192,20 +191,20 @@ public class FatturaController {
 
 	//ENDPOINT CONDIVISI (ADMIN + Account corrispondente)
 	@PostMapping("/reso/inizia")
-    public ResponseEntity<Response> iniziaReso(@RequestParam(required = true) Integer fatturaId, @RequestParam(required = true) Integer accountId, Authentication auth, Principal principal) {
+    public ResponseEntity<Response> iniziaReso(@RequestParam(required = true) Integer fatturaId, @RequestParam(required = true) Integer accountId, Authentication auth) {
 		Response r = new Response();
         HttpStatus status = HttpStatus.OK;
 
        // BLOCCO DI SICUREZZA
        //qui l'id che arriva dal frontend è l'id dell'account
        //bisogna controllare che quindi questo id corrisponda all'id dell'utente loggato che sta facendo la richiesta
-       if (!isAdminOrOwner(auth, principal, accountId)) {
+       if (!isAdminOrOwner(auth, accountId)) {
     	    r.setMsg("Accesso negato: puoi chiedere il reso di ordini solo del tuo account.");
        		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
        }
        try {
             fattS.iniziaReso(fatturaId, accountId);
-            r.setMsg("reso_start");
+            r.setMsg(msgS.get("reso_start"));
         } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
@@ -214,7 +213,7 @@ public class FatturaController {
     }
 	
 	@GetMapping("/findById")
-    public ResponseEntity<Object> findById(@RequestParam(required = true) Integer idFattura, @RequestParam(required = true) Integer accountId, Authentication auth, Principal principal) {
+    public ResponseEntity<Object> findById(@RequestParam(required = true) Integer idFattura, @RequestParam(required = true) Integer idAccount, Authentication auth) {
 		Object r = new Object();
         HttpStatus status = HttpStatus.OK;
 
@@ -222,9 +221,8 @@ public class FatturaController {
         //qui l'id che arriva dal frontend è l'id dell'account
         //bisogna controllare che quindi questo id corrisponda all'id dell'utente loggato che sta facendo la richiesta
         // msg: !auth_fat: Accesso negato: puoi visualizzare solo le fatture del tuo account.
-        if (!isAdminOrOwner(auth, principal, accountId)) {
-        	((Response) r).setMsg(msgS.get("!auth_fat"));
-        		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+        if (!isAdminOrOwner(auth, idAccount)) {
+        		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msgS.get("!auth_fat"));
         }
 
         try {
@@ -237,15 +235,12 @@ public class FatturaController {
     }
 
 
-	private boolean isAdminOrOwner(Authentication auth, Principal principal, Integer targetAccountId) {
+	private boolean isAdminOrOwner(Authentication auth, Integer targetAccountId) {
 		// Se ha il ruolo ADMIN, passa sempre
 		boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
 		if (isAdmin) return true;
 
-		// Se non è admin, cerchiamo il suo account nel DB usando l'username del token
-		Account loggedAccount = accountRepository.findByUsername(principal.getName()).orElse(null);
-		
-		// Ritorna true solo se l'ID richiesto è uguale al suo ID reale
+		Account loggedAccount = accountRepository.findByUsername(auth.getName()).orElse(null);
 		return loggedAccount != null && loggedAccount.getId().equals(targetAccountId);
 	}
 

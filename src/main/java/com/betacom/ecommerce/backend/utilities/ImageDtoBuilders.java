@@ -32,13 +32,28 @@ public class ImageDtoBuilders {
 	private final IGenereRepository geneR;
 	
 	public MangaDTO buildMangaDTO(Manga m, Optional<CasaEditrice> c, Optional<Set<Autore>> lA, Optional<Set<Genere>> lG, Optional<Saga> s) {
-        log.debug(uploS.buildUrl(m.getImmagine()));
+        //log.debug(uploS.buildUrl(m.getImmagine()));
+//        log.debug("CasaEditrice: {}", c.isPresent()?
+//				DtoBuilders.buildCasaEditriceDTO(c.get()) : null);
+//        log.debug("Saga: {}", s.isPresent()?
+//				DtoBuilders.buildSagaDTO(s.get(), Optional.empty()) : null);
+//        log.debug("Autori: {}", lA.isPresent() ?
+//				lA.get().stream()
+//				.map(a -> DtoBuilders.buildAutoreDTO(a, Optional.empty())).toList() :
+//					null);
+//        log.debug("Generi: {}", lG.isPresent() ?
+//				lG.get().stream()
+//				.map(g -> DtoBuilders.buildGenereDTO(g, Optional.empty())).toList() :
+//					null);
+        
 		return MangaDTO.builder()
                 .isbn(m.getIsbn())
                 .titolo(m.getTitolo())
                 .immagine(uploS.buildUrl(m.getImmagine()))
                 .sagaVol(m.getSagaVol())
+                .numeroCopie(m.getNumeroCopie())
                 .prezzo(m.getPrezzo())
+                .dataPubblicazione(m.getDataPubblicazione())
 				.casaEditrice(c.isPresent()?
 						DtoBuilders.buildCasaEditriceDTO(c.get()) : null)
 				.autori(

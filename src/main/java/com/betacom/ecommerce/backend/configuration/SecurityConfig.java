@@ -20,7 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.betacom.ecommerce.backend.security.JwtFilter;
 
-
 import lombok.RequiredArgsConstructor;
 
 @Configuration

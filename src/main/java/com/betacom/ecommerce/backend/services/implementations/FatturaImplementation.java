@@ -14,16 +14,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.FatturaRequest;
+import com.betacom.ecommerce.backend.dto.inputs.RigaFatturaRequest;
+import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.FatturaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Anagrafica;
 import com.betacom.ecommerce.backend.models.Fattura;
 import com.betacom.ecommerce.backend.models.Ordine;
+import com.betacom.ecommerce.backend.models.RigaFattura;
 import com.betacom.ecommerce.backend.models.RigaOrdine;
+import com.betacom.ecommerce.backend.models.TipoPagamento;
+import com.betacom.ecommerce.backend.models.TipoSpedizione;
 import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
+import com.betacom.ecommerce.backend.repositories.IRigaFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
+import com.betacom.ecommerce.backend.repositories.ITipoPagamentoRepository;
+import com.betacom.ecommerce.backend.repositories.ITipoSpedizioneRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaFatturaServices;
@@ -41,6 +49,10 @@ public class FatturaImplementation implements IFatturaServices{
 	private final IOrdineRepository ordeR;
 	private final IRigaOrdineRepository rigoR;
 	private final IFatturaRepository fattR;
+	private final ITipoPagamentoRepository pagR;
+	private final ITipoSpedizioneRepository spedR;
+	
+	private final IRigaFatturaRepository rigfR;
 	private final IRigaFatturaServices rigfS;
 	private final IMangaServices mangS;
 	 
@@ -103,9 +115,6 @@ public class FatturaImplementation implements IFatturaServices{
         if (Utils.isBlank(req.getTipoSpedizione()))
             throw new MangaException("null_spe");
 
-        if (req.getRigheFatturaRequest() == null || req.getRigheFatturaRequest().isEmpty())
-            throw new MangaException("null_rig_fat");
-
         if (req.getOrdineId() == null) {
         	throw new MangaException("null_ord");
         }
@@ -123,29 +132,48 @@ public class FatturaImplementation implements IFatturaServices{
         fat.setClienteStato(Utils.normalize(req.getClienteStato()));
 
         // Pagamento e spedizione
-        fat.setTipoPagamento(Utils.normalize(req.getTipoPagamento()));
-        fat.setTipoSpedizione(Utils.normalize(req.getTipoSpedizione()));
+        TipoPagamento pag = pagR.findByTipoPagamento(Utils.normalize(req.getTipoPagamento())).orElseThrow(()->
+        new MangaException("!exists_pag"));
+        fat.setTipoPagamento(pag.getTipoPagamento());
+        
+        Optional<TipoSpedizione> spe = spedR.findByTipoSpedizione(Utils.normalize(req.getTipoSpedizione()));
+        if (spe.isEmpty()) {
+        	throw new MangaException("!exists_spe");
+        }
+        fat.setTipoSpedizione(spe.get().getTipoSpedizione());
+        fat.setCostoSpedizione(spe.get().getCostoSpedizione());
+        fat.setTotale(fat.getCostoSpedizione()); // totale iniziale, le righe lo aggiorneranno
+
         Ordine ord = ordeR.findById(req.getOrdineId()).orElseThrow(()
         		-> new MangaException("!exists_ord"));
-        
+        fat.setOrdine(ord);
+        fat.setStatoFattura(ord.getStato().getStatoOrdine());
+//		List<RigaOrdine> lR = rigoR.findAllByOrdineId(ord.getId());
+//		rigfS.righeFatturaFromRigheOrdine(lR, fat);
+
 		String numFattura = generateNumeroFattura(ord.getId());
 		log.debug("N fattura: {}", numFattura);
         fat.setNumeroFattura(numFattura);
-
-        fat.setOrdine(ord);
-        
-        
-        fat.setStatoFattura(ord.getStato().getStatoOrdine());
-        
-        // Costi spedizione prob dovremmo prenderceli da classe tiposped per automatizzare
-        fat.setCostoSpedizione(req.getCostoSpedizione() != null 
-        		? req.getCostoSpedizione()
-                : BigDecimal.ZERO
-        );
-        fat.setTotale(fat.getCostoSpedizione()); // totale iniziale, le righe lo aggiorneranno
         fat.setNote(req.getNote());
-        fattR.save(fat);
         
+		log.debug("fattura: {}", fat);
+
+        Fattura f = fattR.save(fat);
+		Integer myId = f.getId();
+
+		if (req.getRigheFatturaRequest() != null && !req.getRigheFatturaRequest().isEmpty()) {
+			 for (RigaFatturaRequest r : req.getRigheFatturaRequest()) {
+			        r.setIdFattura(myId);  // collega la riga alla fattura
+			        r.setNumeroCopie(
+			            r.getNumeroCopie() != null ? r.getNumeroCopie() : 1
+			        );
+			        saveOrUpdateRigaFattura(fat, r);
+			    }
+			 
+		f.setRighe(rigfR.findAllByFatturaId(myId));
+		Utils.ricalcolaTotale(f);
+		fattR.save(f);
+		}
      }
 
 	@Override
@@ -153,56 +181,103 @@ public class FatturaImplementation implements IFatturaServices{
 	public void update(FatturaRequest req) throws MangaException {
 		 log.debug("updating Fattura {}", req);
 		 
-	        Fattura fat = fattR.findById(req.getId()).orElseThrow(() ->
+	     Fattura fat = fattR.findById(req.getId()).orElseThrow(() ->
 	                new MangaException("!exists_fat"));
-	        // Dati fattura
+	     // Dati fattura
 
-	        // Snapshot cliente
-	        if (!Utils.isBlank(req.getClienteNome()))
-	            fat.setClienteNome(Utils.normalize(req.getClienteNome()));
+	     // Snapshot cliente
+	     if (!Utils.isBlank(req.getClienteNome()))
+	         fat.setClienteNome(Utils.normalize(req.getClienteNome()));
 
-	        if (!Utils.isBlank(req.getClienteCognome()))
-	            fat.setClienteCognome(Utils.normalize(req.getClienteCognome()));
+	     if (!Utils.isBlank(req.getClienteCognome()))
+	         fat.setClienteCognome(Utils.normalize(req.getClienteCognome()));
 
-	        if (!Utils.isBlank(req.getClienteEmail()))
-	            fat.setClienteEmail(Utils.normalize(req.getClienteEmail()));
+	     
+	     if (!Utils.isBlank(req.getClienteEmail()))
+		      fat.setClienteEmail(Utils.normalize(req.getClienteEmail()));
 
-	        if (!Utils.isBlank(req.getClienteIndirizzo()))
-	            fat.setClienteIndirizzo(Utils.normalize(req.getClienteIndirizzo()));
+	     if (!Utils.isBlank(req.getClienteIndirizzo()))
+	         fat.setClienteIndirizzo(Utils.normalize(req.getClienteIndirizzo()));
 
-	        if (!Utils.isBlank(req.getClienteCitta()))
-	            fat.setClienteCitta(Utils.normalize(req.getClienteCitta()));
+	     if (!Utils.isBlank(req.getClienteCitta()))
+	         fat.setClienteCitta(Utils.normalize(req.getClienteCitta()));
 
-	        if (!Utils.isBlank(req.getClienteCap()))
-	            fat.setClienteCap(Utils.normalize(req.getClienteCap()));
+	     if (!Utils.isBlank(req.getClienteCap()))
+	         fat.setClienteCap(Utils.normalize(req.getClienteCap()));
 
-	        if (!Utils.isBlank(req.getClienteProvincia()))
-	            fat.setClienteProvincia(Utils.normalize(req.getClienteProvincia()));
+	     if (!Utils.isBlank(req.getClienteProvincia()))
+	         fat.setClienteProvincia(Utils.normalize(req.getClienteProvincia()));
 
-	        if (!Utils.isBlank(req.getClienteStato()))
-	            fat.setClienteStato(Utils.normalize(req.getClienteStato()));
+	     if (!Utils.isBlank(req.getClienteStato()))
+	         fat.setClienteStato(Utils.normalize(req.getClienteStato()));
 
-	        // Pagamento e spedizione
-	        if (!Utils.isBlank(req.getTipoPagamento()))
-	            fat.setTipoPagamento(Utils.normalize(req.getTipoPagamento()));
-
-	        if (!Utils.isBlank(req.getTipoSpedizione()))
-	            fat.setTipoSpedizione(Utils.normalize(req.getTipoSpedizione()));
-
-	        // Costi
-	        if (req.getCostoSpedizione() != null) {
-	            fat.setCostoSpedizione(req.getCostoSpedizione());
-	            Utils.ricalcolaTotale(fat); // aggiorna totale se cambia spedizione
+	     // Pagamento e spedizione
+	     
+	     if (!Utils.isBlank(req.getTipoPagamento())) {
+	    	Optional<TipoPagamento> pag = pagR.findByTipoPagamento(Utils.normalize(req.getTipoPagamento()));
+	        if (pag.isEmpty()) {
+	        	throw new MangaException("!exists_pag");
 	        }
+	        fat.setTipoPagamento(pag.get().getTipoPagamento());
+	     }
+	     
+	     if (!Utils.isBlank(req.getTipoSpedizione())) {
+		    Optional<TipoSpedizione> spe = spedR.findByTipoSpedizione(Utils.normalize(req.getTipoSpedizione()));
+		    if (spe.isEmpty()) {
+		        	throw new MangaException("!exists_spe");
+		     } 
+		    fat.setTipoSpedizione(spe.get().getTipoSpedizione());
+		    fat.setCostoSpedizione(spe.get().getCostoSpedizione());
+		    Utils.ricalcolaTotale(fat);
+	     }
 
-	        if (!Utils.isBlank(req.getNote()))
-	            fat.setNote(req.getNote());
-
-	        fat.setStatoFattura("CREATO");
-	        fat.setOrdine(null);
-	        fattR.save(fat);
+	     if (req.getOrdineId() != null) {
+	    	 Ordine ord = ordeR.findById(req.getOrdineId()).orElseThrow(() ->
+	    			 new MangaException("!exists_ord"));
+	     	 fat.setStatoFattura(ord.getStato().getStatoOrdine());
+	 		List<RigaOrdine> lR = rigoR.findAllByOrdineId(ord.getId());
+			rigfS.righeFatturaFromRigheOrdine(lR, fat);
+	     }
+	     	     
+	     if (!Utils.isBlank(req.getNote())) {
+	      	fat.setOrdine(null);
+	     }
+			
+	     Integer myId = fat.getId();
+	     if (req.getRigheFatturaRequest() != null && !req.getRigheFatturaRequest().isEmpty()) {
+			for (RigaFatturaRequest r : req.getRigheFatturaRequest()) {
+				r.setIdFattura(myId);  // collega la riga alla fattura
+				r.setNumeroCopie(
+				   r.getNumeroCopie() != null ? r.getNumeroCopie() : 1
+				);
+				saveOrUpdateRigaFattura(fat, r);
+			}
+				 
+			fat.setRighe(rigfR.findAllByFatturaId(myId));
+			Utils.ricalcolaTotale(fat);
+	     }
+		fattR.save(fat);
 	}
 
+	@Transactional(rollbackFor = Exception.class)
+	public void saveOrUpdateRigaFattura(Fattura f, RigaFatturaRequest r) {
+		List<String> lR = f.getRighe().stream()
+				.map(rf -> rf.getIsbn())
+				.toList();
+		if (lR.contains(r.getIsbn())) {
+			try {
+				rigfS.update(r);
+			} catch (MangaException e) {
+			    throw new MangaException(e.getMessage());
+			}
+		}
+		try {
+			rigfS.create(r);
+		} catch (MangaException e) {
+		    throw new MangaException(e.getMessage());
+		}
+	}
+	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void delete(Integer id) throws MangaException {

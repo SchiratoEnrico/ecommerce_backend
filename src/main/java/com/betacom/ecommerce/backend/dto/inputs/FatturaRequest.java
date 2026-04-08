@@ -33,12 +33,8 @@ public class FatturaRequest {
     private String tipoPagamento;
     private String tipoSpedizione;
     
-    //Costi
-    private BigDecimal costoSpedizione;
-    private BigDecimal totale;
-    
     // Metadata
     private String note;
     private Integer ordineId;
-    private List<String> righeFatturaRequest;
+    private List<RigaFatturaRequest> righeFatturaRequest;
 }

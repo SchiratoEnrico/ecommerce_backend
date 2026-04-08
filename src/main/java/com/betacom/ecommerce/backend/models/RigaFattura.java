@@ -20,7 +20,6 @@ import lombok.Setter;
 @Entity
 @Table (name="righe_fattura")
 public class RigaFattura {
-	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -44,11 +43,6 @@ public class RigaFattura {
     		length = 255)
     private String titolo;
 
-    // non includerei, abbiamo isbn
-//    @Column(name = "autore", 
-//    		length = 150)
-//    private String autore;
-
     @Column(name = "prezzo_unitario", 
     		nullable = false, 
     		precision = 10, 
@@ -64,5 +58,4 @@ public class RigaFattura {
     		precision = 10, 
     		scale = 2)
     private BigDecimal totaleRiga;
-
 }

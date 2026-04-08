@@ -137,6 +137,8 @@ public class MangaImplementation implements IMangaServices{
 		Set<Genere> g = m.getGeneri();
 		CasaEditrice c = m.getCasaEditrice();
 		Saga s = m.getSaga();
+		log.debug("Autori: {}\nGeneri: {}\nCasaEditrice: {},\nSaga: {}", isbn, a, g, c, s);
+
 		return imgB.buildMangaDTO(m, Optional.ofNullable(c), Optional.ofNullable(a), Optional.ofNullable(g), Optional.ofNullable(s));
 	}
 
@@ -190,10 +192,6 @@ public class MangaImplementation implements IMangaServices{
 	        throw new MangaException("linked_ord");
 	    }
 
-//	    if (rigaCarRepo.existsByMangaIsbn(key)) {
-//	        log.debug("manga {} linked to carrello", key);
-//	        throw new MangaException("linked_car");
-//	    }
 	    // delete manga azione admin => si riflette su righe carrello (User)
 	    rigaCarRepo.deleteAllByMangaIsbn(key);
 	    
