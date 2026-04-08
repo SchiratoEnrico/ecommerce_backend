@@ -108,7 +108,7 @@ public class ImageController {
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {	
-			removeImage(filename);
+			uploS.removeImage(filename);
 			r.setMsg(msgS.get("img_deleted"));
 		} catch (Exception e) {
 			r.setMsg(msgS.get(e.getMessage()));

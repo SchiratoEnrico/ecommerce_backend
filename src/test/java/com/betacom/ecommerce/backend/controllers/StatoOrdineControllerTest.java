@@ -2,6 +2,12 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
@@ -9,37 +15,70 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
 import com.betacom.ecommerce.backend.dto.inputs.StatoOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
+@AutoConfigureMockMvc
+@Transactional //Fa il rollback del DB dopo ogni test 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class StatoOrdineControllerTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private IMessagesServices msgS;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+	private ObjectMapper objectMapper = new ObjectMapper();
+
 	@Autowired
 	private StatoOrdineController statC;
-	
-	@Autowired
-	private IMessagesServices msgS;
 
+    private String getBearerToken(String username) {
+        UserDetails user = userDetailsService.loadUserByUsername(username);
+        String token = jwtService.generateToken(user.getUsername());
+        return "Bearer " + token;
+    }
+
+    // TEST FUNCTIONS
 	@Test
-	public void testStatoOrdineController() {
+	public void testStatoOrdineControllerAdmin() throws Exception {
 		createTest();
 		updateTest();
-		listTest();
-		findByIdTest();
 		deleteTest();
 	}
 	
+	@Test
+	public void testStatoOrdineControllerAny() {
+		listTest();
+		findByIdTest();
+	}
+
 	public void listTest() {
 		log.debug("Start StatoOrdineControllerTest.listTest()");
 		
@@ -68,99 +107,119 @@ public class StatoOrdineControllerTest {
 		Assertions.assertThat(resp.getBody()).isInstanceOf(StatoOrdineDTO.class);
 		}
 
-	public void createTest() {
-		// Normal workflow
+    // ==========================================
+    // ASSERT HELPERS
+    // ==========================================
+    private void assertCreateError(String token, String msg, StatoOrdineRequest req) throws Exception {
+        mockMvc.perform(post("/rest/stato_ordine/create").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+    }
+
+    private void assertUpdateError(String token, String msg, StatoOrdineRequest req) throws Exception {
+        mockMvc.perform(put("/rest/stato_ordine/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+    }
+
+	// ADMIN TEST FUNCTIONS
+    
+	public void createTest() throws Exception {
 		log.debug("Start StatoOrdineControllerTest.createTest()");
+
+		// Normal workflow
+		String token = getBearerToken("AdminUser");
+		String msg = "rest_created";
+
 		StatoOrdineRequest req = new StatoOrdineRequest();
-		req.setStatoOrdine("Pagato");
-		ResponseEntity<Response> resp = statC.create(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
+		req.setStatoOrdine("trallallero");
+		mockMvc.perform(post("/rest/stato_ordine/create").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
 		// errore: null statoOrdine
+		msg = "null_sta";
 		req = new StatoOrdineRequest();
-		resp = statC.create(req);
-		log.debug("Start StatoOrdineControllerTest.createTest(): error expected, statoOrdineReq {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_sta"));
+		assertCreateError(token, msg, req);
 		
 		// errore: blank statoOrdine
 		req = new StatoOrdineRequest();
 		req.setStatoOrdine("");
-		resp = statC.create(req);
-		log.debug("Start StatoOrdineControllerTest.createTest(): error expected, statoOrdineReq {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_sta"));
+		msg = "null_sta";
+		assertCreateError(token, msg, req);
 
 		// errore: duplicate statoOrdine
 		req = new StatoOrdineRequest();
-		req.setStatoOrdine("CREATED");
-		resp = statC.create(req);
-		log.debug("Start StatoOrdineControllerTest.createTest(): error expected, statoOrdineReq duplicato");
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("exists_sta"));
+		req.setStatoOrdine("trallallero");
+		msg = "exists_sta";
+		assertCreateError(token, msg, req);
 	}
 
-	public void updateTest() {
-		// Normal workflow
+	public void updateTest() throws Exception {
 		log.debug("Start StatoOrdineControllerTest.createTest()");
+		// Normal workflow
+		
+		String token = getBearerToken("AdminUser");
+		String msg = "rest_updated";
 		StatoOrdineRequest req = new StatoOrdineRequest();
-		req.setId(1);
-		req.setStatoOrdine("Da pagare");
-		ResponseEntity<Response> resp = statC.update(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
+		req.setStatoOrdine("in conSegna");
+		req.setId(2);
+		mockMvc.perform(put("/rest/stato_ordine/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
 
 		// errore: duplicate statoOrdine
 		req = new StatoOrdineRequest();
 		req.setId(1);
-		req.setStatoOrdine("Da pagare");
-		resp = statC.update(req);
-		log.debug("Start StatoOrdineControllerTest.createTest(): error expected, statoOrdineReq duplicato");
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("exists_sta"));
+		req.setStatoOrdine("in conSegna");
+		msg = "exists_sta";
+		assertUpdateError(token, msg, req);
 
 		// errore: id sbagliato
 		req = new StatoOrdineRequest();
 		req.setId(100);
 		req.setStatoOrdine("spedito");
-		resp = statC.update(req);
-		log.debug("Start StatoOrdineControllerTest.createTest(): error expected, statoOrdineReq {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_sta"));
+		msg = "!exists_sta";
+		assertUpdateError(token, msg, req);
 
 		// errore: stato null
 		req = new StatoOrdineRequest();
 		req.setId(1);
-		resp = statC.update(req);
-		log.debug("Start StatoOrdineControllerTest.createTest(): error expected, statoOrdineReq {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_sta"));
+		msg = "null_sta";
+		assertUpdateError(token, msg, req);
 	}
 
-	public void deleteTest() {
+	public void deleteTest() throws Exception {
+		log.debug("Start StatoOrdineControllerTest.deleteTest());");
+
 		// errore: id non trovato in db/non valido
 		Integer id = 99;
-		log.debug("Start StatoOrdineControllerTest.deleteTest(): error expected, invalid id: {}", id);
-		ResponseEntity<Response> resp = statC.delete(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_sta"));
+		log.debug("error expected, invalid id: {}", id);
+		String token = getBearerToken("AdminUser");
+		String msg = "!exists_sta";
+		mockMvc.perform(delete("/rest/stato_ordine/delete/99").with(csrf())
+					.header("Authorization", token))
+					.andExpect(status().isBadRequest())
+					.andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 		
-		// Normal workflow
-		id = 2;
-		log.debug("Start StatoOrdineControllerTest.deleteTest(), id: {}", id);
-		resp = statC.delete(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
+		msg = "rest_deleted";
+		mockMvc.perform(delete("/rest/stato_ordine/delete/3").with(csrf())
+					.header("Authorization", token))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+		
 	}
 }
