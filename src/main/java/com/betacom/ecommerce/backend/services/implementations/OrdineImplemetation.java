@@ -226,9 +226,9 @@ public class OrdineImplemetation implements IOrdineServices{
 		// stato;
 		String stato = Utils.normalize(req.getStato());
 		if (stato != null) {
-			modificaStatoOrdine(o, stato);
 			StatoOrdine stat = statR.findByStatoOrdine(stato)
 					.orElseThrow(() -> new MangaException("!exists_sta"));
+			modificaStatoOrdine(o, stat.getStatoOrdine());
 			o.setStato(stat);			
 		}
 		
@@ -252,6 +252,8 @@ public class OrdineImplemetation implements IOrdineServices{
 		Ordine o = ordeR.findById(id).orElseThrow(() ->
 					new MangaException("!exists_ord"));
 		
+		log.debug("will update corresponding fattura");
+
 		fattS.updateFromOrdine(o, true);
 		ordeR.delete(o);
 	}

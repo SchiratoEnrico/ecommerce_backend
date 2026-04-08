@@ -1,232 +1,280 @@
-
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
-import com.betacom.ecommerce.backend.dto.outputs.RigaOrdineDTO;
-import com.betacom.ecommerce.backend.exceptions.MangaException;
-import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
-//@Transactional // 🔥 rollback after test → no DB pollution
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RigaOrdineControllerTest {
 
-	@Autowired
-	private RigaOrdineController rowC;
-	@Autowired
-	private IMessagesServices msgS;
-	@MockitoSpyBean
-	private IRigaOrdineServices rowS;
-	
-	@Test
-	public void testRigaOrdineController() {
-		createTest();
-		updateTest();
-		listRigaOrdine();
-		findByIdTest();
-		deleteTest();
-	}
-	
-    private RigaOrdineRequest getProva() {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private IMessagesServices msgS;
+
+    @MockitoSpyBean
+    private IRigaOrdineServices rowS;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    private String getBearerToken(String username) {
+        UserDetails user = userDetailsService.loadUserByUsername(username);
+        String token = jwtService.generateToken(user.getUsername());
+        return "Bearer " + token;
+    }
+
+    // ==========================================
+    // BUILD REQUEST
+    // ==========================================
+    private RigaOrdineRequest buildRigaOrdineRequest() {
         return RigaOrdineRequest.builder()
                 .idOrdine(1)
                 .manga("ISBN002")
                 .numeroCopie(1)
                 .build();
     }
-    /*
-    private void printList() {
-		ResponseEntity<?> resp = rowC.list();
-		List<?> body = (List<?>) resp.getBody();
-		
-		if (body.size() > 0) {
-			body.forEach((rigaOrdineDTO -> log.debug(rigaOrdineDTO.toString())));
-		}
+
+    // ==========================================
+    // ASSERT HELPERS
+    // ==========================================
+    private void assertCreateError(String token, String msg, RigaOrdineRequest req) throws Exception {
+        mockMvc.perform(post("/rest/riga_ordine/create").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
     }
-	
-	public void listTest() {
-		log.debug("Start RigaOrdineControllerTest.listTest()");
-		
-		ResponseEntity<?> resp = rowC.list();
-		
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isInstanceOf(List.class);
-		List<?> body = (List<?>) resp.getBody();
-		if (body.size() > 0) {
-			Assertions.assertThat(body.getFirst()).isInstanceOf(RigaOrdineDTO.class);
-		}
-	}
-	*/
-    
-    public void listRigaOrdine() throws MangaException {
-        log.debug("*** Test list RigaOrdine ***");
 
-        log.debug("* list: no params *");
-        ResponseEntity<?> resp = rowC.list(null);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        Object b = resp.getBody();
-        Assertions.assertThat(b).isInstanceOf(List.class);
-        List<?> lR = (List<?>) b;
-        Assertions.assertThat(lR.size()).isGreaterThan(0);
-        Assertions.assertThat(lR.getFirst()).isInstanceOf(RigaOrdineDTO.class);
-        lR.forEach(r -> r.toString());
-
-        log.debug("* list: with idOrdine *");
-        resp = rowC.list(1); // adatta l'id
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        b = resp.getBody();
-        Assertions.assertThat(b).isInstanceOf(List.class);
-        lR = (List<?>) b;
-        Assertions.assertThat(lR.size()).isGreaterThan(0);
-        Assertions.assertThat(lR.getFirst()).isInstanceOf(RigaOrdineDTO.class);
-        lR.forEach(r -> r.toString());
-
-        String error = "generic error";
-        doThrow(new RuntimeException(error)).when(rowS).list(null);
-        resp = rowC.list(null);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+    private void assertUpdateError(String token, String msg, RigaOrdineRequest req) throws Exception {
+        mockMvc.perform(put("/rest/riga_ordine/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
     }
-    
-    
-    
-    
-	public void findByIdTest() {
-		// Id error
-		Integer id = 99;
-		log.debug("Start RigaOrdineControllerTest.findByIdTest(), error expected");
-		ResponseEntity<?> resp = rowC.findById(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get("!exists_row"), resp.getBody());
 
-		// Normal workflow
-		id = 1;
-		log.debug("Start RigaOrdineControllerTest.findByIdTest()");
-		resp = rowC.findById(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isInstanceOf(RigaOrdineDTO.class);
-		}
+    // ==========================================
+    // TESTS
+    // ==========================================
+    @Test
+    public void testRigaOrdineControllerAdmin() throws Exception {
+        create();
+        update();
+        listRigaOrdine();
+        findById();
+        deleteTest();
+    }
 
-	public void createTest() {
-		// Normal workflow
-		log.debug("Start RigaOrdineControllerTest.createTest()");
-		RigaOrdineRequest req = getProva();
-		req.setId(null);
-		ResponseEntity<Response> resp = rowC.create(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
+    @Test
+    public void testRigaOrdineControllerAuthFails() throws Exception {
+        String token = getBearerToken("UserUser");
+        RigaOrdineRequest req = buildRigaOrdineRequest();
 
-		// errore: id Ordine null
-		req.setIdOrdine(null);
-		resp = rowC.create(req);
-		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_ord"));
-		
-		// errore: id Ordine non esistente
-		req.setIdOrdine(99);
-		resp = rowC.create(req);
-		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_ord"));
-		
-		// errore: ISBN null
-		req = getProva();
-		req.setManga(null);
-		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest\n\t\t\t{}", req);
-		resp = rowC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_man"));
+        // create forbidden for non-admin
+        mockMvc.perform(post("/rest/riga_ordine/create").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isForbidden());
 
-		// errore: ISBN non esistente
-		req = getProva();
-		req.setManga("LALALALAL");
-		log.debug("Start RigaOrdineControllerTest.createTest(): error expected, RigaOrdineRequest {}", req);
-		resp = rowC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_man"));
-	}
+        // update forbidden for non-admin
+        req.setId(1);
+        mockMvc.perform(put("/rest/riga_ordine/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isForbidden());
 
-	public void updateTest() {
-		// Normal workflow
-		RigaOrdineRequest req = getProva();
-		req.setId(1);
-		log.debug("Start RigaOrdineRequest.updateTest(), req: {}", req);
+        // delete forbidden for non-admin
+        mockMvc.perform(delete("/rest/riga_ordine/delete/1").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isForbidden());
+    }
 
-		ResponseEntity<Response> resp = rowC.update(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
+    // ==========================================
+    // CREATE
+    // ==========================================
+    public void create() throws Exception {
+        log.debug("Begin create RigaOrdine Test");
+        String token = getBearerToken("AdminUser");
 
-		// errore: id sbagliato
-		req = new RigaOrdineRequest();
-		req.setId(100);
-		resp = rowC.update(req);
-		log.debug("Start RigaOrdineRequest.updateTest(): error expected, RigaOrdineRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_row"));
+        // Normal workflow
+        RigaOrdineRequest req = buildRigaOrdineRequest();
+        req.setId(null);
+        mockMvc.perform(post("/rest/riga_ordine/create").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("rest_created")));
 
-		// errore: id Ordine non valido
-		req = new RigaOrdineRequest();
-		req.setId(1);
-		req.setIdOrdine(100);
-		resp = rowC.update(req);
-		log.debug("Start RigaOrdineRequest.updateTest(): error expected, RigaOrdineRequest duplicato");
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_ord"));
+        // null_ord
+        req = buildRigaOrdineRequest();
+        req.setIdOrdine(null);
+        String msg = "null_ord";
+        assertCreateError(token, msg, req);
 
-		// errore: isbn non valido
-		req = new RigaOrdineRequest();
-		req.setId(1);
-		req.setManga("WEWEWEW");
-		resp = rowC.update(req);
-		log.debug("Start RigaOrdineRequest.updateTest(): error expected, RigaOrdineRequest {}", req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_man"));
-	}
-	
-	public void deleteTest() {
-		// errore: id non trovato in db/non valido
-		Integer id = 99;
-		log.debug("Start RigaOrdineRequest.deleteTest(): error expected, invalid id: {}", id);
-		ResponseEntity<Response> resp = rowC.delete(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_row"));
-		
-		// Normal workflow
-		id = 1;
-		log.debug("Start RigaOrdineRequest.deleteTest(), id: {}", id);
-		resp = rowC.delete(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
-	}
+        // !exists_ord
+        req = buildRigaOrdineRequest();
+        req.setIdOrdine(99);
+        msg = "!exists_ord";
+        assertCreateError(token, msg, req);
+
+        // null_man
+        req = buildRigaOrdineRequest();
+        req.setManga(null);
+        msg = "null_man";
+        assertCreateError(token, msg, req);
+
+        // !exists_man
+        req = buildRigaOrdineRequest();
+        req.setManga("LALALALAL");
+        msg = "!exists_man";
+        assertCreateError(token, msg, req);
+    }
+
+    // ==========================================
+    // UPDATE
+    // ==========================================
+    public void update() throws Exception {
+        log.debug("Begin update RigaOrdine Test");
+        String token = getBearerToken("AdminUser");
+
+        // Normal workflow
+        RigaOrdineRequest req = buildRigaOrdineRequest();
+        req.setId(1);
+        mockMvc.perform(put("/rest/riga_ordine/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("rest_updated")));
+
+        // !exists_row
+        req = new RigaOrdineRequest();
+        req.setId(100);
+        String msg = "!exists_row";
+        assertUpdateError(token, msg, req);
+
+        // !exists_ord
+        req = new RigaOrdineRequest();
+        req.setId(1);
+        req.setIdOrdine(100);
+        msg = "!exists_ord";
+        assertUpdateError(token, msg, req);
+
+        // !exists_man
+        req = new RigaOrdineRequest();
+        req.setId(1);
+        req.setManga("WEWEWEW");
+        msg = "!exists_man";
+        assertUpdateError(token, msg, req);
+    }
+
+    // ==========================================
+    // LIST
+    // ==========================================
+    public void listRigaOrdine() throws Exception {
+        log.debug("Begin list RigaOrdine Test");
+        String token = getBearerToken("AdminUser");
+
+        // no params
+        mockMvc.perform(get("/rest/riga_ordine/list")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0]").exists());
+
+        // with idOrdine
+        mockMvc.perform(get("/rest/riga_ordine/list")
+                .param("idOrdine", "1")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0]").exists());
+    }
+
+    // ==========================================
+    // FIND BY ID
+    // ==========================================
+    public void findById() throws Exception {
+        log.debug("Begin findById RigaOrdine Test");
+        String token = getBearerToken("AdminUser");
+
+        // !exists_row
+        mockMvc.perform(get("/rest/riga_ordine/findById")
+                .param("id", "99")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest());
+
+        // Normal workflow
+        mockMvc.perform(get("/rest/riga_ordine/findById")
+                .param("id", "1")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
+    // ==========================================
+    // DELETE
+    // ==========================================
+    public void deleteTest() throws Exception {
+        log.debug("Begin delete RigaOrdine Test");
+        String token = getBearerToken("AdminUser");
+
+        // !exists_row
+        String msg = "!exists_row";
+        mockMvc.perform(delete("/rest/riga_ordine/delete/99").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // Normal workflow
+        msg = "rest_deleted";
+        mockMvc.perform(delete("/rest/riga_ordine/delete/1").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+    }
 }

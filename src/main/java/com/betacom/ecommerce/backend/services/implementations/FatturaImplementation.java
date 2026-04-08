@@ -351,6 +351,7 @@ public class FatturaImplementation implements IFatturaServices{
 	// 					e quando ordine viene rimosso
 	@Transactional(rollbackFor = Exception.class)
 	public void createFromOrdine(Ordine o, Boolean toDel) throws MangaException {
+		log.debug("Creating fattura from ordine. To delete? {}", toDel);
 		Fattura f = new Fattura();
 		if (toDel) {
 			f.setOrdine(null);
@@ -358,7 +359,7 @@ public class FatturaImplementation implements IFatturaServices{
 		} else {
 			f.setOrdine(o);
 			f.setNote("Created from ordine");
-		}
+		}	
 		f.setDataEmissione(LocalDate.now());
 
 		String numFattura = generateNumeroFattura(o.getId());
@@ -406,7 +407,7 @@ public class FatturaImplementation implements IFatturaServices{
     		}
             fattR.save(f);
         } else {
-        	createFromOrdine(o, false);
+        	createFromOrdine(o, toDel);
         }		
 	}
 

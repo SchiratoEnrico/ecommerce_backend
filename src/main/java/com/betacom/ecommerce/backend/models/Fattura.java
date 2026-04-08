@@ -100,7 +100,7 @@ public class Fattura {
     private BigDecimal costoSpedizione = BigDecimal.ZERO;
 
     @Column(name = "totale", 
-    		nullable = false, 
+    		nullable = true, 
     		precision = 10, 
     		scale = 2)
     private BigDecimal totale;

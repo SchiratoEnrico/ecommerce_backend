@@ -17,7 +17,6 @@ public class RigaFatturaRequest {
 	private Integer id;
 	private Integer idFattura;
     private String isbn;
-    private String titolo;
     private BigDecimal prezzoUnitario;
     private Integer numeroCopie;
 }

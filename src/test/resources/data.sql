@@ -1,8 +1,8 @@
--- =========================
+-- ============================================================
 -- SYSTEM MESSAGES
--- =========================
+-- ============================================================
 
--- null / missing field errors
+-- null / missing field
 INSERT INTO system_messages VALUES ('null_req',     'Richiesta non valida');
 INSERT INTO system_messages VALUES ('null_usr',     'Username assente');
 INSERT INTO system_messages VALUES ('null_pwd',     'Password assente');
@@ -21,7 +21,7 @@ INSERT INTO system_messages VALUES ('null_cap',     'CAP assente');
 INSERT INTO system_messages VALUES ('null_via',     'Via assente');
 INSERT INTO system_messages VALUES ('null_ind',     'Indirizzo assente');
 INSERT INTO system_messages VALUES ('null_ana',     'Anagrafica assente');
-INSERT INTO system_messages VALUES ('null_pre',     'Campo predefinito assente');
+INSERT INTO system_messages VALUES ('null_pre',     'Prezzo assente/non valido');
 INSERT INTO system_messages VALUES ('null_pag',     'Tipo pagamento assente');
 INSERT INTO system_messages VALUES ('null_spe',     'Tipo spedizione assente');
 INSERT INTO system_messages VALUES ('null_ord',     'Ordine assente');
@@ -48,7 +48,7 @@ INSERT INTO system_messages VALUES ('null_qua',     'Quantità assente');
 INSERT INTO system_messages VALUES ('null_crq',     'RigaCarrelloRequest non può essere null');
 INSERT INTO system_messages VALUES ('null_cri',     'Id carrello non può essere null');
 
--- not found errors
+-- not found
 INSERT INTO system_messages VALUES ('!exists_acc',     'Account non trovato');
 INSERT INTO system_messages VALUES ('!exists_ana',     'Anagrafica non trovata');
 INSERT INTO system_messages VALUES ('!exists_aut',     'Autore non trovato');
@@ -69,24 +69,25 @@ INSERT INTO system_messages VALUES ('!exists_rcr',     'Riga carrello non trovat
 INSERT INTO system_messages VALUES ('!exists_rcar',    'Riga carrello non trovata');
 INSERT INTO system_messages VALUES ('!exists_casa',    'Casa editrice non trovata');
 INSERT INTO system_messages VALUES ('!exists_up',      'File upload vuoto');
+INSERT INTO system_messages VALUES ('!exists_ncopie',  'Copie disponibili insufficienti');
 INSERT INTO system_messages VALUES ('carrello_ntfnd',  'Carrello non trovato');
 
--- already exists errors
-INSERT INTO system_messages VALUES ('exists_usr',     'Username già presente');
-INSERT INTO system_messages VALUES ('exists_ema',     'Email già presente');
-INSERT INTO system_messages VALUES ('exists_aut',     'Autore già presente');
-INSERT INTO system_messages VALUES ('exists_gen',     'Genere già presente');
-INSERT INTO system_messages VALUES ('exists_ced',     'Casa editrice già presente');
-INSERT INTO system_messages VALUES ('exists_casa',    'Casa editrice già presente');
-INSERT INTO system_messages VALUES ('exists_man',     'Manga già presente (ISBN duplicato)');
-INSERT INTO system_messages VALUES ('exists_sag',     'Saga già presente');
-INSERT INTO system_messages VALUES ('exists_sagman',  'Impossibile eliminare: saga ha manga allegati');
-INSERT INTO system_messages VALUES ('exists_sagvol',  'Volume già esistente per questa saga');
-INSERT INTO system_messages VALUES ('exists_sta',     'Stato ordine già presente');
-INSERT INTO system_messages VALUES ('exists_pag',     'Tipo pagamento già presente');
-INSERT INTO system_messages VALUES ('exists_spe',     'Tipo spedizione già presente');
+-- already exists
+INSERT INTO system_messages VALUES ('exists_usr',    'Username già presente');
+INSERT INTO system_messages VALUES ('exists_ema',    'Email già presente');
+INSERT INTO system_messages VALUES ('exists_aut',    'Autore già presente');
+INSERT INTO system_messages VALUES ('exists_gen',    'Genere già presente');
+INSERT INTO system_messages VALUES ('exists_ced',    'Casa editrice già presente');
+INSERT INTO system_messages VALUES ('exists_casa',   'Casa editrice già presente');
+INSERT INTO system_messages VALUES ('exists_man',    'Manga già presente (ISBN duplicato)');
+INSERT INTO system_messages VALUES ('exists_sag',    'Saga già presente');
+INSERT INTO system_messages VALUES ('exists_sagman', 'Impossibile eliminare: saga ha manga allegati');
+INSERT INTO system_messages VALUES ('exists_sagvol', 'Volume già esistente per questa saga');
+INSERT INTO system_messages VALUES ('exists_sta',    'Stato ordine già presente');
+INSERT INTO system_messages VALUES ('exists_pag',    'Tipo pagamento già presente');
+INSERT INTO system_messages VALUES ('exists_spe',    'Tipo spedizione già presente');
 
--- linked / constraint errors
+-- constraint / linked
 INSERT INTO system_messages VALUES ('linked_ord',    'Manga collegato a ordini: eliminazione bloccata');
 INSERT INTO system_messages VALUES ('linked_car',    'Manga collegato a carrelli: eliminazione bloccata');
 INSERT INTO system_messages VALUES ('linked_man',    'Elemento collegato a manga: eliminazione bloccata');
@@ -100,49 +101,64 @@ INSERT INTO system_messages VALUES ('id_required',   'ID obbligatorio per aggior
 INSERT INTO system_messages VALUES ('last_adm',      'Impossibile eliminare l ultimo amministratore');
 INSERT INTO system_messages VALUES ('invalid_path',  'Percorso file non valido');
 
--- auth errors
-INSERT INTO system_messages VALUES ('!valid_log',   'Credenziali non valide');
-INSERT INTO system_messages VALUES ('!valid_rol',   'Ruolo non valido');
+-- ordine stato pipeline
+INSERT INTO system_messages VALUES ('ord_not_cancellable', 'Ordine non annullabile in questo stato');
+INSERT INTO system_messages VALUES ('ord_canc',            'Ordine già cancellato');
+INSERT INTO system_messages VALUES ('ord_use_reso',        'Ordine consegnato: usa il meccanismo di reso sulla fattura');
 
--- password errors
+-- fattura / reso pipeline
+INSERT INTO system_messages VALUES ('stato_fat_invalid', 'Transizione stato fattura non valida');
+INSERT INTO system_messages VALUES ('reso_scad',         'Termine di 30 giorni per il reso scaduto');
+
+-- auth
+INSERT INTO system_messages VALUES ('!valid_log',  'Credenziali non valide');
+INSERT INTO system_messages VALUES ('!valid_rol',  'Ruolo non valido');
+
+-- password
 INSERT INTO system_messages VALUES ('pwd_short',   'Password troppo corta (minimo 6 caratteri)');
 INSERT INTO system_messages VALUES ('pwd_upper',   'Password deve contenere almeno una lettera maiuscola');
 INSERT INTO system_messages VALUES ('pwd_lower',   'Password deve contenere almeno una lettera minuscola');
 INSERT INTO system_messages VALUES ('pwd_digit',   'Password deve contenere almeno un numero');
 INSERT INTO system_messages VALUES ('pwd_special', 'Password deve contenere almeno un carattere speciale');
 
--- upload errors
-INSERT INTO system_messages VALUES ('upload_inv',  'Tipo file non valido: solo immagini accettate');
-INSERT INTO system_messages VALUES ('upsave_err',  'Errore salvataggio file immagine');
-INSERT INTO system_messages VALUES ('udir_err',    'Errore creazione directory upload');
-INSERT INTO system_messages VALUES ('null_idxs',   'Specificare isbn o id per associare l immagine');
+-- upload
+INSERT INTO system_messages VALUES ('upload_inv', 'Tipo file non valido: solo immagini accettate');
+INSERT INTO system_messages VALUES ('upsave_err', 'Errore salvataggio file immagine');
+INSERT INTO system_messages VALUES ('udir_err',   'Errore creazione directory upload');
+INSERT INTO system_messages VALUES ('null_idxs',  'Specificare isbn o id per associare l immagine');
 
--- generic REST responses
+-- generic REST
 INSERT INTO system_messages VALUES ('rest_created', 'Elemento creato con successo');
 INSERT INTO system_messages VALUES ('rest_updated', 'Elemento aggiornato con successo');
 INSERT INTO system_messages VALUES ('rest_deleted', 'Elemento eliminato con successo');
 
--- =========================
+-- ============================================================
 -- LOOKUP TABLES
--- =========================
+-- ============================================================
 
-INSERT INTO stati_ordine (stato_ordine) VALUES ('CREATED');
-INSERT INTO stati_ordine (stato_ordine) VALUES ('CONFERMATO');
+-- Stati ordine — full pipeline
+INSERT INTO stati_ordine (stato_ordine) VALUES ('CREATO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('PAGATO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('LAVORAZIONE');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('SPEDITO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('CONSEGNATO');
-INSERT INTO stati_ordine (stato_ordine) VALUES ('ANNULLATO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('CANCELLATO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('RICHIESTA_RESO');
 
 INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('PAYPAL');
-INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('CARTA_DI_CREDITO');
+INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('CARTA DI CREDITO');
 INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('BONIFICO');
 
-INSERT INTO tipi_spedizione (tipo_spedizione) VALUES ('STANDARD');
-INSERT INTO tipi_spedizione (tipo_spedizione) VALUES ('EXPRESS');
+INSERT INTO tipi_spedizione (tipo_spedizione, costo_spedizione) VALUES ('STANDARD', 4.99);
+INSERT INTO tipi_spedizione (tipo_spedizione, costo_spedizione) VALUES ('EXPRESS',  9.99);
+INSERT INTO tipi_spedizione (tipo_spedizione, costo_spedizione) VALUES ('GRATUITA', 0.00);
 
 INSERT INTO generi (descrizione) VALUES ('AZIONE');
 INSERT INTO generi (descrizione) VALUES ('SHONEN');
 INSERT INTO generi (descrizione) VALUES ('SEINEN');
 INSERT INTO generi (descrizione) VALUES ('AVVENTURA');
+INSERT INTO generi (descrizione) VALUES ('ROMANTICO');
+INSERT INTO generi (descrizione) VALUES ('HORROR');
 
 INSERT INTO case_editrici (nome, descrizione, indirizzo, email)
 VALUES ('Shueisha', 'Major Japanese publisher', 'Tokyo, Japan', 'info@shueisha.jp');
@@ -156,24 +172,29 @@ VALUES ('Akira', 'Toriyama', '1955-04-05', 'Dragon Ball author');
 INSERT INTO autori (nome, cognome, data_nascita, descrizione)
 VALUES ('Eiichiro', 'Oda', '1975-01-01', 'One Piece author');
 
--- =========================
+-- ============================================================
 -- ACCOUNTS
--- =========================
+-- ============================================================
 
 INSERT INTO accounts (username, password, email, data_creazione, ruolo)
-VALUES ('MarioRossi', 'Password1!', 'mario.rossi@email.com', CURRENT_TIMESTAMP, 'USER');
+VALUES ('MarioRossi', '$2a$10$dummyhashfortest000000000000000000000000000000000000000',
+        'mario.rossi@email.com', CURRENT_TIMESTAMP, 'USER');
 
 INSERT INTO accounts (username, password, email, data_creazione, ruolo)
-VALUES ('AdminUser', 'Password1!', 'admin@email.com', CURRENT_TIMESTAMP, 'ADMIN');
+VALUES ('AdminUser', '$2a$10$dummyhashfortest000000000000000000000000000000000000000',
+        'admin@email.com', CURRENT_TIMESTAMP, 'ADMIN'), 
+        ('UserUser', '$2a$10$dummyhashdebolest000000000000000000000000000000000000000',
+        'user@email.com', CURRENT_TIMESTAMP, 'USER');
 
 INSERT INTO anagrafiche (id_account, predefinito, nome, cognome, via, citta, provincia, cap, stato)
-VALUES (1, TRUE, 'Mario', 'Rossi', 'Via Roma 1', 'Roma', 'RM', '00100', 'Italia');
+VALUES (1, TRUE, 'Mario', 'Rossi', 'Via Roma 1', 'Roma', 'RM', '00100', 'Italia')
+	    ;
 
 INSERT INTO carrelli (id_account) VALUES (1);
 
--- =========================
+-- ============================================================
 -- SAGA + MANGA
--- =========================
+-- ============================================================
 
 INSERT INTO saghe (nome, descrizione, immagine, proxy)
 VALUES ('One Piece', 'Saga sui pirati', NULL, FALSE);
@@ -193,43 +214,54 @@ INSERT INTO manga_autori (id_autore, isbn_manga) VALUES (1, 'ISBN002');
 INSERT INTO manga_generi (id_genere, isbn_manga) VALUES (2, 'ISBN001');
 INSERT INTO manga_generi (id_genere, isbn_manga) VALUES (1, 'ISBN002');
 
--- =========================
+-- ============================================================
 -- CART
--- =========================
+-- ============================================================
 
 INSERT INTO righe_carrello (id_carrello, isbn_manga, numero_copie) VALUES (1, 'ISBN001', 2);
 INSERT INTO righe_carrello (id_carrello, isbn_manga, numero_copie) VALUES (1, 'ISBN002', 1);
 
--- =========================
+-- ============================================================
 -- ORDERS
--- =========================
+-- ============================================================
 
+-- Order in CONSEGNATO stato — has a linked fattura below
 INSERT INTO ordini (data, id_account, id_stato, id_tipo_pagamento, id_tipo_spedizione, id_anagrafica)
-VALUES (CURRENT_DATE, 1, 1, 1, 1, 1);
+VALUES (CURRENT_DATE, 1, 5, 1, 1, 1);  -- id_stato=5 = CONSEGNATO
 
-INSERT INTO righe_ordine (id_ordine, isbn_manga, numero_copie, prezzo) VALUES (1, 'ISBN001', 2, 9.99);
-INSERT INTO righe_ordine (id_ordine, isbn_manga, numero_copie, prezzo) VALUES (1, 'ISBN002', 1, 7.99);
+INSERT INTO righe_ordine (id_ordine, isbn_manga, numero_copie, prezzo)
+VALUES (1, 'ISBN001', 2, 9.99);
 
--- =========================
+INSERT INTO righe_ordine (id_ordine, isbn_manga, numero_copie, prezzo)
+VALUES (1, 'ISBN002', 1, 7.99);
+
+-- ============================================================
 -- INVOICES
--- =========================
+-- ============================================================
 
+-- Fattura auto-created from ordine 1 (stato_fattura inherits CONSEGNATO)
 INSERT INTO fatture (
     numero_fattura, data_emissione, totale, costo_spedizione,
     tipo_pagamento, tipo_spedizione,
     cliente_nome, cliente_cognome, cliente_email,
     cliente_indirizzo, cliente_citta, cliente_provincia, cliente_cap, cliente_stato,
-    stato, stato_reclamo, id_ordine
+    stato_fattura, id_ordine, note
 ) VALUES (
-    'FAT-2026-001', CURRENT_DATE, 25.97, 5.00,
+    'FAT-1-A1B2C3D4', CURRENT_DATE, 32.96, 4.99,
     'PAYPAL', 'STANDARD',
     'Mario', 'Rossi', 'mario.rossi@email.com',
     'Via Roma 1', 'Roma', 'RM', '00100', 'Italia',
-    'ATTIVA', NULL, 1
+    'CONSEGNATO', 1, 'Created from ordine'
+),  (
+    'FAT-2-A1B2C3D4', CURRENT_DATE, 12.86, 6.99,
+    'PAYPAL', 'STANDARD',
+    'Mario', 'Rossi', 'mario.rossi@email.com',
+    'Via Roma 1', 'Roma', 'RM', '00100', 'Italia',
+    'CONSEGNATO', 1, 'Created from ordine'
 );
 
-INSERT INTO righe_fattura (id_fattura, titolo, autore, isbn, prezzo_unitario, quantita, totale_riga)
-VALUES (1, 'One Piece Vol.1', 'Eiichiro Oda', 'ISBN001', 9.99, 2, 19.98);
+INSERT INTO righe_fattura (id_fattura, isbn, titolo, prezzo_unitario, numero_copie, totale_riga)
+VALUES (1, 'ISBN001', 'One Piece Vol.1', 9.99, 2, 19.98);
 
-INSERT INTO righe_fattura (id_fattura, titolo, autore, isbn, prezzo_unitario, quantita, totale_riga)
-VALUES (1, 'Dragon Ball Vol.1', 'Akira Toriyama', 'ISBN002', 7.99, 1, 7.99);
+INSERT INTO righe_fattura (id_fattura, isbn, titolo, prezzo_unitario, numero_copie, totale_riga)
+VALUES (1, 'ISBN002', 'Dragon Ball Vol.1', 7.99, 1, 7.99);

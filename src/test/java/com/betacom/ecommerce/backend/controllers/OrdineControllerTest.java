@@ -1,386 +1,351 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
-import com.betacom.ecommerce.backend.dto.outputs.OrdineDTO;
-import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class OrdineControllerTest {
-	@Autowired
-	private OrdineController ordC;
-	@Autowired
-	private IMessagesServices msgS;
-	
-	@Test
-	public void testOrdineController() {
-		createTest();
-		updateTest();
-		listOrdiniTest();
-		findByIdTest();
-		deleteTest();
-	}
-	
-    private OrdineRequest getProva() {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private IMessagesServices msgS;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    private String getBearerToken(String username) {
+        UserDetails user = userDetailsService.loadUserByUsername(username);
+        String token = jwtService.generateToken(user.getUsername());
+        return "Bearer " + token;
+    }
+
+    // ==========================================
+    // BUILD REQUEST
+    // ==========================================
+    private OrdineRequest buildOrdineRequest() {
         return OrdineRequest.builder()
-        		.id(1)
+                .id(1)
                 .account(1)
                 .pagamento("PAYPAL")
                 .spedizione("STANDARD")
-                .data("2026-03-20")
-                .stato("CREATED")
+                .data(LocalDate.of(2026, 03, 20))
+                .anagrafica(1)
                 .build();
     }
 
-	private void createTest(){
-		// Normal workflow
-		OrdineRequest req = getProva();
-		req.setId(null);
-		
-		log.debug("Start OrdineControllerTest.createTest(), req: {}", req);
-		ResponseEntity<Response> resp = ordC.create(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
-
-		// errore: account null
-		req = getProva();
-		req.setId(null);
-		req.setAccount(null);
-		log.debug("Start OrdineControllerTest.createTest(): error expected: null_acc, OrdineRequest {}", req);
-		 resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_acc"));
-
-		// errore: account non esistente
-		req = getProva();
-		req.setId(null);
-		req.setAccount(99);
-		log.debug("Start OrdineControllerTest.createTest(): error expected: !exists_acc, OrdineRequest {}", req);
-		resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_acc"));
-
-		// errore: pagamento null
-		req = getProva();
-		req.setId(null);
-		req.setPagamento(null);
-		log.debug("Start OrdineControllerTest.createTest(): error expected: null_pag, OrdineRequest {}", req);
-		 resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_pag"));
-
-		// errore: pagamento non esistente
-		req = getProva();
-		req.setId(null);
-		req.setPagamento("MIO");
-		log.debug("Start OrdineControllerTest.createTest(): error expected: !exists_pag, OrdineRequest {}", req);
-		 resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_pag"));
-
-		// errore: spedizione null
-		req = getProva();
-		req.setId(null);
-		req.setSpedizione(null);
-		log.debug("Start OrdineControllerTest.createTest(): error expected: null_spe, OrdineRequest {}", req);
-		 resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_spe"));
-
-		// errore: spedizione non esistente
-		req = getProva();
-		req.setId(null);
-		req.setSpedizione("MIO");
-		log.debug("Start OrdineControllerTest.createTest(): error expected: !exists_spe, OrdineRequest {}", req);
-		resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_spe"));
-
-		// errore: data null
-		req = getProva();
-		req.setId(null);
-		req.setData(null);
-		log.debug("Start OrdineControllerTest.createTest(): error expected: null_dat, OrdineRequest {}", req);
-		resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_dat"));
-
-		// errore: stato null
-		req = getProva();
-		req.setId(null);
-		req.setStato(null);
-		log.debug("Start OrdineControllerTest.createTest(): error expected: null_sta, OrdineRequest {}", req);
-		resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_sta"));
-
-		// errore: stato non esistente
-		req = getProva();
-		req.setId(null);
-		req.setStato("MIO");
-		log.debug("Start OrdineControllerTest.createTest(): error expected: !exists_sta, OrdineRequest {}", req);
-		resp = ordC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_sta"));
-	};
-
-	private void updateTest(){
-		// Normal workflow
-		OrdineRequest req = getProva();
-		log.debug("Start OrdineControllerTest.updateTest(), req: {}", req);
-		ResponseEntity<Response> resp = ordC.update(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
-
-		// errore: id null
-		req = getProva();
-		req.setId(null);
-		log.debug("Start OrdineControllerTest.updateTest(): error expected: null_ord, OrdineRequest {}", req);
-		 resp = ordC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_ord"));
-		
-		// errore: id non esistente
-		req = getProva();
-		req.setId(99);
-		log.debug("Start OrdineControllerTest.updateTest(): error expected: !exists_ord, OrdineRequest {}", req);
-		 resp = ordC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_ord"));
-
-		// update invalido per campi
-		// account invalido !exists_acc
-		req = getProva();
-		req.setAccount(99);
-		log.debug("Start OrdineControllerTest.updateTest(): error expected: !exists_acc, OrdineRequest {}", req);
-		resp = ordC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_acc"));
-
-		// errore: pagamento non esistente
-		req = getProva();
-		req.setPagamento("MIO");
-		log.debug("Start OrdineControllerTest.updateTest(): error expected: !exists_pag, OrdineRequest {}", req);
-		 resp = ordC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_pag"));
-
-		// errore: spedizione non esistente
-		req = getProva();
-		req.setSpedizione("MIO");
-		log.debug("Start OrdineControllerTest.updateTest(): error expected: !exists_spe, OrdineRequest {}", req);
-		resp = ordC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_spe"));
-
-		// errore: data invalida
-		req = getProva();
-		req.setData("OGGI");
-		log.debug("Start OrdineControllerTest.updateTest(): error expected: null_dat, OrdineRequest {}", req);
-		resp = ordC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_dat"));
-
-		// errore: stato non esistente
-		req = getProva();
-		req.setStato("MIO");
-		log.debug("Start OrdineControllerTest.updateTest(): error expected: !exists_sta, OrdineRequest {}", req);
-		resp = ordC.update(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_sta"));
-
-	};
-/*
-	private void listTest(){
-		log.debug("Start OrdineControllerTest.listTest()");
-		
-		ResponseEntity<?> resp = ordC.list();
-		
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody()).isInstanceOf(List.class);
-		List<?> body = (List<?>) resp.getBody();
-		if (body.size() > 0) {
-			Assertions.assertThat(body.getFirst()).isInstanceOf(OrdineDTO.class);
-		}
-	};
-*/
-	@Test
-    public void listOrdiniTest() {
-        log.debug("start list ordini test");
-        
-        // Inizializzazione parametri di ricerca
-        String username = null;
-        String tipoPagamento = null;
-        String tipoSpedizione = null;
-        LocalDate data = null;
-        String statoOrdine = null;
-        List<String> isbns = new ArrayList<>();
-
-        //Test Lista Vuota (senza filtri)
-        List<OrdineDTO> lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
-        assertThat(lO).isNotEmpty();
-        
-        // Test per Username
-        username = "Mario";
-        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
-        username = null;
-        assertThat(lO).isNotEmpty();
-        assertThat(lO.get(0).getAccount().getUsername()).containsIgnoringCase("mario");
-
-        // Test per Tipo Pagamento
-        tipoPagamento = "PayPal";
-        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
-        tipoPagamento = null;
-        assertThat(lO).isNotEmpty();
-        assertThat(lO.get(0).getPagamento().getTipoPagamento()).isEqualToIgnoringCase("paypal");
-
-        // Test per Tipo Spedizione
-        tipoSpedizione = "Corriere";
-        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
-        tipoSpedizione = null;
-        assertThat(lO).isNotEmpty();
-        assertThat(lO.get(0).getSpedizione().getTipoSpedizione()).isEqualToIgnoringCase("corriere");
-
-        // Test per Stato Ordine
-        statoOrdine = "Spedito";
-        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
-        statoOrdine = null;
-        assertThat(lO).isNotEmpty();
-        assertThat(lO.get(0).getStato().getStatoOrdine()).isEqualToIgnoringCase("spedito");
-
-        // Test per ISBN
-        isbns.add("978-1234567890");
-        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
-        isbns.clear();
-        assertThat(lO).isNotEmpty();
-        assertThat(lO.get(0).getRigheOrdine().stream()
-            .anyMatch(r -> r.getManga().equals("978-1234567890"))).isTrue();
-
-        // Test per Data
-        data = LocalDate.of(2024, 5, 15);
-        lO = getLoadedList(username, tipoPagamento, tipoSpedizione, data, statoOrdine, isbns);
-        data = null;
-        assertThat(lO).isNotEmpty();
-        assertThat(lO.get(0).getData().getMonthValue()).isEqualTo(5);
-        assertThat(lO.get(0).getData().getYear()).isEqualTo(2024);
+    // ==========================================
+    // ASSERT HELPERS
+    // ==========================================
+    private void assertCreateError(String token, String msg, OrdineRequest req) throws Exception {
+        mockMvc.perform(post("/rest/ordine/create").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
     }
-	
-	@SuppressWarnings("unchecked")
-	private List<OrdineDTO> getLoadedList(
-	        String username,
-	        String tipoPagamento,
-	        String tipoSpedizione,
-	        LocalDate data,
-	        String statoOrdine,
-	        List<String> isbns
-	) {
-		Integer anno = (data != null) ? data.getYear() : null;
-	    Integer mese = (data != null) ? data.getMonthValue() : null;
-	    Integer giorno = (data != null) ? data.getDayOfMonth() : null;
-	    ResponseEntity<Object> resp = ordC.list(
-	            username,
-	            tipoPagamento,
-	            tipoSpedizione,
-	            statoOrdine,
-	            anno,
-	            mese,
-	            giorno,
-	            isbns
-	    );
 
-	    assertEquals(HttpStatus.OK, resp.getStatusCode());
-	    Object b = resp.getBody();
-	    Assertions.assertThat(b).isInstanceOf(List.class);
+    private void assertUpdateError(String token, String msg, OrdineRequest req) throws Exception {
+        mockMvc.perform(put("/rest/ordine/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+    }
 
-	    return (List<OrdineDTO>) b;
-	}
-	
-	private void findByIdTest(){
-		// Id error
-		// null_ord
-		Integer id = null;
-		log.debug("Start OrdineControllerTest.findByIdTest(), error null_ord expected");
-		ResponseEntity<?> resp = ordC.findById(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get("null_ord"), resp.getBody());
+    // ==========================================
+    // TESTS
+    // ==========================================
+    @Test
+    public void testOrdineControllerAdmin() throws Exception {
+        create();
+        update();
+        listOrdini();
+        findById();
+        deleteTest();
+    }
 
-		// !exists_ord
-		id = 99;
-		log.debug("Start OrdineControllerTest.findByIdTest(), error expected");
-		resp = ordC.findById(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get("!exists_ord"), resp.getBody());
+    // ==========================================
+    // CREATE
+    // ==========================================
+    public void create() throws Exception {
+        log.debug("Begin create Ordine Test");
+        String token = getBearerToken("AdminUser");
 
-		// Normal workflow
-		id = 1;
-		log.debug("Start OrdineControllerTest.findByIdTest()");
-		resp = ordC.findById(id);
-		Assertions.assertThat(resp.getBody()).isInstanceOf(OrdineDTO.class);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-	}
-	
+        // Normal workflow
+        OrdineRequest req = buildOrdineRequest();
+        req.setId(null);
+        mockMvc.perform(post("/rest/ordine/create").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("rest_created")));
 
-	private void deleteTest(){
-		// !exists_ord
-		Integer id = 99;
-		log.debug("Start OrdineRequest.deleteTest(): error expected !exists_ord, invalid id: {}", id);
-		ResponseEntity<Response> resp = ordC.delete(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_ord"));
-		
-		// null_ord
-		id = null;
-		log.debug("Start OrdineRequest.deleteTest(): error expected: null_ord, invalid id: {}", id);
-		resp = ordC.delete(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("null_ord"));
+        // null_acc
+        req = buildOrdineRequest();
+        req.setId(null);
+        req.setAccount(null);
+        String msg = "null_acc";
+        assertCreateError(token, msg, req);
 
-		// Normal workflow
-		id = 2;
-		log.debug("Start OrdineRequest.deleteTest(), id: {}", id);
-		resp = ordC.delete(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
-	};
-	
+        // !exists_acc
+        req = buildOrdineRequest();
+        req.setId(null);
+        req.setAccount(99);
+        msg = "!exists_acc";
+        assertCreateError(token, msg, req);
+
+        // null_pag
+        req = buildOrdineRequest();
+        req.setId(null);
+        req.setPagamento(null);
+        msg = "null_pag";
+        assertCreateError(token, msg, req);
+
+        // !exists_pag
+        req = buildOrdineRequest();
+        req.setId(null);
+        req.setPagamento("MIO");
+        msg = "!exists_pag";
+        assertCreateError(token, msg, req);
+
+        // null_spe
+        req = buildOrdineRequest();
+        req.setId(null);
+        req.setSpedizione(null);
+        msg = "null_spe";
+        assertCreateError(token, msg, req);
+
+        // !exists_spe
+        req = buildOrdineRequest();
+        req.setId(null);
+        req.setSpedizione("MIO");
+        msg = "!exists_spe";
+        assertCreateError(token, msg, req);
+
+        // null_dat
+        req = buildOrdineRequest();
+        req.setId(null);
+        req.setData(null);
+        msg = "null_dat";
+        assertCreateError(token, msg, req);
+
+    }
+
+    // ==========================================
+    // UPDATE (ADMIN only)
+    // ==========================================
+    public void update() throws Exception {
+        log.debug("Begin update Ordine Test");
+        String token = getBearerToken("AdminUser");
+
+        // Normal workflow
+        OrdineRequest req = buildOrdineRequest();
+        mockMvc.perform(put("/rest/ordine/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("rest_updated")));
+
+        // forbidden for non-admin
+        String userToken = getBearerToken("UserUser");
+        mockMvc.perform(put("/rest/ordine/update").with(csrf())
+                .header("Authorization", userToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isForbidden());
+
+        // null_ord
+        req = buildOrdineRequest();
+        req.setId(null);
+        String msg = "null_ord";
+        assertUpdateError(token, msg, req);
+
+        // !exists_ord
+        req = buildOrdineRequest();
+        req.setId(99);
+        msg = "!exists_ord";
+        assertUpdateError(token, msg, req);
+
+        // !exists_acc
+        req = buildOrdineRequest();
+        req.setAccount(99);
+        msg = "!exists_acc";
+        assertUpdateError(token, msg, req);
+
+        // !exists_pag
+        req = buildOrdineRequest();
+        req.setPagamento("MIO");
+        msg = "!exists_pag";
+        assertUpdateError(token, msg, req);
+
+        // !exists_spe
+        req = buildOrdineRequest();
+        req.setSpedizione("MIO");
+        msg = "!exists_spe";
+        assertUpdateError(token, msg, req);
+
+        // !exists_sta
+        req = buildOrdineRequest();
+        req.setStato("MIO");
+        msg = "!exists_sta";
+        assertUpdateError(token, msg, req);
+    }
+
+    // ==========================================
+    // LIST
+    // ==========================================
+    public void listOrdini() throws Exception {
+        log.debug("Begin list Ordine Test");
+        String token = getBearerToken("AdminUser");
+
+        // no filters
+        mockMvc.perform(get("/rest/ordine/list")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        // username filter
+        mockMvc.perform(get("/rest/ordine/list")
+                .param("username", "Mario")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        // tipoPagamento filter
+        mockMvc.perform(get("/rest/ordine/list")
+                .param("tipoPagamento", "PayPal")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        // tipoSpedizione filter
+        mockMvc.perform(get("/rest/ordine/list")
+                .param("tipoSpedizione", "Corriere")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        // statoOrdine filter
+        mockMvc.perform(get("/rest/ordine/list")
+                .param("statoOrdine", "Spedito")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        // isbns filter
+        mockMvc.perform(get("/rest/ordine/list")
+                .param("isbns", "978-1234567890")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        // date filter
+        mockMvc.perform(get("/rest/ordine/list")
+                .param("anno", "2024")
+                .param("mese", "5")
+                .param("giorno", "15")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    // ==========================================
+    // FIND BY ID
+    // ==========================================
+    public void findById() throws Exception {
+        log.debug("Begin findById Ordine Test");
+        String token = getBearerToken("AdminUser");
+
+        // Normal workflow
+        mockMvc.perform(get("/rest/ordine/findById")
+                .param("id", "1")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+
+        // !exists_ord
+        mockMvc.perform(get("/rest/ordine/findById")
+                .param("id", "99")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest());
+    }
+
+    // ==========================================
+    // DELETE (ADMIN only)
+    // ==========================================
+    public void deleteTest() throws Exception {
+        log.debug("Begin delete Ordine Test");
+        String token = getBearerToken("AdminUser");
+
+        // forbidden for non-admin
+        String userToken = getBearerToken("UserUser");
+        mockMvc.perform(delete("/rest/ordine/delete/99").with(csrf())
+                .header("Authorization", userToken))
+                .andExpect(status().isForbidden());
+
+        // !exists_ord
+        String msg = "!exists_ord";
+        mockMvc.perform(delete("/rest/ordine/delete/99").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // null_ord
+        msg = "null_ord";
+        mockMvc.perform(delete("/rest/ordine/delete/").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isNotFound());
+
+        // Normal workflow
+        msg = "rest_deleted";
+        mockMvc.perform(delete("/rest/ordine/delete/2").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+    }
 }

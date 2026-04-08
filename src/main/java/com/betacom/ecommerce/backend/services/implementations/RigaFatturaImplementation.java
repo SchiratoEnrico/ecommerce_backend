@@ -64,6 +64,9 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
         r.setIsbn(m.getIsbn());
         r.setTitolo(m.getTitolo());
         r.setPrezzoUnitario(m.getPrezzo());
+        if (req.getPrezzoUnitario() != null) {
+        	r.setPrezzoUnitario(req.getPrezzoUnitario());
+        }
         
         r.setNumeroCopie(req.getNumeroCopie());
 		Integer left = m.getNumeroCopie() - req.getNumeroCopie();
