@@ -2,6 +2,11 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
@@ -9,30 +14,69 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.betacom.ecommerce.backend.dto.inputs.GenereRequest;
 import com.betacom.ecommerce.backend.dto.outputs.GenereDTO;
+import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class GenereControllerTest {
 	
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private IMessagesServices msgS;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private String getBearerToken(String username) {
+        UserDetails user = userDetailsService.loadUserByUsername(username);
+        String token = jwtService.generateToken(user.getUsername());
+        return "Bearer " + token;
+    }
+
 	@Autowired
 	private GenereController genC;
 	
 	@Test
-	public void testGenereController() {
-		list();
-		listById();
+	public void testGenereControllerAdmin() throws Exception {
 		create();
 		update();
 		delete();
+	}
+
+	@Test
+	public void testGenereControllerAny() {
+		list();
+		listById();
 	}
 
 	public void list() {
@@ -61,73 +105,86 @@ public class GenereControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
-	public void create() {
+	public void create() throws Exception {
+		String token = getBearerToken("AdminUser");
 		GenereRequest req = new GenereRequest();
 		req.setDescrizione(" comico");
-		ResponseEntity<?> resp = genC.create(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		String msg = "rest_created";
+		mockMvc.perform(post("/rest/genere/create").with(csrf())
+        .header("Authorization", token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
-		resp = genC.findById(3);
-		GenereDTO g = (GenereDTO)resp.getBody();
-		assertEquals(g.getDescrizione(), "COMICO");
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		
 		//errore duplicazione
-		resp = genC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		msg = "exists_gen";
+		mockMvc.perform(post("/rest/genere/create").with(csrf())
+		        .header("Authorization", token)
+		        .contentType(MediaType.APPLICATION_JSON)
+		        .content(objectMapper.writeValueAsString(req)))
+		        .andExpect(status().isBadRequest())
+		        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 	}
 	
-	public void update() {
-	    GenereRequest req = new GenereRequest();
-
-	    // creo prima un altro genere che servirà per il test duplicato
-	    GenereRequest createReq = new GenereRequest();
-	    createReq.setDescrizione("comico");
-	    genC.create(createReq);
-
-	    req.setDescrizione(" romantico");
-	    req.setId(1);
-
-	    ResponseEntity<?> resp = genC.update(req);
-	    assertEquals(HttpStatus.OK, resp.getStatusCode());
+	public void update() throws Exception {
+		String token = getBearerToken("AdminUser");
+		GenereRequest req = new GenereRequest();
+		req.setId(5);
+		req.setDescrizione(" sport");
+		String msg = "rest_updated";
+		mockMvc.perform(put("/rest/genere/update").with(csrf())
+        .header("Authorization", token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
 	    // update error id inesistente
 	    req.setId(99);
-	    resp = genC.update(req);
-	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+	    msg = "!exists_gen";
+		mockMvc.perform(put("/rest/genere/update").with(csrf())
+        .header("Authorization", token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
 	    // update error duplicato
-	    req.setDescrizione(" comico");
-	    req.setId(1);
-	    resp = genC.update(req);
-
-	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+	    req.setDescrizione(" azione");
+	    req.setId(2);
+	    msg = "exists_gen";
+		mockMvc.perform(put("/rest/genere/update").with(csrf())
+        .header("Authorization", token)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+		}
 	
-	    //update error id
-	    req.setDescrizione(" comico");
-	    req.setId(99);
-	    resp = genC.update(req);
-
-	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-	
-	 // update error request null
-	    resp = genC.update(null);
-
-	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-	}
-	
-	public void delete() {
-		
+	public void delete() throws Exception {
+		String token = getBearerToken("AdminUser");
+		String msg = "rest_deleted";
 		//delete a buon fine
-		ResponseEntity<?> resp = genC.delete(3);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		mockMvc.perform(MockMvcRequestBuilders.delete("/rest/genere/delete/6").with(csrf())
+		        .header("Authorization", token))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 		
 		//delete andato male id sbagliato
-		resp = genC.delete(99);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		msg = "!exists_gen";
+		mockMvc.perform(MockMvcRequestBuilders.delete("/rest/genere/delete/99").with(csrf())
+		        .header("Authorization", token))
+        		.andExpect(status().isBadRequest())
+		        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 		
 		//delete andato male ci sono manga collegati
-		resp = genC.delete(1);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		msg = "linked_man";
+		mockMvc.perform(MockMvcRequestBuilders.delete("/rest/genere/delete/1").with(csrf())
+		        .header("Authorization", token))
+		        .andExpect(status().isBadRequest())
+		        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+		
 	}
 }

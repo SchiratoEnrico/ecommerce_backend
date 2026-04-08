@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IGenereServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -36,7 +38,7 @@ public class GenereController {
 			genS.create(req);
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
@@ -51,7 +53,7 @@ public class GenereController {
 			genS.update(req);
 			r.setMsg(msgS.get("rest_updated"));
 		} catch (Exception e) {
-			r.setMsg(e.getMessage());
+			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
 		}
 		
@@ -65,7 +67,7 @@ public class GenereController {
 		try {
 			r =  genS.list();
 		}catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}	
 		
@@ -79,7 +81,7 @@ public class GenereController {
 		try {
 			r =  genS.findById(id);
 		}catch (Exception e) {
-			r = e.getMessage();
+			r = msgS.get(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}	
 		
@@ -87,8 +89,8 @@ public class GenereController {
 	}
 	
 	@PreAuthorize("hasAuthority('ADMIN')")
-	@DeleteMapping("/delete")
-	public ResponseEntity<Response> delete(@RequestParam(required = true) Integer id){
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Response> delete(@PathVariable(required = true) Integer id){
 	    Response r = new Response();
 	    HttpStatus status = HttpStatus.OK;
 
@@ -96,7 +98,7 @@ public class GenereController {
 	        genS.delete(id);
 	        r.setMsg(msgS.get("rest_deleted"));
 	    } catch (Exception e) {
-	        r.setMsg(e.getMessage());
+	        r.setMsg(msgS.get(e.getMessage()));
 	        status = HttpStatus.BAD_REQUEST;
 	    }
 
