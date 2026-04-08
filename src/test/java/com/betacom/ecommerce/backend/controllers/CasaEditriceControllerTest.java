@@ -1,209 +1,286 @@
 package com.betacom.ecommerce.backend.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-import java.util.List;
-
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.betacom.ecommerce.backend.security.JwtService; 
 import com.betacom.ecommerce.backend.dto.inputs.CasaEditriceRequest;
-import com.betacom.ecommerce.backend.dto.outputs.CasaEditriceDTO;
-import com.betacom.ecommerce.backend.response.Response;
-import com.betacom.ecommerce.backend.services.interfaces.ICasaEditriceServices;
-import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@AutoConfigureMockMvc
+@Transactional // Rollback automatico del DB H2 dopo ogni test
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class CasaEditriceControllerTest {
-	@Autowired 
-	private CasaEditriceController casC;
-	
-	@Autowired 
-	private IMessagesServices msgS;
-	
-	@MockitoSpyBean
-	private ICasaEditriceServices casS;
 
-	@Test
-	public void testCasaEditriceController() throws Exception {
-		createCasa();
-		findCasaByIdSuccesso();
-		findCasaByIdErrore();
-		updateCasaSuccess();
-		updateCasaError();
-		listCase();
-		deleteCasaSuccess();
-		deleteCasaError();
+	@Autowired
+	private MockMvc mockMvc;
+
+	@Autowired
+	private JwtService jwtService; 
+
+	@Autowired
+	private UserDetailsService userDetailsService;
+
+	private ObjectMapper objectMapper = new ObjectMapper();
+
+	// UTILITIES
+	private String getBearerToken(String username) {
+		UserDetails user = userDetailsService.loadUserByUsername(username);
+		String token = jwtService.generateToken(user.getUsername()); 
+		return "Bearer " + token;
 	}
 
 	private CasaEditriceRequest buildCasaEditriceRequest() {
 		CasaEditriceRequest req = new CasaEditriceRequest();
-		req.setDescrizione("String");
-		req.setEmail("Email");
-		req.setIndirizzo("Indiririzzo");
-		req.setNome("Nome");
+		req.setNome("Edizioni Test");
+		req.setDescrizione("Casa editrice di prova per i test");
+		req.setIndirizzo("Via del Test 1, Milano");
+		req.setEmail("info@edizionitest.it");
 		return req;
 	}
-	public void createCasa() {
-		log.debug("*** Test creazione Case Editrice ***");
+
+
+	// TEST ENDPOINT: CREATE (Solo ADMIN)
+
+	@Test
+	public void createSuccessAdmin() throws Exception {
+		log.debug("Begin create CasaEditrice Test - Success");
+		String token = getBearerToken("AdminUser"); 
+
 		CasaEditriceRequest req = buildCasaEditriceRequest();
-		ResponseEntity<Response> resp = casC.create(req);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_created"));
-	
-		// null_des
-		String msg = "null_des";
-		req = buildCasaEditriceRequest();
-		req.setDescrizione(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		ResponseEntity<Response> re = casC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
 
-		// null_ema
-		msg = "null_ema";
-		req = buildCasaEditriceRequest();
-		req.setEmail(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = casC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
+		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento creato con successo"));
+	}
 
-		// null_ind
-		msg = "null_ind";
-		req = buildCasaEditriceRequest();
-		req.setIndirizzo(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = casC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
-		
-		// null_nom
-		msg = "null_nom";
-		req = buildCasaEditriceRequest();
+	@Test
+	public void createForbiddenUser() throws Exception {
+		log.debug("Begin create CasaEditrice Test - Forbidden");
+		String token = getBearerToken("MarioRossi"); 
+
+		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(buildCasaEditriceRequest())))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	public void createErrorCatchBlocks() throws Exception {
+		log.debug("Begin create CasaEditrice Test - Null Fields Catch");
+		String token = getBearerToken("AdminUser"); 
+
+		// Errore 1: Nome nullo (null_nom)
+		CasaEditriceRequest req = buildCasaEditriceRequest();
 		req.setNome(null);
-		log.debug("Begin create Account Test, error expected: {}", msg);
-		re = casC.create(req);
-		assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
-		Assertions.assertThat(re.getBody().getMsg()).isEqualTo(msgS.get(msg));
 
-	}
-	
-	public void findCasaByIdSuccesso() {
-		log.debug("*** Test ricerca Casa Editrice per id - successo");
-		ResponseEntity<Object> resp = casC.findById(1);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Object b =  resp.getBody();
-		Assertions.assertThat(b).isNotNull();
+		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Nome assente")); 
 
-		Assertions.assertThat(b).isInstanceOf(CasaEditriceDTO.class);
-		assertThat(((CasaEditriceDTO) b).getId()).isEqualTo(1);
+		// Errore 2: Duplicato (exists_casa)
+		CasaEditriceRequest reqDup = buildCasaEditriceRequest();
+		// Inseriamo prima l'originale
+		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(reqDup)))
+				.andExpect(status().isOk());
+
+		// Proviamo a inserirne una con lo stesso nome ma case diverso (il service usa ignoreCase)
+		reqDup.setNome("edizioni TEST"); 
+		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(reqDup)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Casa editrice già presente")); 
 	}
-				
-	public void findCasaByIdErrore() {
-		log.debug("*** Test ricerca Casa Editrice per id - errore ***");
-		ResponseEntity<Object> resp = casC.findById(0);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		Assertions.assertThat(resp.getBody().toString()).isNotEmpty();
-	}
-	
-	public void updateCasaSuccess() {
-		log.debug("*** Test update Casa Editrice - successo ***");
-		
+
+
+	// TEST ENDPOINT: UPDATE (Solo ADMIN)
+
+	@Test
+	public void updateSuccessAdmin() throws Exception {
+		log.debug("Begin update CasaEditrice Test - Success");
+		String token = getBearerToken("AdminUser"); 
+
+		// Aggiorniamo la casa editrice 1 dal data.sql
 		CasaEditriceRequest req = new CasaEditriceRequest();
 		req.setId(1);
-		req.setDescrizione("string");
-		req.setEmail("string");
-		req.setIndirizzo("string");
-		req.setNome("string");
-		
-		ResponseEntity<Response> resp = casC.update(req);
-		
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_updated"));
-	}
-	
-	public void updateCasaError() {
-		log.debug("*** Test update Casa Editrice - errore ***");
-		
-		CasaEditriceRequest req = new CasaEditriceRequest();
-		req.setId(0);
-		req.setDescrizione("string");
-		req.setEmail("string");
-		req.setIndirizzo("string");
-		req.setNome("string");
-		
-		ResponseEntity<Response> resp = casC.update(req);
-		
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-	}
-	
-	public void deleteCasaSuccess() {
-		log.debug("*** Test delete Casa Editrice ***");
-		
-		log.debug("* Expected: fail due to manga attached not empty *");
-		ResponseEntity<Response> resp = casC.delete(1);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		log.debug("* Done *");
-		
-		log.debug("* Expected: success *");
-		resp = casC.delete(2);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		Response r = (Response)resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
-		log.debug("* Done *");
-	}
-	
-	public void deleteCasaError() {
-		log.debug("*** Test delete Casa Editrice - errore ***");
-		
-		ResponseEntity<Response> resp = casC.delete(0);
-		
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		req.setNome("Nuovo Nome Editore");
+		req.setEmail("nuovaemail@test.it");
+
+		mockMvc.perform(put("/rest/casa_editrice/update").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento aggiornato con successo"));
 	}
 
-	public void listCase() throws Exception {
-		log.debug("*** Test list Case ***");
-		
-		log.debug("* list: no params *");
-		ResponseEntity<?> resp = casC.list(null, null, null, null);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-        Object b = resp.getBody();
-		Assertions.assertThat(b).isInstanceOf(List.class);
-		List<?> lC = (List<?>) b;
-		Assertions.assertThat(lC.size()).isGreaterThan(0);
-		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(CasaEditriceDTO.class);
-		lC.forEach(c -> c.toString());
-		
-		log.debug("* list: with params *");
-		resp = casC.list("JPOP", null, null, null);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		b = resp.getBody();
-		Assertions.assertThat(b).isInstanceOf(List.class);
-		lC = (List<?>) b;
-		Assertions.assertThat(lC.size()).isGreaterThan(0);
-		Assertions.assertThat(((List<?>) b).getFirst()).isInstanceOf(CasaEditriceDTO.class);
-		lC.forEach(c -> c.toString());
-		
-		String error = "generic error";
-		doThrow(new RuntimeException(error)).when(casS).list(null, null, null, null);
-		resp = casC.list(null, null, null, null);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+
+	// TEST ENDPOINT: DELETE (Solo ADMIN)
+
+	@Test
+	public void deleteSuccessAdmin() throws Exception {
+		log.debug("Begin delete CasaEditrice Test - Real Lifecycle");
+		String token = getBearerToken("AdminUser"); 
+
+		// 1. Creiamo una casa editrice sacrificabile
+		CasaEditriceRequest req = buildCasaEditriceRequest();
+		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+				.andExpect(status().isOk());
+
+		// 2. Troviamola tramite list 
+		String responseBody = mockMvc.perform(get("/rest/casa_editrice/list")
+				.param("nome", "Edizioni Test")
+				.header("Authorization", token))
+				.andReturn().getResponse().getContentAsString();
+				
+		com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(responseBody);
+		Integer idDaCancellare = rootNode.get(0).path("id").asInt();
+
+		// 3. Eseguiamo la delete
+		mockMvc.perform(delete("/rest/casa_editrice/delete/" + idDaCancellare).with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.msg").value("Elemento eliminato con successo"));
 	}
+
+	@Test
+	public void deleteErrorLinkedMangaCatch() throws Exception {
+		log.debug("Begin delete CasaEditrice Test - Linked Manga");
+		String token = getBearerToken("AdminUser"); 
+
+		// La casa editrice con ID 1 nel DB di test ha dei manga associati.
+		mockMvc.perform(delete("/rest/casa_editrice/delete/1").with(csrf())
+				.header("Authorization", token))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value("Casa editrice ha manga allegati: eliminazione bloccata")); 
+	}
+
+
+	// TEST ENDPOINT: RECUPERO DATI (Pubblici)
+
+	@Test
+	public void listSuccess() throws Exception {
+		log.debug("Begin list CasaEditrice test");
+		String token = getBearerToken("MarioRossi"); 
+
+		mockMvc.perform(get("/rest/casa_editrice/list")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray());
+	}
+
+	@Test
+	public void findByIdSuccess() throws Exception {
+		log.debug("Begin findById CasaEditrice test");
+		String token = getBearerToken("MarioRossi");
+
+		mockMvc.perform(get("/rest/casa_editrice/findById").param("id", "1")
+				.header("Authorization", token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(1));
+	}
+	
+	
+
+		// TEST ERRORI: UPDATE
+
+		@Test
+		public void updateErrorNotFound() throws Exception {
+			log.debug("Begin update CasaEditrice Test - ID Not Found");
+			String token = getBearerToken("AdminUser"); 
+
+			// Proviamo a modificare un ID che non esiste nel DB
+			CasaEditriceRequest req = new CasaEditriceRequest();
+			req.setId(999);
+			req.setNome("Editore Fantasma");
+
+			mockMvc.perform(put("/rest/casa_editrice/update").with(csrf())
+					.header("Authorization", token)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(req)))
+					.andExpect(status().isBadRequest())
+					.andExpect(jsonPath("$.msg").value("Casa editrice non trovata")); 
+		}
+
+		@Test
+		public void updateErrorDuplicateName() throws Exception {
+			log.debug("Begin update CasaEditrice Test - Duplicate Name");
+			String token = getBearerToken("AdminUser"); 
+
+			// 1. Creiamo una seconda casa editrice "Mondadori"
+			CasaEditriceRequest req2 = new CasaEditriceRequest();
+			req2.setNome("Mondadori");
+			req2.setEmail("info@mondadori.it");
+			req2.setIndirizzo("Milano");
+			req2.setDescrizione("Grande Editore");
+			
+			mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+					.header("Authorization", token)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(req2)))
+					.andExpect(status().isOk());
+
+			// 2. Proviamo ad aggiornare l'ID 1 (che nel data.sql è "Panini") 
+			// rinominandolo "Mondadori" (che ora esiste già)
+			CasaEditriceRequest reqUpdate = new CasaEditriceRequest();
+			reqUpdate.setId(1);
+			reqUpdate.setNome("Mondadori");
+
+			mockMvc.perform(put("/rest/casa_editrice/update").with(csrf())
+					.header("Authorization", token)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(reqUpdate)))
+					.andExpect(status().isBadRequest())
+					.andExpect(jsonPath("$.msg").value("Casa editrice già presente")); 
+		}
+
+
+		// TEST ERRORI: FIND BY ID
+		@Test
+		public void findByIdErrorNotFound() throws Exception {
+			log.debug("Begin findById CasaEditrice Test - Not Found");
+			String token = getBearerToken("MarioRossi");
+
+			// Cerchiamo un ID inesistente
+			mockMvc.perform(get("/rest/casa_editrice/findById").param("id", "999")
+					.header("Authorization", token))
+					.andExpect(status().isBadRequest())
+					.andExpect(content().string("Casa editrice non trovata")); 
+		}
 }
