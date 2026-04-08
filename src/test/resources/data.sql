@@ -202,6 +202,9 @@ VALUES ('One Piece', 'Saga sui pirati', NULL, FALSE);
 INSERT INTO saghe (nome, descrizione, immagine, proxy)
 VALUES ('Dragon Ball', 'Saga sui guerrieri alieni', NULL, FALSE);
 
+INSERT INTO saghe (nome, descrizione, immagine, proxy)
+VALUES ('Arale', 'Saga sui ragazza Robot', NULL, FALSE);
+
 INSERT INTO manga (isbn, titolo, data_pubblicazione, id_casa_editrice, numero_copie, prezzo, immagine, id_saga, saga_volume)
 VALUES ('ISBN001', 'One Piece Vol.1', '1997-07-22', 1, 100, 9.99, NULL, 1, 1);
 

@@ -32,19 +32,6 @@ public class ImageDtoBuilders {
 	private final IGenereRepository geneR;
 	
 	public MangaDTO buildMangaDTO(Manga m, Optional<CasaEditrice> c, Optional<Set<Autore>> lA, Optional<Set<Genere>> lG, Optional<Saga> s) {
-        //log.debug(uploS.buildUrl(m.getImmagine()));
-//        log.debug("CasaEditrice: {}", c.isPresent()?
-//				DtoBuilders.buildCasaEditriceDTO(c.get()) : null);
-//        log.debug("Saga: {}", s.isPresent()?
-//				DtoBuilders.buildSagaDTO(s.get(), Optional.empty()) : null);
-//        log.debug("Autori: {}", lA.isPresent() ?
-//				lA.get().stream()
-//				.map(a -> DtoBuilders.buildAutoreDTO(a, Optional.empty())).toList() :
-//					null);
-//        log.debug("Generi: {}", lG.isPresent() ?
-//				lG.get().stream()
-//				.map(g -> DtoBuilders.buildGenereDTO(g, Optional.empty())).toList() :
-//					null);
         
 		return MangaDTO.builder()
                 .isbn(m.getIsbn())
@@ -84,9 +71,9 @@ public class ImageDtoBuilders {
 	                ? lM.stream()
 	                    .map(m -> buildMangaDTO(
 	                        m,
-	                        Optional.ofNullable(m.getCasaEditrice()),
-	                        Optional.ofNullable(m.getAutori()),
-	                        Optional.ofNullable(m.getGeneri()),
+	                        Optional.empty(),
+	                        Optional.empty(),
+	                        Optional.empty(),
 	                        Optional.empty()))  // empty = no saga back-ref → no recursion
 	                    .toList()
 	                : null)
@@ -96,9 +83,9 @@ public class ImageDtoBuilders {
 	}
 	
 	private List<AutoreDTO> computeAutori(List<Manga> manga) {
+		//List<Autore> = 
 		Set<Integer> ids = manga.stream()
-		        .filter(m -> m.getAutori() != null)
-		        .flatMap(m -> m.getAutori().stream())
+		        .flatMap(m -> autoR.findAllByMangaIsbn(m.getIsbn()).stream())
 		        .map(a -> a.getId())
 		        .collect(Collectors.toSet());
 		return autoR.findAllById(ids).stream()
@@ -108,8 +95,7 @@ public class ImageDtoBuilders {
 
 	private List<GenereDTO> computeGeneri(List<Manga> manga) {
 		Set<Integer> ids = manga.stream()
-		        .filter(m -> m.getGeneri() != null)
-		        .flatMap(m -> m.getGeneri().stream())
+		        .flatMap(m -> geneR.findAllByMangaIsbn(m.getIsbn()).stream())
 		        .map(a -> a.getId())
 		        .collect(Collectors.toSet());
 	    return geneR.findAllById(ids).stream()

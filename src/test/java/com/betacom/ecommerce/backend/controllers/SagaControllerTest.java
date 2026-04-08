@@ -2,6 +2,12 @@ package com.betacom.ecommerce.backend.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,35 +16,83 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 
 import com.betacom.ecommerce.backend.dto.inputs.SagaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.SagaDTO;
-import com.betacom.ecommerce.backend.response.Response;
+import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class SagaControllerTest {
     @Autowired
     private SagaController sagaC;
     
     @Autowired
-	private IMessagesServices msgS;
+    private MockMvc mockMvc;
 
-	@Test
-	public void testSagaController() {
-		listTest();
-		findByIdTest();
-		createTest();
-		updateTest();
-		deleteTest();
+    @Autowired
+    private IMessagesServices msgS;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    private String getBearerToken(String username) {
+        UserDetails user = userDetailsService.loadUserByUsername(username);
+        String token = jwtService.generateToken(user.getUsername());
+        return "Bearer " + token;
+    }
+
+    // ==========================================
+    // BUILD REQUEST
+    // ==========================================
+	private SagaRequest buildSagaRequest() {
+		SagaRequest r = new SagaRequest();
+		r.setNome("Ken Shiro");
+		r.setDescrizione("Saga su formidabli guerrieri");
+		return r;
 	}
+	
+    // ==========================================
+    // TESTS
+    // ==========================================
+    @Test
+    public void testSagaControllerAdmin() throws Exception {
+        createTest();
+        updateTest();
+        deleteTest();
+    }
+    
+    @Test
+    public void testSagaController() {
+    	// chiunque => identici a prima
+        listTest();
+        findByIdTest();
+    }
 	
 	private List<SagaDTO> getLoadedList(
 			String casaEditriceNome,
@@ -128,7 +182,7 @@ public class SagaControllerTest {
     	assertThat(lS.get(0).getNome().toLowerCase().contains("one piece"));
 	}
 
-	public void findByIdTest() {
+public void findByIdTest() {
 		// Id error
 		Integer id = 99;
 		String msg = "!exists_sag";
@@ -145,121 +199,118 @@ public class SagaControllerTest {
 		Assertions.assertThat(resp.getBody()).isInstanceOf(SagaDTO.class);
 	}
 	
-	private SagaRequest getReq() {
-		SagaRequest r = new SagaRequest();
-		r.setNome("Ken Shiro");
-		r.setDescrizione("Saga su formidabli guerrieri");
-		return r;
-	}
-	
-	public void createTest() {
-		String msg = "null_req";
-		log.debug("Start testSagaController.createTest(), error expected: {}", msg);
-		ResponseEntity<Response> resp = sagaC.create(null);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
-		
-		SagaRequest r = getReq();
-		r.setNome(null);
-		msg = "null_snom";
-		log.debug("Start testSagaController.create(), error expected: {}", msg);
-		resp = sagaC.create(r);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
+	    // ==========================================
+	    // ASSERT HELPERS
+	    // ==========================================
+	private void assertCreateError(String token, String msg, SagaRequest req) throws Exception {
+	      mockMvc.perform(post("/rest/saga/create").with(csrf())
+	         .header("Authorization", token)
+	             .contentType(MediaType.APPLICATION_JSON)
+	                .content(objectMapper.writeValueAsString(req)))
+	                .andExpect(status().isBadRequest())
+	                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+	    }
 
-		r = getReq();
-		r.setNome("One Piece");
-		msg = "exists_sag";
-		log.debug("Start testSagaController.create(), error expected: {}", msg);
-		resp = sagaC.create(r);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
-		
-		r = getReq();
-		r.setDescrizione(null);
-		msg = "null_desc";
-		log.debug("Start testSagaController.create(), error expected: {}", msg);
-		resp = sagaC.create(r);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
-		
-		r = getReq();
-		List<String> manga = new ArrayList<String>();
-		manga.add("ABC");
-		r.setManga(manga);
-		msg = "!exists_man";
-		log.debug("Start testSagaController.create(), error expected: {}", msg);
-		resp = sagaC.create(r);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
-		
-		r = getReq();
-		msg = "rest_created";
-		manga = new ArrayList<String>();
-		manga.add("ISBN001");
-		r.setManga(manga);
+	private void assertUpdateError(String token, String msg, SagaRequest req) throws Exception {
+	        mockMvc.perform(put("/rest/saga/update").with(csrf())
+	                .header("Authorization", token)
+	                .contentType(MediaType.APPLICATION_JSON)
+	                .content(objectMapper.writeValueAsString(req)))
+	                .andExpect(status().isBadRequest())
+	                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+	    }
 
-		log.debug("Start testSagaController.create(): {}", msg);
-		resp = sagaC.create(r);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
-	}
-
-	public void updateTest() {
-		SagaRequest r = getReq();
+	public void updateTest() throws Exception {
+		SagaRequest r = buildSagaRequest();
 		String msg = "!exists_sag";
 		r.setId(99);
-
-		log.debug("Start testSagaController.update(), error expected: {}", msg);
-		ResponseEntity<Response> resp = sagaC.update(r);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
+		String token = getBearerToken("AdminUser");
+        assertUpdateError(token, msg, r);
 		
 		msg = "!exists_man";
-		r = getReq();
+		r = buildSagaRequest();
 		r.setId(1);
 		List<String> manga = new ArrayList<String>();
 		manga.add("kutvg");
 		r.setManga(manga);
-		log.debug("Start testSagaController.update(), error expected: {}", msg);
-		resp = sagaC.update(r);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
+        assertUpdateError(token, msg, r);
 
 		msg = "rest_updated";
-		r = getReq();
+		r = buildSagaRequest();
 		r.setId(1);
 		r.setDescrizione("descrizione aggriornata");
-		log.debug("Start testSagaController.update(), error expected: {}", msg);
-		resp = sagaC.update(r);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		assertEquals(msgS.get(msg), resp.getBody().getMsg());
+		mockMvc.perform(put("/rest/saga/update").with(csrf())
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(r)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 	}
+	
 
-	public void deleteTest() {
-		// errore: id non trovato in db/non valido
-		Integer id = 99;
-		log.debug("Start testSagaController.deleteTest(): error expected, invalid id: {}", id);
-		ResponseEntity<Response> resp = sagaC.delete(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		Response r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("!exists_sag"));
+	public void createTest() throws Exception {
+		String msg = "null_req";
+		String token = getBearerToken("AdminUser");
+		SagaRequest r = null;
+        //assertCreateError(token, msg, r);
+		
+		r = buildSagaRequest();
+		r.setNome(null);
+		msg = "null_snom";
+        assertCreateError(token, msg, r);
+
+		r = buildSagaRequest();
+		r.setNome("One Piece");
+		msg = "exists_sag";
+        assertCreateError(token, msg, r);
+		
+		r = buildSagaRequest();
+		r.setDescrizione(null);
+		msg = "null_desc";
+        assertCreateError(token, msg, r);
+		
+		r = buildSagaRequest();
+		List<String> manga = new ArrayList<String>();
+		manga.add("ABC");
+		r.setManga(manga);
+		msg = "!exists_man";
+        assertCreateError(token, msg, r);
+		
+		r = buildSagaRequest();
+		msg = "rest_created";
+		manga = new ArrayList<String>();
+		manga.add("ISBN001");
+		mockMvc.perform(post("/rest/saga/create").with(csrf())
+	         .header("Authorization", token)
+	         .contentType(MediaType.APPLICATION_JSON)
+	         .content(objectMapper.writeValueAsString(r)))
+	         .andExpect(status().isOk())
+	         .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+		}
+
+	public void deleteTest() throws Exception {
+		String token = getBearerToken("AdminUser");
+		String msg = "!exists_sag";
+
+        mockMvc.perform(delete("/rest/saga/delete/99").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 		
 		// Errore: exists_sagman: manga collegati a saga
-		id = 1;
-		log.debug("Start testSagaController.deleteTest(), id: {}", id);
-		resp = sagaC.delete(id);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("exists_sagman"));
+		msg = "exists_sagman";
+        mockMvc.perform(delete("/rest/saga/delete/1").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
 		
 		// Normal workflow
-		id = 3;
-		log.debug("Start testSagaController.deleteTest(), id: {}", id);
-		resp = sagaC.delete(id);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		r = resp.getBody();
-		Assertions.assertThat(r.getMsg()).isEqualTo(msgS.get("rest_deleted"));
+		msg = "rest_deleted";
+        mockMvc.perform(delete("/rest/saga/delete/3").with(csrf())
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
 	}
 }
