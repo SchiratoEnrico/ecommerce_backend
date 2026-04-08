@@ -1,5 +1,7 @@
 package com.betacom.ecommerce.backend.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +12,6 @@ public interface IGenereRepository extends JpaRepository<Genere, Integer>{
 	
 	Boolean existsByDescrizione(String genere);
 	Boolean existsByDescrizioneAndIdNot(String genere, Integer id);
+	List<Genere> findAllByMangaIsbn(String isbn);
+
 }

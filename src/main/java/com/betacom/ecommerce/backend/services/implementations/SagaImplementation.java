@@ -187,6 +187,8 @@ public class SagaImplementation implements  ISagaServices {
 					new MangaException("!exists_sag")
 					);
 		List<Manga> lM = mangaRepo.findAllBySagaId(id);
+		//log.debug("Found saga: {} List manga {}", s, lM);
+
 		return imgB.buildSagaDTO(s, Optional.ofNullable(lM));
 	}
 }
