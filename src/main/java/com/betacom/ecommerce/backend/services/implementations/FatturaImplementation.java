@@ -425,8 +425,8 @@ public class FatturaImplementation implements IFatturaServices{
 
 	// mappa di transizion possibili
 	private static final Map<String, List<String>> ALLOWED_TRANSITIONS = Map.of(
-			"CREATO",          List.of("PAGATO", "CANCELLATO"),
-			"PAGATO",          List.of("LAVORAZIONE", "CANCELLATO"),
+			"CREATO",          List.of("PAGATO", "ANNULLATA"),
+			"PAGATO",          List.of("LAVORAZIONE", "ANNULLATA"),
 			"LAVORAZIONE",     List.of("SPEDITO"),
 			"SPEDITO",         List.of("CONSEGNATO"),
 			"CONSEGNATO",      List.of("RICHIESTA_RESO"),

@@ -22,8 +22,11 @@ import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
+import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
+import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
+import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IOrdineServices;
@@ -38,7 +41,8 @@ public class OrdineController {
     private final IOrdineServices ordS;
     private final IMessagesServices msgS;
     private final IAccountRepository accountRepository; // Necessario per recuperare l'ID dall'username del token
-
+    private final IStatoOrdineRepository statoR;
+    
     // --- METODI DI SUPPORTO ---
     private boolean isAdmin(Authentication auth) {
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
@@ -172,7 +176,7 @@ public class OrdineController {
  	@PutMapping("/update")
      public ResponseEntity<Response> update(@RequestBody(required = true) OrdineRequest req) {
 
- 		Response r = new Response();
+ 		 Response r = new Response();
          HttpStatus status = HttpStatus.OK;
          try {
              ordS.update(req);
@@ -183,4 +187,41 @@ public class OrdineController {
          }
          return ResponseEntity.status(status).body(r);
      }
+ 	
+ 	@PutMapping("/avanza_stato_ordine")
+     public ResponseEntity<Response> avanzaStatoOrdine (
+    		 @RequestParam(required = true) Integer ordineId, 
+    		 @RequestParam(required = true) Integer statoId,
+             Authentication auth, Principal principal 
+    		 ) {
+ 		Response r = new Response();
+        HttpStatus status = HttpStatus.OK;
+        try {
+        	
+        	if (!isAdmin(auth)) {
+        		// controllo se richiedente non admin è possessore del carrello
+        		Account loggedAcc = getLoggedAccount(principal);
+        		if (loggedAcc == null || !ordS.isOrdineOwnedByAccount(ordineId, loggedAcc.getId()))
+        			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        	
+                // User può solo fare: PAGATO,  CANCELLATO (pre-lavorazione) o RICHIESTA_RESO
+                StatoOrdine target = statoR.findById(statoId)
+                    .orElseThrow(() -> new MangaException("!exists_sta"));
+                String targetName = target.getStatoOrdine();
+
+                if (!List.of("PAGATO", "CANCELLATO", "RICHIESTA_RESO").contains(targetName))
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            ordS.advanceStatoOrdine(ordineId, statoId);
+            r.setMsg(msgS.get("ord_adv"));
+        } catch (Exception e) {
+        	r.setMsg(msgS.get(e.getMessage()));
+            status = HttpStatus.BAD_REQUEST;
+        }
+
+        return ResponseEntity.status(status).body(r);
+
+    }
+
 }

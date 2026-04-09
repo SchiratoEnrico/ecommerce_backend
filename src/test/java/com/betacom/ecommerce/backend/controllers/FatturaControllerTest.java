@@ -76,7 +76,8 @@ public class FatturaControllerTest {
     @Test
     public void testFatturaControllerOwner()  throws Exception{
     	findById();
-    	iniziaReso();  
+    	// NW inizio reso testato dopo
+    	//iniziaReso();  
     }
 
 	public void findById() throws Exception {
@@ -104,27 +105,6 @@ public class FatturaControllerTest {
 				.andExpect(status().isForbidden());
 	}
 	
-	public void iniziaReso() throws Exception {
-        log.debug("Begin iniziaReso Fattura Test");
-        
-        String token = getBearerToken("UserUser");
-        mockMvc.perform(post("/rest/fattura/reso/inizia")
-        		.header("Authorization", token)
-        		.param("fatturaId", "1")
-        		.param("accountId", "1")
-        		)
-				.andExpect(status().isForbidden());
-        
-        token = getBearerToken("MarioRossi");
-        mockMvc.perform(post("/rest/fattura/reso/inizia")
-				.header("Authorization", token)
-        		.param("fatturaId", "1")
-        		.param("accountId", "1"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.msg").value(msgS.get("reso_start")));
-	}
-
-	 //
 	
 	@Test
     public void testFatturaControllerAdmin() throws Exception {
@@ -133,9 +113,16 @@ public class FatturaControllerTest {
         list();
         deleteTest();
     	authFails();
+    	resoPipeline();
     }
 
     private FatturaRequest buildFatturaRequest() {
+    	/*
+    	 * NW in data.sql:
+    	 * tipoPagamentoId: 1 - PAYPAL, 2 - CARTA DI CREDITO, 3 - BONIFICO
+    	 * tipi_spedizioneId: 1 - standard, 2 - express, 3 - gratuita 
+    	 */
+
         return FatturaRequest.builder()
                 .clienteNome("Mario")
                 .clienteCognome("Rossi")
@@ -145,11 +132,99 @@ public class FatturaControllerTest {
                 .clienteCap("20100")
                 .clienteProvincia("Milano")
                 .clienteStato("Italia")
-                .tipoPagamento("Carta di Credito")
-                .tipoSpedizione("Standard")
+                .tipoPagamentoId(2)
+                .tipoSpedizioneId(1)
                 .ordineId(1)
                 .righeFatturaRequest(List.of())
                 .build();
+    }
+
+    public void resoPipeline() throws Exception {
+        log.debug("Begin reso pipeline Fattura Test");
+        String token = getBearerToken("AdminUser");
+        String userToken = getBearerToken("UserUser");
+        String ownerToken = getBearerToken("MarioRossi");
+
+        // rifiuta forbidden per non-admin
+        mockMvc.perform(put("/rest/fattura/reso/rifiuta").with(csrf())
+                .param("fatturaId", "1")
+                .header("Authorization", userToken))
+                .andExpect(status().isForbidden());
+        
+        //conferma forbidden per non-admin
+        mockMvc.perform(put("/rest/fattura/reso/conferma").with(csrf())
+                .param("fatturaId", "1")
+                .header("Authorization", userToken))
+                .andExpect(status().isForbidden());
+        // rimborsa forbidden per non-admin
+        mockMvc.perform(put("/rest/fattura/reso/rimborso").with(csrf())
+                .param("fatturaId", "1")
+                .param("ripristinaCopie", "false")
+                .header("Authorization", userToken))
+                .andExpect(status().isForbidden());
+
+        
+        // fattura 1 in CONSEGNATO
+        // invalid: conferma reso su fattura non in RICHIESTA_RESO
+        String msg = "stato_fat_invalid";
+        mockMvc.perform(put("/rest/fattura/reso/conferma").with(csrf())
+        		.header("Authorization", token)
+        		.param("fatturaId", "1")
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // invalid: rimborsa on fattura not in RESTITUITO
+        mockMvc.perform(put("/rest/fattura/reso/rimborso").with(csrf())
+                .param("fatturaId", "1")
+                .param("ripristinaCopie", "false")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // !exists_fat
+        msg = "!exists_fat";
+        mockMvc.perform(put("/rest/fattura/reso/conferma").with(csrf())
+                .param("fatturaId", "999")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // !owner
+        msg = "!owner";
+        mockMvc.perform(post("/rest/fattura/reso/inizia").with(csrf())
+                .param("fatturaId", "1")
+                .param("accountId", "1")
+                .header("Authorization", userToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // inizia reso
+        msg = "reso_start";
+        mockMvc.perform(post("/rest/fattura/reso/inizia").with(csrf())
+                .param("fatturaId", "1")
+                .param("accountId", "1")
+                .header("Authorization", ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+
+        // conferma: RICHIESTA_RESO → RESTITUITO
+        msg = "reso_conf";
+        mockMvc.perform(put("/rest/fattura/reso/conferma").with(csrf())
+                .param("fatturaId", "1")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // rimborsa: RESTITUITO → RIMBORSATO (with copy restore)
+        msg = "refunded";
+        mockMvc.perform(put("/rest/fattura/reso/rimborso").with(csrf())
+                .param("fatturaId", "1")
+                .param("ripristinaCopie", "true")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
     }
 
     private void assertCreateError(String msg, FatturaRequest req, String token) throws Exception {
@@ -233,13 +308,13 @@ public class FatturaControllerTest {
      	// null_pag
      	msg = "null_pag";
      	req = buildFatturaRequest();
-     	req.setTipoPagamento(null);
+     	req.setTipoPagamentoId(null);
      	assertCreateError(msg, req, token);
 
      	// null_spe
      	msg = "null_spe";
      	req = buildFatturaRequest();
-     	req.setTipoSpedizione(null);
+     	req.setTipoSpedizioneId(null);
      	assertCreateError(msg, req, token);
  	}
 
@@ -271,13 +346,13 @@ public class FatturaControllerTest {
 	    msg = "!exists_pag";
 	    req = buildFatturaRequest();
 	    req.setId(1);
-	    req.setTipoPagamento("AA");
+	    req.setTipoPagamentoId(99);
 	    assertUpdateError(msg, req, token);
 	    
 	    msg = "!exists_spe";
 	    req = buildFatturaRequest();
 	    req.setId(1);
-	    req.setTipoSpedizione("AA");
+	    req.setTipoSpedizioneId(99);
 	    assertUpdateError(msg, req, token);
 	    
 	    msg = "!exists_ord";

@@ -81,10 +81,11 @@ public class OrdineImplemetation implements IOrdineServices{
  
 		Ordine o = ordeR.findById(ordineId)
 			.orElseThrow(() -> new MangaException("!exists_ord"));
- 
+
 		StatoOrdine nuovoStato = statR.findById(statoId)
 			.orElseThrow(() -> new MangaException("!exists_sta"));
- 
+		log.debug("stato ordine attuale={}, nuovo stato={}", o.getStato().getStatoOrdine(), nuovoStato.getStatoOrdine());
+
 		String current = o.getStato().getStatoOrdine();
 		String target = nuovoStato.getStatoOrdine();
  

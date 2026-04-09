@@ -24,8 +24,6 @@ public class OrdineRequest {
 	
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate data;
-
-	private String stato;
 	private Integer anagrafica;
 
 	private List<RigaOrdineRequest> righeOrdineRequest;
