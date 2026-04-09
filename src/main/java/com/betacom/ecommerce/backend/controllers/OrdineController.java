@@ -131,16 +131,34 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
 
- // ENDPOINT SOLO ADMIN 
-	
+    // ENDPOINT SOLO ADMIN 
+ 	
+    // inizio reso da fattua controller, qui solo admin
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/advanceStato")
+    public ResponseEntity<Response> advanceStato(
+            @RequestParam(required = true) Integer ordineId,
+            @RequestParam(required = true) Integer statoId) {
+        Response r = new Response();
+        HttpStatus status = HttpStatus.OK;
+        try {
+            ordS.advanceStatoOrdine(ordineId, statoId);
+            r.setMsg(msgS.get("rest_updated"));
+        } catch (Exception e) {
+            r.setMsg(msgS.get(e.getMessage()));
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(r);
+    }
+    
  	// Solo l'admin dovrebbe poter cancellare fisicamente un ordine dal DB
- 	@PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
  	@DeleteMapping("/delete/{id}")
-     public ResponseEntity<Response> delete(@PathVariable(required = true) Integer id) {
+     public ResponseEntity<Response> delete(@PathVariable(required = true) Integer id, @RequestParam(required = false) Boolean ripristinaCopie) {
  		Response r = new Response();
          HttpStatus status = HttpStatus.OK;
          try {
-             ordS.delete(id);
+             ordS.delete(id, Boolean.TRUE.equals(ripristinaCopie));
              r.setMsg(msgS.get("rest_deleted"));
          } catch (Exception e) {
          	r.setMsg(msgS.get(e.getMessage()));
