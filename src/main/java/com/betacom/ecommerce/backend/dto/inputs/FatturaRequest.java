@@ -30,8 +30,8 @@ public class FatturaRequest {
     private String clienteStato;
     
     //Dati pagamento e spedizione
-    private String tipoPagamento;
-    private String tipoSpedizione;
+    private Integer tipoPagamentoId;
+    private Integer tipoSpedizioneId;
     
     // Metadata
     private String note;

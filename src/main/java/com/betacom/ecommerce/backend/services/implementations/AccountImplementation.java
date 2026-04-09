@@ -11,20 +11,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
-import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
-import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
-import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
-import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
-import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.specification.AccountSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.ReqValidators;
@@ -37,13 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class AccountImplementation implements IAccountServices{
-	private final CarrelloImplementation carI;
 	private final IAccountRepository repAcc;
-	private final ICarrelloRepository carR;
-	private final IFatturaRepository fattR;
-	private final IFatturaServices fattS;
-	private final IMessagesServices msgS;
 	private final PasswordEncoder passwordEncoder;
+	private final IFatturaServices fattS;
 	private final IOrdineRepository ordeR;
 	
 	@Override
@@ -87,41 +78,32 @@ public class AccountImplementation implements IAccountServices{
 	    }
 
 	    repAcc.save(acc);
-	    //Integer id = repAcc.save(acc).getId();
-	    
-//	    CarrelloRequest carReq = new CarrelloRequest();
-//	    carReq.setId_account(id);
-//	    Integer chartId = carI.create(carReq);
-//	    Carrello car = carR.findById(chartId)
-//	    		.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
-//	    acc.setCarrello(car);
-//	    repAcc.save(acc);
 	}
 
 	@Override
-	@Transactional (rollbackFor = Exception.class)
+	@Transactional(rollbackFor = Exception.class)
 	public void delete(Integer id) throws MangaException {
-		log.debug("Delete Account, id: {}", id);
-        Account acc = repAcc.findById(id)
-                .orElseThrow(() -> new MangaException("null_acc"));
-        
-        if(acc.getRuolo().equals(Ruoli.ADMIN)) {
-			List<Account> lU = repAcc.findByRuolo(Ruoli.ADMIN);
-			
-			if(lU.size()==1)
-				throw new MangaException("last_adm");
-		}
-        
-        // controllo ordini
-        ordeR.findAllByAccountId(id).stream()
-        	.forEach(o -> fattS.updateFromOrdine(o, true));
-        
-        repAcc.delete(acc);	
-        // cascad su carrello, righecarrello, anagrafiche
+	    log.debug("Delete Account, id: {}", id);
+	    Account acc = repAcc.findById(id)
+	        .orElseThrow(() -> new MangaException("null_acc"));
+
+	    // check se ultimo admin
+	    if (acc.getRuolo().equals(Ruoli.ADMIN)) {
+	        List<Account> lU = repAcc.findByRuolo(Ruoli.ADMIN);
+	        if (lU.size() == 1)
+	            throw new MangaException("last_adm");
+	    }
+
+	    // rimuovo ordini aggiungendoli a fatture.
+	    // 
+	    List<Ordine> ordini = ordeR.findAllByAccountId(id);
+	    for (Ordine o : ordini) {
+	        fattS.detachFromOrdine(o, "Account eliminato");
+	    }
+
+	    repAcc.delete(acc);
 	}
 	
-
-
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void update(AccountRequest req, boolean isAdmin) throws MangaException { 
