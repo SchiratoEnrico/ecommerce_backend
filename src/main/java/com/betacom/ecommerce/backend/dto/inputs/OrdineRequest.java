@@ -19,8 +19,8 @@ import lombok.Setter;
 public class OrdineRequest {
 	private Integer id;
 	private Integer account;
-	private String pagamento;
-	private String spedizione;
+	private Integer pagamentoId;
+	private Integer spedizioneId;
 	
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate data;
