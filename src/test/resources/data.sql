@@ -133,6 +133,7 @@ INSERT INTO system_messages VALUES ('null_idxs',  'Specificare isbn o id per ass
 INSERT INTO system_messages VALUES ('rest_created', 'Elemento creato con successo');
 INSERT INTO system_messages VALUES ('rest_updated', 'Elemento aggiornato con successo');
 INSERT INTO system_messages VALUES ('rest_deleted', 'Elemento eliminato con successo');
+INSERT INTO system_messages VALUES ('mail_error', 'Invio mail fallito');
 
 -- ============================================================
 -- LOOKUP TABLES

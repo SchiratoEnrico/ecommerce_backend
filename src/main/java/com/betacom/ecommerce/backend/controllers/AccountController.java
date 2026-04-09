@@ -62,7 +62,9 @@ public class AccountController {
 		Response r = new Response();
 		HttpStatus status = HttpStatus.OK;
 		try {
+			//creo account e mando mail
 			accS.create(req);
+			accS.sendValidation(req.getUsername());
 			r.setMsg(msgS.get("rest_created"));
 		} catch (Exception e) { 
 			r.setMsg(msgS.get(e.getMessage()));

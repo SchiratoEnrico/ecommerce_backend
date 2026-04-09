@@ -3,6 +3,8 @@ package com.betacom.ecommerce.backend.models;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.DynamicInsert;
+
 import com.betacom.ecommerce.backend.enums.Ruoli;
 
 import jakarta.persistence.CascadeType;
@@ -26,6 +28,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "accounts")
 @ToString(exclude = {"anagrafiche", "carrello"})
+@DynamicInsert //per poter usare Boolean in validated 
 public class Account {
 
 	@Id
@@ -70,4 +73,9 @@ public class Account {
 			orphanRemoval = true
 			)
 	private Carrello carrello;
+	
+	@Column (name="email_validation",
+			nullable= false,
+			columnDefinition = "BOOLEAN DEFAULT false")
+	Boolean validated;
 }
