@@ -36,7 +36,6 @@ import com.betacom.ecommerce.backend.services.interfaces.IOrdineServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
 import com.betacom.ecommerce.backend.specification.OrdineSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
-import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +56,9 @@ public class OrdineImplemetation implements IOrdineServices{
 	private final IAnagraficaRepository anaR;
 	private final IMangaServices mangaS;
 	
+
+	/// operazioni CRUD e helpers
+	
 	private Anagrafica checkAnagrafica(Integer anagId, Integer accId) {
 		Anagrafica ana = anaR.findById(anagId)
 			    .orElseThrow(() -> new MangaException("!exists_ana"));
@@ -67,7 +69,57 @@ public class OrdineImplemetation implements IOrdineServices{
 		return ana;
 	}
 
-	
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void advanceStatoOrdine(Integer ordineId, Integer statoId) throws MangaException {
+		log.debug("advanceStatoOrdine ordineId={}, statoId={}", ordineId, statoId);
+ 
+		if (ordineId == null)
+			throw new MangaException("null_ord");
+		if (statoId == null)
+			throw new MangaException("null_sta");
+ 
+		Ordine o = ordeR.findById(ordineId)
+			.orElseThrow(() -> new MangaException("!exists_ord"));
+ 
+		StatoOrdine nuovoStato = statR.findById(statoId)
+			.orElseThrow(() -> new MangaException("!exists_sta"));
+ 
+		String current = o.getStato().getStatoOrdine();
+		String target = nuovoStato.getStatoOrdine();
+ 
+		// Controllo target stato permesso
+		validateOrdineTransition(current, target);
+ 
+		// aggiorno fattura in base a nuovo stato
+		switch (target) {
+			case "PAGATO", "LAVORAZIONE", "SPEDITO", "CONSEGNATO" ->
+				// copia statoordine su fattura, no cambio copie
+				fattS.updateFromOrdine(o, target, false);
+ 
+			case "CANCELLATO" ->
+				// ANNULLATA su fattura + ripristino copie 
+				// settabile solo se stato CREATO/PAGATO
+				fattS.updateFromOrdine(o, "CANCELLATO", true);
+ 
+			case "RICHIESTA_RESO" -> {
+				// Passa a fattura reso
+				fattS.iniziaReso(
+					fattR.findByOrdineId(o.getId())
+						.orElseThrow(() -> new MangaException("!exists_fat"))
+						.getId(),
+					o.getAccount().getId()
+				);
+			}
+ 
+			default -> throw new MangaException("ord_transition_invalid");
+		}
+ 
+		// Aggiorno stato ordine dopo sincronizzazione con fattura
+		o.setStato(nuovoStato);
+		ordeR.save(o);
+	}
+
 	@Override
 	@Transactional (rollbackFor = Exception.class)
 	public Integer create(OrdineRequest req) throws MangaException {
@@ -84,9 +136,9 @@ public class OrdineImplemetation implements IOrdineServices{
 		o.setAccount(acc);
 			
 		// Pagamento (da fare come id?)
-		String tipoPag = Utils.normalize(req.getPagamento());
-		if (tipoPag != null) {
-			TipoPagamento pag = pagR.findByTipoPagamento(tipoPag).orElseThrow(() ->
+		
+		if (req.getPagamentoId() != null) {
+			TipoPagamento pag = pagR.findById(req.getPagamentoId()).orElseThrow(() ->
 					new MangaException("!exists_pag"));
 				o.setTipoPagamento(pag);			
 		} else {
@@ -94,9 +146,8 @@ public class OrdineImplemetation implements IOrdineServices{
 		}
 		
 		// Spedizioni
-		String tipoSpe = Utils.normalize(req.getSpedizione());
-		if (tipoSpe != null) {
-			TipoSpedizione spe = speR.findByTipoSpedizione(tipoSpe).orElseThrow(() ->
+		if (req.getSpedizioneId() != null) {
+			TipoSpedizione spe = speR.findById(req.getSpedizioneId()).orElseThrow(() ->
 					new MangaException("!exists_spe"));
 				o.setTipoSpedizione(spe);
 		} else {
@@ -110,12 +161,13 @@ public class OrdineImplemetation implements IOrdineServices{
 			throw new MangaException("null_dat");
 		}
 		
-		// stato; NW FORSE DOVREMMO FORZARE CREATO IN CREAZIONE
-		String stato = "CREATO"; //Utils.normalize(req.getStato());
+		// NW: stato FORZATO IN CREAZIONE
+		String stato = "CREATO";
 		StatoOrdine stat = statR.findByStatoOrdine(stato).orElseThrow(() ->
 					new MangaException("!exists_sta"));
 				o.setStato(stat);
-		// anagrafica:
+		
+				// anagrafica:
 		if (req.getAnagrafica() == null)
 		    throw new MangaException("null_ana");
 		
@@ -142,48 +194,12 @@ public class OrdineImplemetation implements IOrdineServices{
 		
 		Integer myId = savedOrdine.getId();
 		savedOrdine.setRigheOrdine(rowR.findAllByOrdineId(myId));
-		// block copies
+		// blocca copie richieste da ordine
 		mangaS.decrementaNumeroCopie(savedOrdine);
 
 		return savedOrdine.getId(); 
 	}
     
-		
-    private void assertTransition(String current, String expected) {
-        if (!expected.equals(current))
-            throw new MangaException("ord_not_cancellable");
-    }
-    
-    private void modificaStatoOrdine(Ordine o, String nuovoStato) {
-        String current = o.getStato().getStatoOrdine();
-
-        if ("CANCELLATO".equals(current))
-            throw new MangaException("ord_canc");
-
-        switch (nuovoStato) {
-            case "PAGATO"      -> assertTransition(current, "CREATO");
-            case "LAVORAZIONE" -> assertTransition(current, "PAGATO");
-            case "SPEDITO"     -> assertTransition(current, "LAVORAZIONE");
-            case "CONSEGNATO"  -> {
-                assertTransition(current, "SPEDITO");
-                fattS.updateFromOrdine(o, true);
-            	}
-            case "CANCELLATO"  -> {
-                	fattS.rimborsaNonConsegnato(o, null);
-            	}
-            case "RICHIESTA_RESO" -> {
-                assertTransition(current, "CONSEGNATO");
-                fattS.iniziaReso(
-                        fattR.findByOrdineId(o.getId())
-                            .orElseThrow(() -> new MangaException("!exists_fat"))
-                            .getId(),
-                        o.getAccount().getId()
-                    );
-            }
-            default -> throw new MangaException("ord_not_cancellable");
-        }
-    }
-	
 	@Transactional (rollbackFor = Exception.class)
 	@Override
 	public void update(OrdineRequest req) throws MangaException {
@@ -203,17 +219,15 @@ public class OrdineImplemetation implements IOrdineServices{
 		}
 			
 		// Pagamento
-		String tipoPag = Utils.normalize(req.getPagamento());
-		if (tipoPag != null) {
-			TipoPagamento pag = pagR.findByTipoPagamento(tipoPag)
+		if (req.getPagamentoId() != null) {
+			TipoPagamento pag = pagR.findById(req.getPagamentoId())
 					.orElseThrow(() -> new MangaException("!exists_pag"));
 			o.setTipoPagamento(pag);
 		}		 
 				
 		// Spedizioni
-		String tipoSpe = Utils.normalize(req.getSpedizione());
-		if (tipoSpe != null) {
-			TipoSpedizione spe = speR.findByTipoSpedizione(tipoSpe)
+		if (req.getSpedizioneId() != null) {
+			TipoSpedizione spe = speR.findById(req.getSpedizioneId())
 					.orElseThrow(() -> new MangaException("!exists_spe"));
 				o.setTipoSpedizione(spe);
 		}
@@ -221,15 +235,6 @@ public class OrdineImplemetation implements IOrdineServices{
 		// data;
 		if (req.getData() != null) {
 			o.setData(req.getData());
-		}
-		
-		// stato;
-		String stato = Utils.normalize(req.getStato());
-		if (stato != null) {
-			StatoOrdine stat = statR.findByStatoOrdine(stato)
-					.orElseThrow(() -> new MangaException("!exists_sta"));
-			modificaStatoOrdine(o, stat.getStatoOrdine());
-			o.setStato(stat);			
 		}
 		
 		// anagrafica
@@ -244,7 +249,7 @@ public class OrdineImplemetation implements IOrdineServices{
 
 	@Transactional (rollbackFor = Exception.class)
 	@Override
-	public void delete(Integer id) throws MangaException {
+	public void delete(Integer id, Boolean ripristinaCopie) throws MangaException {
 		log.debug("removing ordine con id {}", id);
 		if (id == null) {
 			throw new MangaException("null_ord");
@@ -253,8 +258,11 @@ public class OrdineImplemetation implements IOrdineServices{
 					new MangaException("!exists_ord"));
 		
 		log.debug("will update corresponding fattura");
+		fattS.detachFromOrdine(o, "Ordine eliminato");
+		if (Boolean.TRUE.equals(ripristinaCopie)) {
+			mangaS.ripristinaNumeroCopie(o);
+		}
 
-		fattS.updateFromOrdine(o, true);
 		ordeR.delete(o);
 	}
 
@@ -316,6 +324,27 @@ public class OrdineImplemetation implements IOrdineServices{
 				Optional.ofNullable(rowR.findAllByOrdineId(o.getId())),
 				Optional.ofNullable(o.getAnagrafica()));
 	}
+	
+	//PIPELINE STATI ORDINE
+
+	// mappa di transizion possibili
+
+	private static final java.util.Map<String, List<String>> ALLOWED_ORDINE = java.util.Map.of(
+			"CREATO",      List.of("PAGATO", "CANCELLATO"),
+			"PAGATO",      List.of("LAVORAZIONE", "CANCELLATO"),
+			"LAVORAZIONE", List.of("SPEDITO"),
+			"SPEDITO",     List.of("CONSEGNATO"),
+			"CONSEGNATO",  List.of("RICHIESTA_RESO")
+		);
+	 
+	private void validateOrdineTransition(String from, String to) {
+			if ("CANCELLATO".equals(from))
+				throw new MangaException("ord_canc");
+			List<String> allowed = ALLOWED_ORDINE.getOrDefault(from, List.of());
+			if (!allowed.contains(to))
+				throw new MangaException("ord_transition_invalid");
+		}
+	 
 	
 	@Override
 	public Boolean isOrdineOwnedByAccount(Integer ordineId, Integer accountId) {
