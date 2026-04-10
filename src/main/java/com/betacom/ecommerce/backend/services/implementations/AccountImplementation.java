@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
+import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
 import com.betacom.ecommerce.backend.dto.inputs.MailRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.enums.Ruoli;
@@ -21,6 +22,7 @@ import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
+import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.specification.AccountSpecifications;
@@ -40,10 +42,13 @@ public class AccountImplementation implements IAccountServices{
 	private final IFatturaServices fattS;
 	private final IOrdineRepository ordeR;
 	private final IMailServices  mailS;
+	private final ICarrelloServices  carrS;
 	
 	@Value("${mail.validation}")
 	private String validationURL;
 	
+	
+	// CRUD operations
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void create(AccountRequest req) throws MangaException {
@@ -60,9 +65,6 @@ public class AccountImplementation implements IAccountServices{
 	    if (req.getEmail() == null || req.getEmail().isBlank())
 	        throw new MangaException("null_ema");
 
-	    if (Utils.isBlank(req.getRuolo()))
-	        throw new MangaException("null_ruo"); 
-
 	    if (repAcc.findByUsername(req.getUsername().trim()).isPresent() )
 	        throw new MangaException("exists_usr");
 
@@ -78,13 +80,16 @@ public class AccountImplementation implements IAccountServices{
 	    acc.setEmail(req.getEmail().trim());
 	    acc.setDataCreazione(LocalDateTime.now());
 	    
-	    try {
-	    	acc.setRuolo(Ruoli.valueOf(Utils.normalize(req.getRuolo())));
-	    }catch(IllegalArgumentException e) {
-	    	throw new MangaException("!valid_rol");
-	    }
+	    acc.setRuolo(Ruoli.USER);
+	    acc.setValidated(false);
 
-	    repAcc.save(acc);
+	    Integer id = repAcc.save(acc).getId();
+	    
+	    // creo carrello quando account viene creato
+	    CarrelloRequest carr = new CarrelloRequest();
+	    carr.setId_account(id);
+	    carrS.create(carr);	
+
 	}
 
 	@Override
@@ -181,7 +186,6 @@ public class AccountImplementation implements IAccountServices{
 
 	    Account acc = repAcc.findById(id)
 	            .orElseThrow(() -> new MangaException("!exists_acc"));
-
 	    return DtoBuilders.buildAccountDTO(acc, Optional.ofNullable(acc.getCarrello()), Optional.ofNullable(acc.getAnagrafiche()));
 	}
 	
@@ -222,8 +226,8 @@ public class AccountImplementation implements IAccountServices{
 		Account ut = repAcc.findByUsername(username)
 				.orElseThrow(() -> new MangaException("!exists_acc"));	
 		ut.setValidated(true);
+		ut.setRuolo(Ruoli.VERIFIED_USER);		
 		repAcc.save(ut);
-		
 	}
 	
 	@Override

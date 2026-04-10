@@ -55,7 +55,7 @@ public class Account {
 	private LocalDateTime dataCreazione;
 	
 	@Enumerated(EnumType.STRING)
-	@Column (nullable = false, length = 20)
+	@Column (nullable = false, length = 30)
 	private Ruoli ruolo;
 	
 	@OneToMany(

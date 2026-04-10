@@ -96,14 +96,22 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	@Override
 	@Transactional (rollbackFor = Exception.class)
 	public void update(AnagraficaRequest req) throws MangaException {
-	    log.debug("Update Account: ", req);
+	    log.debug("Update Anagrafica: ", req);
 
 	    Anagrafica ana = repAna.findById(req.getId())
 	            .orElseThrow(() -> new MangaException("null_ana"));
 
-	  //se la nuova richiesta è predefinito true, setto tutte le altre a false
-	    if(req.getPredefinito())
-	    	ana.getAccount().getAnagrafiche().forEach(a -> a.setPredefinito(false));
+	    if (req.getIdAccount()!= null) {
+	    	ana.setAccount(repAcc.findById(req.getIdAccount()).orElseThrow(
+	    			()-> new MangaException("!exists_acc")));
+	    }
+	    //se la nuova richiesta è predefinito true, setto tutte le altre a false
+	    if(req.getPredefinito() != null) {
+	    	if(req.getPredefinito()) {
+	    		ana.getAccount().getAnagrafiche().forEach(a -> a.setPredefinito(false));
+	    	}
+	    	ana.setPredefinito(req.getPredefinito());
+	    }
 	    
 	    if (!Utils.isBlank(req.getNome()))
 	        ana.setNome(Utils.normalize(req.getNome()));
@@ -124,10 +132,7 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	        ana.setCap(req.getCap());
 
 	    if (!Utils.isBlank(req.getVia()))
-	        ana.setVia(Utils.normalize(req.getVia()));
-
-	    if (req.getPredefinito() != null)
-	        ana.setPredefinito(req.getPredefinito());
+	        ana.setVia(Utils.normalize(req.getVia()));	        
 	    
 	    repAna.save(ana);
 	}
@@ -155,7 +160,7 @@ public class AnagraficaImplementation implements IAnagraficaServices{
 	public List<AnagraficaDTO> findByAccountId(Integer id) throws MangaException {
 		log.debug("findind anagrafiche di account {}", id);
 		
-		List<Anagrafica> lA = repAna.findByAccountId(id);
+		List<Anagrafica> lA = repAna.findAllByAccountId(id);
 		
 		return DtoBuilders.buildAnagraficaDTO(lA);
 	}
