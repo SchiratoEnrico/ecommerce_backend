@@ -37,7 +37,11 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 		
 		CasaEditrice cas = new CasaEditrice();
 		cas.setDescrizione(req.getDescrizione());
+		if (caseR.findByEmail(req.getEmail().trim()).isPresent()) {
+			throw new MangaException("exists_ema");
+		}
 		cas.setEmail(req.getEmail());
+		
 		cas.setIndirizzo(req.getIndirizzo());
 		if (caseR.findByNomeIgnoreCase(req.getNome().trim()).isPresent()) {
 			throw new MangaException("exists_casa");
@@ -55,8 +59,13 @@ public class CasaEditriceImplementation implements ICasaEditriceServices{
 		
 		if(req.getDescrizione()!=null)
 			cas.setDescrizione(req.getDescrizione());
-		if(req.getEmail()!=null)
+		if(req.getEmail()!=null) {
+			if (caseR.findByEmail(req.getEmail().trim()).isPresent()) {
+				throw new MangaException("exists_ema");
+			}
 			cas.setEmail(req.getEmail());
+		}
+		
 		if(req.getIndirizzo()!=null)
 			cas.setIndirizzo(req.getIndirizzo());
 		if(req.getNome()!=null) {

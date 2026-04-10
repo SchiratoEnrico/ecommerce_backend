@@ -14,4 +14,5 @@ JpaRepository<CasaEditrice, Integer>,
 JpaSpecificationExecutor<CasaEditrice> {
 	boolean existsByIdAndMangaIsNotEmpty(Integer id);
 	Optional<CasaEditrice> findByNomeIgnoreCase(String nome);
+	Optional<CasaEditrice> findByEmail(String email);
 }

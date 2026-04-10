@@ -30,7 +30,6 @@ import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
 import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IGenereRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
-import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ISagaRepository;

@@ -149,6 +149,11 @@ public class ReqValidators {
 	        throw new MangaException("id_required");
 	    }
 	    
+	    if (req.getNumeroCopie() != null && req.getNumeroCopie()<0) {
+	        throw new MangaException("neg_ncp");
+
+	    }
+	    
 	    req.setDataPubblicazione(req.getDataPubblicazione());
 	    
 	    //trim e uppercase
@@ -174,7 +179,7 @@ public class ReqValidators {
 	    if(create && req.getCasaEditrice()==null)
 	    	throw new MangaException("null_ced");
 	    
-	    if(create && req.getNumeroCopie()==null)
+	    if(create && (req.getNumeroCopie()==null || req.getNumeroCopie()<0))
 	    	throw new MangaException("null_ncp");
 	    
 	    if(create && req.getPrezzo()==null)

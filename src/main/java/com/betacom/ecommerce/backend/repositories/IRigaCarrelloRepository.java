@@ -1,5 +1,7 @@
 package com.betacom.ecommerce.backend.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -12,4 +14,5 @@ JpaRepository<RigaCarrello, Integer>,
 JpaSpecificationExecutor<RigaCarrello>{
 	boolean existsByMangaIsbn(String isbn);
 	void deleteAllByMangaIsbn(String isbn);
+	List<RigaCarrello> findAllByCarrelloId(Integer carrelloId);
 }
