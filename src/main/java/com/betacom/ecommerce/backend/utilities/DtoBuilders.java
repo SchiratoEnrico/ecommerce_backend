@@ -196,6 +196,7 @@ public class DtoBuilders {
 				.email(a.getEmail())
 				.ruolo(a.getRuolo().toString())
 				.username(a.getUsername())
+				.validated(a.getValidated())
 				.build();	
 	}
 	

@@ -23,5 +23,5 @@ public class AccountDTO {
 	private String ruolo;
 	private List<AnagraficaDTO> anagrafiche;
     private Integer carrelloId;
-    
+    private Boolean validated;
 }

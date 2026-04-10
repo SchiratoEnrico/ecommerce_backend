@@ -22,10 +22,12 @@ import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/rest/account")
+@Slf4j
 public class AccountController {
 
 	private final IAccountServices accS;
@@ -71,6 +73,19 @@ public class AccountController {
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
+	}
+	
+	@GetMapping("/validateEmail")
+	public ResponseEntity<Response> validateEmail(@RequestParam String username) {
+	    Response r = new Response();
+	    try {
+	        accS.emailValidate(username);
+	        r.setMsg(msgS.get("email_validated"));
+	        return ResponseEntity.ok(r);
+	    } catch (Exception e) {
+	        r.setMsg(msgS.get(e.getMessage()));
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
+	    }
 	}
 
 	// ENDPOINT SOLO ADMIN 
@@ -188,5 +203,26 @@ public class AccountController {
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(r);
+	}
+	
+	@GetMapping("/resendValidation")
+	public ResponseEntity<Response> resendValidation(@RequestParam String username, Authentication auth) {
+		Response r = new Response();
+		
+		//solo il proprietario dell'account può farsi reinviare la mail
+		if (!isAdminOrOwnerByUsername(auth, username)) {
+			r.setMsg("Accesso negato.");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+		}
+
+		try {
+			accS.sendValidation(username);
+			r.setMsg("Mail di validazione inviata con successo.");
+			return ResponseEntity.ok(r);
+		} catch (Exception e) {
+			log.debug("dentro catch");
+			r.setMsg(msgS.get(e.getMessage()));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
+		}
 	}
 }
