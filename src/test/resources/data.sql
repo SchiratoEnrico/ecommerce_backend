@@ -133,6 +133,7 @@ INSERT INTO system_messages VALUES ('null_idxs',  'Specificare isbn o id per ass
 INSERT INTO system_messages VALUES ('rest_created', 'Elemento creato con successo');
 INSERT INTO system_messages VALUES ('rest_updated', 'Elemento aggiornato con successo');
 INSERT INTO system_messages VALUES ('rest_deleted', 'Elemento eliminato con successo');
+INSERT INTO system_messages VALUES ('mail_error', 'Invio mail fallito');
 
 -- ============================================================
 -- LOOKUP TABLES
@@ -232,7 +233,9 @@ INSERT INTO righe_carrello (id_carrello, isbn_manga, numero_copie) VALUES (1, 'I
 
 -- Order in CONSEGNATO stato — has a linked fattura below
 INSERT INTO ordini (data, id_account, id_stato, id_tipo_pagamento, id_tipo_spedizione, id_anagrafica)
-VALUES (CURRENT_DATE, 1, 5, 1, 1, 1);  -- id_stato=5 = CONSEGNATO
+VALUES (CURRENT_DATE, 1, 5, 1, 1, 1),
+	   (CURRENT_DATE, 1, 1, 1, 1, 1),
+	   (CURRENT_DATE, 1, 1, 1, 1, 1);  -- id_stato=5 = CONSEGNATO
 
 INSERT INTO righe_ordine (id_ordine, isbn_manga, numero_copie, prezzo)
 VALUES (1, 'ISBN001', 2, 9.99);
@@ -262,7 +265,13 @@ INSERT INTO fatture (
     'PAYPAL', 'STANDARD',
     'Mario', 'Rossi', 'mario.rossi@email.com',
     'Via Roma 1', 'Roma', 'RM', '00100', 'Italia',
-    'CONSEGNATO', 1, 'Created from ordine'
+    'RICHIESTA_RESO', 1, 'Created from ordine'
+),  (
+    'FAT-3-A1B2C3D4', CURRENT_DATE, 12.86, 6.99,
+    'PAYPAL', 'STANDARD',
+    'Mario', 'Rossi', 'mario.rossi@email.com',
+    'Via Roma 1', 'Roma', 'RM', '00100', 'Italia',
+    'CREATO', 1, 'Created from ordine'
 );
 
 INSERT INTO righe_fattura (id_fattura, isbn, titolo, prezzo_unitario, numero_copie, totale_riga)

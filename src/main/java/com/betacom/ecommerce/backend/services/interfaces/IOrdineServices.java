@@ -13,7 +13,7 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 public interface IOrdineServices {
 	Integer create(OrdineRequest req) throws MangaException; 
 	void update(OrdineRequest req) throws MangaException; 
-	void delete(Integer id) throws MangaException; 
+	void delete(Integer id, Boolean ripristinaCopie) throws MangaException; 
 	
 	List<OrdineDTO> list(
 		    AccountDTO account,
@@ -28,5 +28,5 @@ public interface IOrdineServices {
 	OrdineDTO findById(Integer id) throws MangaException;
 
 	Boolean isOrdineOwnedByAccount(Integer ordineId, Integer accountId);
-
+	void advanceStatoOrdine(Integer ordineId, Integer statoId) throws MangaException;
 }

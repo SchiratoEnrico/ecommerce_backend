@@ -129,7 +129,7 @@ public class FatturaController {
         HttpStatus status = HttpStatus.OK;
         try {
             fattS.rifiutaReso(fatturaId);
-            r.setMsg("reso_ref");
+            r.setMsg(msgS.get("reso_ref"));
         } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
@@ -146,7 +146,7 @@ public class FatturaController {
         HttpStatus status = HttpStatus.OK;
         try {
             fattS.confermaReso(fatturaId);
-            r.setMsg("reso_conf");
+            r.setMsg(msgS.get("reso_conf"));
         } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
@@ -158,11 +158,11 @@ public class FatturaController {
 
 	@PreAuthorize("hasAuthority('ADMIN')")
 	@PutMapping("/reso/rimborso")
-	public ResponseEntity<Response> rimborso(@RequestParam(required = true) Integer fatturaId, @RequestParam(required = true) Boolean ripristina) {
+	public ResponseEntity<Response> rimborso(@RequestParam(required = true) Integer fatturaId, @RequestParam(required = true) Boolean ripristinaCopie) {
 		Response r = new Response();
         HttpStatus status = HttpStatus.OK;
         try {
-            fattS.confermaReso(fatturaId);
+            fattS.rimborsa(fatturaId, Boolean.TRUE.equals(ripristinaCopie));
             r.setMsg("refunded");
         } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
@@ -199,7 +199,7 @@ public class FatturaController {
        //qui l'id che arriva dal frontend è l'id dell'account
        //bisogna controllare che quindi questo id corrisponda all'id dell'utente loggato che sta facendo la richiesta
        if (!isAdminOrOwner(auth, accountId)) {
-    	    r.setMsg("Accesso negato: puoi chiedere il reso di ordini solo del tuo account.");
+    	    r.setMsg(msgS.get("!owner"));
        		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
        }
        try {

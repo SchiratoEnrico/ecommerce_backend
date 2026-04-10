@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,11 +63,17 @@ public class OrdineControllerTest {
     // BUILD REQUEST
     // ==========================================
     private OrdineRequest buildOrdineRequest() {
+    	/*
+    	 * NW in data.sql:
+    	 * tipoPagamentoId: 1 - PAYPAL, 2 - CARTA DI CREDITO, 3 - BONIFICO
+    	 * tipi_spedizioneId: 1 - standard, 2 - express, 3 - gratuita 
+    	 */
+
         return OrdineRequest.builder()
                 .id(1)
                 .account(1)
-                .pagamento("PAYPAL")
-                .spedizione("STANDARD")
+                .pagamentoId(1)
+                .spedizioneId(1)
                 .data(LocalDate.of(2026, 03, 20))
                 .anagrafica(1)
                 .build();
@@ -104,6 +109,7 @@ public class OrdineControllerTest {
         update();
         listOrdini();
         findById();
+        advanceStato();
         deleteTest();
     }
 
@@ -141,28 +147,28 @@ public class OrdineControllerTest {
         // null_pag
         req = buildOrdineRequest();
         req.setId(null);
-        req.setPagamento(null);
+        req.setPagamentoId(null);
         msg = "null_pag";
         assertCreateError(token, msg, req);
 
         // !exists_pag
         req = buildOrdineRequest();
         req.setId(null);
-        req.setPagamento("MIO");
+        req.setPagamentoId(99);
         msg = "!exists_pag";
         assertCreateError(token, msg, req);
 
         // null_spe
         req = buildOrdineRequest();
         req.setId(null);
-        req.setSpedizione(null);
+        req.setSpedizioneId(null);
         msg = "null_spe";
         assertCreateError(token, msg, req);
 
         // !exists_spe
         req = buildOrdineRequest();
         req.setId(null);
-        req.setSpedizione("MIO");
+        req.setSpedizioneId(99);
         msg = "!exists_spe";
         assertCreateError(token, msg, req);
 
@@ -219,21 +225,16 @@ public class OrdineControllerTest {
 
         // !exists_pag
         req = buildOrdineRequest();
-        req.setPagamento("MIO");
+        req.setPagamentoId(99);
         msg = "!exists_pag";
         assertUpdateError(token, msg, req);
 
         // !exists_spe
         req = buildOrdineRequest();
-        req.setSpedizione("MIO");
+        req.setSpedizioneId(99);
         msg = "!exists_spe";
         assertUpdateError(token, msg, req);
 
-        // !exists_sta
-        req = buildOrdineRequest();
-        req.setStato("MIO");
-        msg = "!exists_sta";
-        assertUpdateError(token, msg, req);
     }
 
     // ==========================================
@@ -348,4 +349,134 @@ public class OrdineControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
     }
+    
+    public void advanceStato() throws Exception {
+        log.debug("Begin advanceStato Ordine Test");
+
+        /*
+         * Stati:
+         * 1 - CREATO
+         * 2 - PAGATO
+         * 3 - LAVORAZIONE
+         * 4 - SPEDITO
+         * 5 - CONSEGNATO
+         * 6 - CANCELLATO
+         * 7 - RICHIESTA_RESO
+         * 
+         * Ordini: 1: CONSEGNATO, account MarioRossi
+         * 		   2: LAVORAZIONE, account MarioRossi
+         * 		   3: CREATO, account MarioRossi
+         * 
+         */
+        String token = getBearerToken("AdminUser");
+        String userToken = getBearerToken("UserUser");
+        // forbidden: non admin nè owner
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "1")
+                .param("statoId", "2")
+                .header("Authorization", userToken))
+                .andExpect(status().isForbidden());
+
+        // null_ord
+        String msg = "null_ord";
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("statoId", "2")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest());
+
+        // null_sta
+        msg = "null_sta";
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "1")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest());
+
+        // !exists_ord
+        msg = "!exists_ord";
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "99")
+                .param("statoId", "2")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // !exists_sta
+        msg = "!exists_sta";
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "1")
+                .param("statoId", "99")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // invalida: CONSEGNATO → SPEDITO (skip)
+        msg = "ord_transition_invalid";
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "1")
+                .param("statoId", "4") // SPEDITO
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // valida: CREATO → PAGATO da parte di owner, id 3
+        String ownerToken = getBearerToken("MarioRossi");
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "2") // PAGATO
+                .header("Authorization", ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+        // passo a LAVORAZIONE
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "3") // LAVORAZIONE
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+        // invalida: LAVORAZIONE → CANCELLATO
+        msg = "ord_transition_invalid";
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "6") // CANCELLATO
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        // continuo pipeline: LAVORAZIONE → SPEDITO → CONSEGNATO
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "4") // SPEDITO
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "5") // CONSEGNATO
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+
+        // test CANCELLATO su  ordine 2 (ancora su CREATO)
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "2")
+                .param("statoId", "6") // CANCELLATO
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+        // already cancelled → ord_canc
+        msg = "ord_canc";
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "2")
+                .param("statoId", "2")
+                .header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+    }
+
 }

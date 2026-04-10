@@ -18,7 +18,6 @@ import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IGenereServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 
 @RestController

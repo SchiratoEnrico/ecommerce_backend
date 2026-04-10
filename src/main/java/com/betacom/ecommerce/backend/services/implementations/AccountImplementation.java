@@ -5,26 +5,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
-import com.betacom.ecommerce.backend.dto.inputs.CarrelloRequest;
+import com.betacom.ecommerce.backend.dto.inputs.MailRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
-import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
-import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
-import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
-import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.specification.AccountSpecifications;
 import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.betacom.ecommerce.backend.utilities.ReqValidators;
@@ -37,14 +35,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class AccountImplementation implements IAccountServices{
-	private final CarrelloImplementation carI;
 	private final IAccountRepository repAcc;
-	private final ICarrelloRepository carR;
-	private final IFatturaRepository fattR;
-	private final IFatturaServices fattS;
-	private final IMessagesServices msgS;
 	private final PasswordEncoder passwordEncoder;
+	private final IFatturaServices fattS;
 	private final IOrdineRepository ordeR;
+	private final IMailServices  mailS;
+	
+	@Value("${mail.validation}")
+	private String validationURL;
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -87,41 +85,32 @@ public class AccountImplementation implements IAccountServices{
 	    }
 
 	    repAcc.save(acc);
-	    //Integer id = repAcc.save(acc).getId();
-	    
-//	    CarrelloRequest carReq = new CarrelloRequest();
-//	    carReq.setId_account(id);
-//	    Integer chartId = carI.create(carReq);
-//	    Carrello car = carR.findById(chartId)
-//	    		.orElseThrow(() -> new MangaException(msgS.get("carrello_ntfnd")));
-//	    acc.setCarrello(car);
-//	    repAcc.save(acc);
 	}
 
 	@Override
-	@Transactional (rollbackFor = Exception.class)
+	@Transactional(rollbackFor = Exception.class)
 	public void delete(Integer id) throws MangaException {
-		log.debug("Delete Account, id: {}", id);
-        Account acc = repAcc.findById(id)
-                .orElseThrow(() -> new MangaException("null_acc"));
-        
-        if(acc.getRuolo().equals(Ruoli.ADMIN)) {
-			List<Account> lU = repAcc.findByRuolo(Ruoli.ADMIN);
-			
-			if(lU.size()==1)
-				throw new MangaException("last_adm");
-		}
-        
-        // controllo ordini
-        ordeR.findAllByAccountId(id).stream()
-        	.forEach(o -> fattS.updateFromOrdine(o, true));
-        
-        repAcc.delete(acc);	
-        // cascad su carrello, righecarrello, anagrafiche
+	    log.debug("Delete Account, id: {}", id);
+	    Account acc = repAcc.findById(id)
+	        .orElseThrow(() -> new MangaException("null_acc"));
+
+	    // check se ultimo admin
+	    if (acc.getRuolo().equals(Ruoli.ADMIN)) {
+	        List<Account> lU = repAcc.findByRuolo(Ruoli.ADMIN);
+	        if (lU.size() == 1)
+	            throw new MangaException("last_adm");
+	    }
+
+	    // rimuovo ordini aggiungendoli a fatture.
+	    // 
+	    List<Ordine> ordini = ordeR.findAllByAccountId(id);
+	    for (Ordine o : ordini) {
+	        fattS.detachFromOrdine(o, "Account eliminato");
+	    }
+
+	    repAcc.delete(acc);
 	}
 	
-
-
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void update(AccountRequest req, boolean isAdmin) throws MangaException { 
@@ -216,4 +205,59 @@ public class AccountImplementation implements IAccountServices{
 	}
 
 	
+	@Override
+	public void sendValidation(String username) throws MangaException {
+		log.debug("sendValidation {}", username);
+
+		Account ut = repAcc.findByUsername(username)
+				.orElseThrow(() -> new MangaException("!exists_acc"));
+		sendMailValidation(ut);
+	}
+
+	@Transactional (rollbackFor = Exception.class)
+	@Override
+	public void emailValidate(String username) throws MangaException {
+		log.debug("emailValidate {}", username);
+		
+		Account ut = repAcc.findByUsername(username)
+				.orElseThrow(() -> new MangaException("!exists_acc"));	
+		ut.setValidated(true);
+		repAcc.save(ut);
+		
+	}
+	
+	
+	private void sendMailValidation(Account acc) throws MangaException {
+	    String validationLink = validationURL + acc.getUsername();
+	    
+	    String body = """
+	        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+	            <h2 style='color: #2c3e50; text-align: center;'>Benvenuto su Mangas Store! 📚</h2>
+	            <p style='font-size: 16px; color: #555;'>Ciao <b>%s</b>,</p>
+	            <p style='font-size: 16px; color: #555;'>Grazie per esserti registrato! Conferma la tua email cliccando sul pulsante qui sotto:</p>
+	            
+	            <div style='text-align: center; margin: 30px 0;'>
+	                <a href='%s' style='background-color: #e74c3c; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;'>Conferma la tua Email</a>
+	            </div>
+	            
+	            <p style='font-size: 14px; color: #777;'>Oppure copia e incolla questo link:</p>
+	            <p style='font-size: 14px; color: #3498db; word-break: break-all;'>%s</p>
+	            
+	            <hr style='border: none; border-top: 1px solid #eee; margin-top: 30px;' />
+	            <p style='font-size: 12px; color: #999; text-align: center;'>Il team di Mangas Store</p>
+	        </div>
+	        """.formatted(acc.getUsername(), validationLink, validationLink);
+
+	    sendMail(acc, "Benvenuto! Conferma la tua email per Mangas Store", body);
+	}
+
+	private void sendMail(Account account, String oggetto, String body) throws MangaException{
+		
+		mailS.sendMail(MailRequest.builder()
+				.to(account.getEmail())
+				.oggetto(oggetto)
+				.body(body)
+				.build()
+				);
+	}
 }
