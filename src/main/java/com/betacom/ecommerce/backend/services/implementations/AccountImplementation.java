@@ -226,6 +226,16 @@ public class AccountImplementation implements IAccountServices{
 		
 	}
 	
+	@Override
+	public Boolean isAccountValidated(Integer accountId) throws MangaException {
+		log.debug("isAccountValidated query ottimizzata, id: {}", accountId);
+
+		Boolean isValidated = repAcc.checkValidationStatus(accountId)
+				.orElseThrow(() -> new MangaException("!exists_acc"));
+
+		return Boolean.TRUE.equals(isValidated);
+	}
+	
 	
 	private void sendMailValidation(Account acc) throws MangaException {
 	    String validationLink = validationURL + acc.getUsername();

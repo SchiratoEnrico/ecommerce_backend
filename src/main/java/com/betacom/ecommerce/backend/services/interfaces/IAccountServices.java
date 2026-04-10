@@ -25,4 +25,6 @@ public interface IAccountServices {
 
     public void sendValidation(String username) throws MangaException;
 	public void emailValidate(String username) throws MangaException;
+	
+	Boolean isAccountValidated(Integer accountId) throws MangaException;
 }
