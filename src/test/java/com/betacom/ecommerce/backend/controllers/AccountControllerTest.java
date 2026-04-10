@@ -5,9 +5,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,6 @@ import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
 import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +45,7 @@ public class AccountControllerTest {
 	@Autowired
 	private UserDetailsService userDetailsService;
 
-    @MockitoSpyBean
+    @MockitoBean
     private IMailServices mailSender;
 
 	private ObjectMapper objectMapper = new ObjectMapper();
@@ -344,7 +343,7 @@ public class AccountControllerTest {
 		public void deleteSuccessReal() throws Exception {
 			log.debug("Begin delete test - Real Success Lifecycle");
 			
-			// 1. Creiamo un utente "sacrificabile" (senza carrelli o ordini) tramite la API pubblica
+			// 1. Creiamo un utente (senza carrelli o ordini) tramite la API pubblica
 			AccountRequest req = AccountRequest.builder()
 					.username("UsaEGetta")
 					.password("Aaa.012!")
@@ -366,11 +365,10 @@ public class AccountControllerTest {
 					.andExpect(status().isOk())
 					.andReturn().getResponse().getContentAsString();
 					
-			// Estraiamo l'ID dall'oggetto JSON di risposta usando Jackson
+
 			com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(responseBody);
 			Integer idDaCancellare = rootNode.path("id").asInt();
 
-			// 3. Eseguiamo finalmente la DELETE con successo!
 			mockMvc.perform(delete("/rest/account/delete/" + idDaCancellare).with(csrf())
 					.header("Authorization", adminToken))
 					.andExpect(status().isOk())
@@ -398,7 +396,6 @@ public class AccountControllerTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(req)))
 					.andExpect(status().isBadRequest())
-					// Controlliamo che il controller ci restituisca il messaggio di errore dal DB
 					.andExpect(jsonPath("$.msg").value("Account assente")); 
 		}
 
@@ -408,8 +405,6 @@ public class AccountControllerTest {
 			
 			String adminToken = getBearerToken("AdminUser");
 
-			// Attenzione: Nel tuo Controller, la findById restituisce direttamente e.getMessage() come Stringa, 
-			// non usa r.setMsg(...) come le altre. Quindi verifichiamo il "content().string(...)"
 			mockMvc.perform(get("/rest/account/findById").param("id", "999")
 					.header("Authorization", adminToken))
 					.andExpect(status().isBadRequest())
