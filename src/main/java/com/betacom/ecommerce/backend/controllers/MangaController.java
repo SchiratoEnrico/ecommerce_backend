@@ -125,4 +125,43 @@ public class MangaController {
 
 	    return ResponseEntity.status(status).body(r);
 	}
+	
+	@GetMapping("/advices")
+	public ResponseEntity<Object> getAdvices(@RequestParam(required = false) Integer accountId) {
+	    Object r;
+	    HttpStatus status = HttpStatus.OK;
+	    try {
+	        r = mangaS.getAdvices(accountId);
+	    } catch (Exception e) {
+	        r = e.getMessage();
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+	    return ResponseEntity.status(status).body(r);
+	}
+
+	@GetMapping("/bestSellers")
+	public ResponseEntity<Object> getBestSellers() {
+	    Object r;
+	    HttpStatus status = HttpStatus.OK;
+	    try {
+	        r = mangaS.getBestSellers();
+	    } catch (Exception e) {
+	        r = e.getMessage();
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+	    return ResponseEntity.status(status).body(r);
+	}
+
+	@GetMapping("/latestArrives")
+	public ResponseEntity<Object> getLatestArrives() {
+	    Object r;
+	    HttpStatus status = HttpStatus.OK;
+	    try {
+	        r = mangaS.getLatestArrives();
+	    } catch (Exception e) {
+	        r = e.getMessage();
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+	    return ResponseEntity.status(status).body(r);
+	}
 }

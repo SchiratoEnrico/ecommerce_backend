@@ -336,6 +336,19 @@ public class FatturaImplementation implements IFatturaServices{
         return DtoBuilders.buildFatturaDTO(fat, Optional.ofNullable(fat.getRighe()), Optional.ofNullable(fat.getOrdine()));
     }
 	
+	@Override
+	public List<FatturaDTO> listByAccountId(Integer accountId) throws Exception {
+	    List<Fattura> lista = fattR.findAllByAccountId(accountId);
+	    
+	    return lista.stream()
+                .map(f -> DtoBuilders.buildFatturaDTO(
+                        f, 
+                        Optional.ofNullable(f.getRighe()), 
+                        Optional.ofNullable(f.getOrdine())
+                )) 
+                .collect(Collectors.toList());
+	}
+	
 	private Fattura mirrorAnagrafica(Anagrafica ana, Fattura f) {
 		f.setClienteNome(ana.getNome());
 		f.setClienteCognome(ana.getCognome());

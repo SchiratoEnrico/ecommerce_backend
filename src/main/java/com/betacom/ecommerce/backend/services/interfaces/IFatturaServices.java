@@ -29,6 +29,7 @@ public interface IFatturaServices {
 			);
 	
 	FatturaDTO findById(Integer id) throws MangaException;
+	List<FatturaDTO> listByAccountId(Integer accountId) throws Exception;
 	
 	// trigger automatico da cancellazione ordine
 	public void updateFromOrdine(Ordine o, Boolean toDel) throws MangaException;

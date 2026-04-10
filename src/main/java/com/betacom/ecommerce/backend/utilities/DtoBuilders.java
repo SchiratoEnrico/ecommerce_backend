@@ -97,7 +97,6 @@ public class DtoBuilders {
 						).collect(Collectors.toList());
 	}
 	
-
 	public static List<AnagraficaDTO> buildAnagraficaDTO(List<Anagrafica> lA) {
 		return lA.stream()
 				.map(a -> AnagraficaDTO.builder()
@@ -183,9 +182,6 @@ public class DtoBuilders {
 				.build();
 	}
 	
-	/*
-	 * 
-	 */
 	public static AccountDTO buildAccountDTO(Account a, Optional<Carrello> c, Optional<List<Anagrafica>> lA) {
 		return AccountDTO.builder()
 				.id(a.getId())
@@ -217,7 +213,6 @@ public class DtoBuilders {
 				.build();
 	}
 	
-	
 	public static AutoreDTO buildAutoreDTO(Autore a, Optional<List<Manga>> lM) {
 		return AutoreDTO.builder()
 				.id(a.getId())
@@ -234,8 +229,6 @@ public class DtoBuilders {
 				.build();
 	}
 
-	
-	
 	public static GenereDTO buildGenereDTO(Genere g, Optional<List<Manga>> lM) {
 		return GenereDTO.builder()
 				.id(g.getId())
@@ -247,7 +240,6 @@ public class DtoBuilders {
 					)
 				.build();
 	}
-	
 	
 	@Transactional(readOnly = true)
 	public static OrdineDTO buildOrdineDTO(Ordine o,
@@ -293,7 +285,12 @@ public class DtoBuilders {
 				.build();
 	}
 
-	
+	/**
+	 * @param r
+	 * @param man
+	 * @return
+	 * Valutare se aggiungere il prezzo
+	 */
 	@Transactional(readOnly = true)
 	public static RigaOrdineDTO buildRigaOrdineDTO(RigaOrdine r, Optional<Manga> man) {
 		return RigaOrdineDTO.builder()

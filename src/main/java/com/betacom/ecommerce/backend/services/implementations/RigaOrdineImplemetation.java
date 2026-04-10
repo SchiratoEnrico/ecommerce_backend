@@ -57,6 +57,7 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		r.setOrdine(o);
 		r.setManga(m);
 		r.setNumeroCopie(req.getNumeroCopie());
+		r.setPrezzo(m.getPrezzo());
 		
 		return righR.save(r).getId();
 	}

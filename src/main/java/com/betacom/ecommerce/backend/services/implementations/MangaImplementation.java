@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +24,10 @@ import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.models.Saga;
 import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
 import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
+import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IGenereRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
+import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ISagaRepository;
@@ -51,7 +55,7 @@ public class MangaImplementation implements IMangaServices{
 	private final ISagaRepository sagaRepo;
 	private final ImageDtoBuilders imgB;
 	private final IUploadServices uplS;
-	
+	private final IFatturaRepository fatR;
 	
 	@Override
 	@Transactional
@@ -311,5 +315,70 @@ public class MangaImplementation implements IMangaServices{
         	m.setNumeroCopie(left);
         	mangaRepo.save(m);
            });
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<MangaDTO> getAdvices(Integer accountId) throws MangaException {
+		log.debug("Inizio getAdvices per account: {}", accountId);
+		
+		// 1. Controllo sicurezza (kaboom)
+		if (accountId == null) {
+			throw new MangaException("Utente non loggato: impossibile generare consigli.");
+		}
+		
+		// 2. Chiediamo alla repository di ordine i 3 generi più comprati da questo utente
+		Pageable topThree = PageRequest.of(0, 3);
+		List<Integer> generiPreferiti = fatR.findTopGeneriByAccount(accountId, topThree);
+		
+		// Se la lista è vuota significa che non ha mai comprato nulla
+		if (generiPreferiti == null || generiPreferiti.isEmpty()) {
+			return new ArrayList<>();
+		}
+		
+		// 3. Chiediamo a OrdineRepo gli ISBN dei Managa che ha già letto
+		List<String> mangaGiaComprati = fatR.findIsbnCompratiByAccount(accountId);
+		
+		// 4. Creiamo la Specification passandogli i dati
+		Specification<Manga> spec = MangaSpecifications.consigliatiSpec(generiPreferiti, mangaGiaComprati);
+		
+		// 5. Interroghiamo la repository di Manga, vogliamo massimo 10 consigli
+		Pageable topTen = PageRequest.of(0, 10);
+		List<Manga> mangaConsigliati = mangaRepo.findAll(spec, topTen).getContent();
+		
+		return mangaConsigliati.stream()
+				.map(m -> imgB.buildMangaDTO(m, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))
+				.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<MangaDTO> getBestSellers() throws MangaException {
+		log.debug("Inizio getBestSellers");
+		
+		// 1. Chiediamo al DB i primi 10 risultati assoluti
+		Pageable topTen = PageRequest.of(0, 10);
+		List<Manga> bestSellers = mangaRepo.findTopBestSellers(topTen);
+		
+		// 2. Se non ci sono ordini nel DB restituiamo un array vuotoi
+		if (bestSellers == null || bestSellers.isEmpty()) {
+			return new ArrayList<>();
+		}
+	
+		return bestSellers.stream()
+				.map(m -> imgB.buildMangaDTO(m, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))
+				.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<MangaDTO> getLatestArrives() throws MangaException {
+		log.debug("Inizio getLatestArrives");
+		
+		List<Manga> recenti = mangaRepo.findTop10ByOrderByIsbnDesc();
+		
+		return recenti.stream()
+				.map(m -> imgB.buildMangaDTO(m, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))
+				.toList();
 	}
 }

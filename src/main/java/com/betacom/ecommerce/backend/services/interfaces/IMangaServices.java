@@ -34,4 +34,8 @@ public interface IMangaServices {
 	void decrementaNumeroCopie(Ordine o) throws MangaException;
 	void decrementaNumeroCopie(Fattura f) throws MangaException;
 	
+	List<MangaDTO> getAdvices(Integer accountId) throws MangaException;
+	List<MangaDTO> getBestSellers() throws MangaException;
+	List<MangaDTO> getLatestArrives() throws MangaException;
+	
 }

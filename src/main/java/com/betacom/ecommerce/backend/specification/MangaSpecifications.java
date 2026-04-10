@@ -15,6 +15,19 @@ public class MangaSpecifications {
 //	            ? cb.conjunction()
 //	            : cb.like(cb.lower(root.get("isbn")), "%" + isbn.toLowerCase() + "%");
 //	}
+	
+	public static Specification<Manga> consigliatiSpec(List<Integer> generiIds, List<String> isbnComprati) {
+	    return (root, query, cb) -> {
+	        var generiJoin = root.join("generi");
+	        var inGeneri = generiJoin.get("id").in(generiIds);
+	        
+	        if (isbnComprati != null && !isbnComprati.isEmpty()) {
+	            var notInIsbn = cb.not(root.get("isbn").in(isbnComprati));
+	            return cb.and(inGeneri, notInIsbn);
+	        }
+	        return inGeneri;
+	    };
+	}
 
 	public static Specification<Manga> distinct() {
 	    return (root, query, cb) -> {
