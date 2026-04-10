@@ -18,10 +18,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.betacom.ecommerce.backend.security.JwtService; 
+import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.dto.inputs.AutoreRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -44,6 +46,9 @@ public class AutoreControllerTest {
  
 	@Autowired
 	private UserDetailsService userDetailsService;
+
+    @MockitoSpyBean
+    private IMailServices mailSender;
 
 	// Inizializziamo l'ObjectMapper col modulo per le date (LocalDate), essenziale per Autore
 	private ObjectMapper objectMapper = new ObjectMapper()

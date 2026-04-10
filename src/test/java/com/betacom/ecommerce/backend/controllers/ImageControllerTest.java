@@ -16,9 +16,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,9 @@ public class ImageControllerTest {
     @Autowired
     private UserDetailsService userDetailsService;
  
+    @MockitoSpyBean
+    private IMailServices mailSender;
+
     private String getBearerToken(String username) {
         UserDetails user = userDetailsService.loadUserByUsername(username);
         String token = jwtService.generateToken(user.getUsername());

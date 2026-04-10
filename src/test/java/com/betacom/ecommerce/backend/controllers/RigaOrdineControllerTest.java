@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +52,9 @@ public class RigaOrdineControllerTest {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @MockitoSpyBean
+    private IMailServices mailSender;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())

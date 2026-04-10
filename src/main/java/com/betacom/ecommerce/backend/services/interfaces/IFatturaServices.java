@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.betacom.ecommerce.backend.dto.inputs.FatturaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.FatturaDTO;
+import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Ordine;
+import org.springframework.security.core.Authentication;
 
 public interface IFatturaServices {
 	
@@ -33,6 +35,11 @@ public interface IFatturaServices {
 	
 	// trigger automatico da cancellazione ordine
 	public void updateFromOrdine(Ordine o, String nuovoStatoOrdine, Boolean ripristinaCopie) throws MangaException;
+	
+
+	// helpers
+	public Boolean isAdminOrOwner(Authentication auth, Integer targetFatturaId);
+	public List<StatoOrdineDTO> getNextAllowedStates(Integer fatturaId) throws MangaException;
 	
 	// reso
 	public void iniziaReso(Integer fatturaId, Integer accountId) throws MangaException;

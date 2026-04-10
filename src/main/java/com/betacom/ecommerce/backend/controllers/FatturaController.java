@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.ecommerce.backend.dto.inputs.FatturaRequest;
-import com.betacom.ecommerce.backend.models.Account;
-import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
@@ -27,6 +25,7 @@ import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import lombok.RequiredArgsConstructor;
 
 // Qui tutti endpoint admin-only tranne findById
+// iniziaReso e getNextAllowedStates
 
 @RequiredArgsConstructor
 @RestController
@@ -35,7 +34,6 @@ public class FatturaController {
 	
 	private final IFatturaServices fattS;
 	private final IMessagesServices msgS;
-	private final IAccountRepository accountRepository;
 
 	@PreAuthorize("hasAuthority('ADMIN')")
 	@PostMapping("/create")
@@ -190,15 +188,21 @@ public class FatturaController {
 	}
 
 	//ENDPOINT CONDIVISI (ADMIN + Account corrispondente)
+	
+	// NW CONTROLLO CHE ID ACCOUNT LEGATO A FATTURA 
+	// E ID ACCOUNT RICHIESTA COINCIDANO
 	@PostMapping("/reso/inizia")
-    public ResponseEntity<Response> iniziaReso(@RequestParam(required = true) Integer fatturaId, @RequestParam(required = true) Integer accountId, Authentication auth) {
+    public ResponseEntity<Response> iniziaReso(
+    		@RequestParam(required = true) Integer fatturaId,
+    		@RequestParam(required = true) Integer accountId, 
+    		Authentication auth) {
 		Response r = new Response();
         HttpStatus status = HttpStatus.OK;
 
        // BLOCCO DI SICUREZZA
        //qui l'id che arriva dal frontend è l'id dell'account
        //bisogna controllare che quindi questo id corrisponda all'id dell'utente loggato che sta facendo la richiesta
-       if (!isAdminOrOwner(auth, accountId)) {
+       if (!fattS.isAdminOrOwner(auth, fatturaId)) {
     	    r.setMsg(msgS.get("!owner"));
        		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
        }
@@ -213,7 +217,9 @@ public class FatturaController {
     }
 	
 	@GetMapping("/findById")
-    public ResponseEntity<Object> findById(@RequestParam(required = true) Integer idFattura, @RequestParam(required = true) Integer idAccount, Authentication auth) {
+    public ResponseEntity<Object> findById(
+    		@RequestParam(required = true) Integer idFattura,
+    		Authentication auth) {
 		Object r = new Object();
         HttpStatus status = HttpStatus.OK;
 
@@ -221,7 +227,7 @@ public class FatturaController {
         //qui l'id che arriva dal frontend è l'id dell'account
         //bisogna controllare che quindi questo id corrisponda all'id dell'utente loggato che sta facendo la richiesta
         // msg: !auth_fat: Accesso negato: puoi visualizzare solo le fatture del tuo account.
-        if (!isAdminOrOwner(auth, idAccount)) {
+        if (!fattS.isAdminOrOwner(auth, idFattura)) {
         		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msgS.get("!auth_fat"));
         }
 
@@ -234,14 +240,24 @@ public class FatturaController {
         return ResponseEntity.status(status).body(r);
     }
 
+	
+    @GetMapping("/get_next_allowed_states")
+    public ResponseEntity<Object> getNextAllowedStates(
+    		@RequestParam(required = true) Integer idFattura, 
+    		Authentication auth) {
+        Object r = new Object();
+        HttpStatus status = HttpStatus.OK;
 
-	private boolean isAdminOrOwner(Authentication auth, Integer targetAccountId) {
-		// Se ha il ruolo ADMIN, passa sempre
-		boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
-		if (isAdmin) return true;
+        if (!fattS.isAdminOrOwner(auth, idFattura)) {
+           return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msgS.get("!owned_fat"));
+        }
 
-		Account loggedAccount = accountRepository.findByUsername(auth.getName()).orElse(null);
-		return loggedAccount != null && loggedAccount.getId().equals(targetAccountId);
-	}
-
+        try {
+            r = fattS.getNextAllowedStates(idFattura);
+        } catch (Exception e) {
+            r = msgS.get(e.getMessage());
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(r);
+    }
 }

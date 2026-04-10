@@ -22,12 +22,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.betacom.ecommerce.backend.dto.inputs.GenereRequest;
 import com.betacom.ecommerce.backend.dto.outputs.GenereDTO;
 import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,6 +53,9 @@ public class GenereControllerTest {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @MockitoSpyBean
+    private IMailServices mailSender;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

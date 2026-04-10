@@ -17,11 +17,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import com.betacom.ecommerce.backend.security.JwtService; 
+import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.dto.inputs.AnagraficaRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,8 +45,10 @@ public class AnagraficaControllerTest {
 	@Autowired
 	private UserDetailsService userDetailsService;
 
-	private ObjectMapper objectMapper = new ObjectMapper();
+    @MockitoSpyBean
+    private IMailServices mailSender;
 
+	private ObjectMapper objectMapper = new ObjectMapper();
 
 	// UTILITIES
 	private String getBearerToken(String username) {

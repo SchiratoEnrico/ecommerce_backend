@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
+import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
+import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -42,12 +48,18 @@ public class OrdineControllerTest {
 
     @Autowired
     private IMessagesServices msgS;
+    
+    @Autowired
+    private IStatoOrdineRepository statR;
 
     @Autowired
     private JwtService jwtService;
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @MockitoSpyBean
+    private IMailServices mailSender;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -80,7 +92,7 @@ public class OrdineControllerTest {
     }
 
     // ==========================================
-    // ASSERT HELPERS
+    // ASSERT AND HELPERS
     // ==========================================
     private void assertCreateError(String token, String msg, OrdineRequest req) throws Exception {
         mockMvc.perform(post("/rest/ordine/create").with(csrf())
@@ -100,6 +112,45 @@ public class OrdineControllerTest {
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
     }
 
+	private static final java.util.Map<String, List<String>> ALLOWED_ORDINE = java.util.Map.of(
+			"CREATO",      List.of("PAGATO", "CANCELLATO"),
+			"PAGATO",      List.of("LAVORAZIONE", "CANCELLATO"),
+			"LAVORAZIONE", List.of("SPEDITO"),
+			"SPEDITO",     List.of("CONSEGNATO"),
+			"CONSEGNATO",  List.of("RICHIESTA_RESO")
+		);
+
+    /// DTO builder per check get_next_allowed_states
+    private List<StatoOrdineDTO> getNextStates(String statoOrdine) {
+    	List<String> allowed = ALLOWED_ORDINE.getOrDefault(statoOrdine, List.of());
+    	List<StatoOrdineDTO> lS = allowed.stream()
+                .map(s -> statR.findByStatoOrdine(s))
+                .filter(s -> s.isPresent())
+    			.map(s -> DtoBuilders.buildStatoOrdineDTO(s.get()))
+    			.toList();
+    	log.debug("Stato ordine input: {}", statoOrdine);
+    	for (StatoOrdineDTO s: lS) {
+        	log.debug("\tstato concesso: {}", s);
+    	}
+    	return lS;
+    }
+    
+    private void assertNextStates(String token, String ordineId, String currentState) throws Exception {
+        List<StatoOrdineDTO> expected = getNextStates(currentState);
+
+        var result = mockMvc.perform(get("/rest/ordine/get_next_allowed_states")
+                .param("idOrdine", ordineId)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(expected.size()));
+
+        for (int i = 0; i < expected.size(); i++) {
+            result.andExpect(jsonPath("$[" + i + "].id").value(expected.get(i).getId()))
+                  .andExpect(jsonPath("$[" + i + "].statoOrdine").value(expected.get(i).getStatoOrdine()));
+        }
+    }
+
     // ==========================================
     // TESTS
     // ==========================================
@@ -111,7 +162,55 @@ public class OrdineControllerTest {
         findById();
         advanceStato();
         deleteTest();
+        buildFromCarrello();
+        //getNextAllowedStates testato in advanceStato()
     }
+
+    public void buildFromCarrello() throws Exception {
+    	Integer carrelloId = 1;
+    	Integer anagraficaId = 1;
+    	Integer tipoPagamentoId = 1;
+    	Integer tipoSpedizioneId = 1;
+        log.debug("Begin buildFromCarrello Test");
+        String ownertoken = getBearerToken("MarioRossi");
+
+        //normal workflow
+        mockMvc.perform(post("/rest/ordine/create_ordine_from_carrello").with(csrf())
+                .header("Authorization", ownertoken)
+        		.param("carrelloId", carrelloId.toString())
+        		.param("anagraficaId", anagraficaId.toString())
+        		.param("tipoPagamentoId", tipoPagamentoId.toString())
+        		.param("tipoSpedizioneId", tipoSpedizioneId.toString())
+        		)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.msg").value(msgS.get("rest_created")));
+    
+        //not owner
+        String token = getBearerToken("UserUser");
+        String msg = "!owned_carr";
+        mockMvc.perform(post("/rest/ordine/create_ordine_from_carrello").with(csrf())
+                .header("Authorization", token)
+        		.param("carrelloId", carrelloId.toString())
+        		.param("anagraficaId", anagraficaId.toString())
+        		.param("tipoPagamentoId", tipoPagamentoId.toString())
+        		.param("tipoSpedizioneId", tipoSpedizioneId.toString())
+        		)
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        msg = "!exists_carr";
+        carrelloId = 99;
+        mockMvc.perform(post("/rest/ordine/create_ordine_from_carrello").with(csrf())
+                .header("Authorization", ownertoken)
+        		.param("carrelloId", carrelloId.toString())
+        		.param("anagraficaId", anagraficaId.toString())
+        		.param("tipoPagamentoId", tipoPagamentoId.toString())
+        		.param("tipoSpedizioneId", tipoSpedizioneId.toString())
+        		)
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+    }
+
 
     // ==========================================
     // CREATE
@@ -304,14 +403,14 @@ public class OrdineControllerTest {
 
         // Normal workflow
         mockMvc.perform(get("/rest/ordine/findById")
-                .param("id", "1")
+                .param("idOrdine", "1")
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
 
         // !exists_ord
         mockMvc.perform(get("/rest/ordine/findById")
-                .param("id", "99")
+                .param("idOrdine", "99")
                 .header("Authorization", token))
                 .andExpect(status().isBadRequest());
     }
@@ -349,7 +448,7 @@ public class OrdineControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
     }
-    
+        
     public void advanceStato() throws Exception {
         log.debug("Begin advanceStato Ordine Test");
 
@@ -418,14 +517,22 @@ public class OrdineControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
-        // valida: CREATO → PAGATO da parte di owner, id 3
         String ownerToken = getBearerToken("MarioRossi");
+        String curState = "CONSEGNATO";
+        String ordineId = ((Integer) 1).toString();
+        assertNextStates(ownerToken, ordineId, curState);
+
+        // valida: CREATO → PAGATO da parte di owner, id 3
         mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
                 .param("ordineId", "3")
                 .param("statoId", "2") // PAGATO
                 .header("Authorization", ownerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+        curState = "PAGATO";
+        ordineId = ((Integer) 3).toString();
+        assertNextStates(ownerToken, ordineId, curState);
 
         // passo a LAVORAZIONE
         mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
@@ -434,6 +541,10 @@ public class OrdineControllerTest {
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+        curState = "LAVORAZIONE";
+        assertNextStates(token, ordineId, curState);
+
 
         // invalida: LAVORAZIONE → CANCELLATO
         msg = "ord_transition_invalid";
@@ -452,6 +563,8 @@ public class OrdineControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
 
+        curState = "SPEDITO";
+        assertNextStates(token, ordineId, curState);
 
         mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
                 .param("ordineId", "3")
@@ -460,6 +573,8 @@ public class OrdineControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
 
+        curState = "CONSEGNATO";
+        assertNextStates(token, ordineId, curState);
 
         // test CANCELLATO su  ordine 2 (ancora su CREATO)
         mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
@@ -468,6 +583,10 @@ public class OrdineControllerTest {
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get("ord_adv")));
+
+        curState = "CANCELLATO";
+        ordineId = ((Integer) 2).toString();
+        assertNextStates(token, ordineId, curState);
 
         // already cancelled → ord_canc
         msg = "ord_canc";

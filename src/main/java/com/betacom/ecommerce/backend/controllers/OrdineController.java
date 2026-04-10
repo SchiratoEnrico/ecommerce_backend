@@ -2,6 +2,7 @@ package com.betacom.ecommerce.backend.controllers;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,10 @@ import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
+import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
+import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.response.Response;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
@@ -41,6 +44,7 @@ public class OrdineController {
     private final IOrdineServices ordS;
     private final IMessagesServices msgS;
     private final IAccountRepository accountRepository; // Necessario per recuperare l'ID dall'username del token
+    private final ICarrelloRepository carrelloRepository; // Necessario per recuperare l'ID dall'username del token
     private final IStatoOrdineRepository statoR;
     
     // --- METODI DI SUPPORTO ---
@@ -53,6 +57,7 @@ public class OrdineController {
     }
 
     // --- ENDPOINT CREAZIONE ---
+    // endpoints condivisi admin/account owner
     @PostMapping("/create")
     public ResponseEntity<Response> create(@RequestBody(required = true) OrdineRequest req, Authentication auth, Principal principal) {
         Response r = new Response();
@@ -115,19 +120,19 @@ public class OrdineController {
     
 
     @GetMapping("/findById")
-    public ResponseEntity<Object> findById(@RequestParam(required = true) Integer id, Authentication auth, Principal principal) {
+    public ResponseEntity<Object> findById(@RequestParam(required = true) Integer idOrdine, Authentication auth, Principal principal) {
         Object r = new Object();
         HttpStatus status = HttpStatus.OK;
 
         if (!isAdmin(auth)) {
             Account loggedAcc = getLoggedAccount(principal);
-            if (loggedAcc == null || !ordS.isOrdineOwnedByAccount(id, loggedAcc.getId())) {
+            if (loggedAcc == null || !ordS.isOrdineOwnedByAccount(idOrdine, loggedAcc.getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accesso negato: questo ordine non è tuo.");
             }
         }
 
         try {
-            r = ordS.findById(id);
+            r = ordS.findById(idOrdine);
         } catch (Exception e) {
             r = msgS.get(e.getMessage());
             status = HttpStatus.BAD_REQUEST;
@@ -135,26 +140,67 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
 
-    // ENDPOINT SOLO ADMIN 
- 	
-    // inizio reso da fattua controller, qui solo admin
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping("/advanceStato")
-    public ResponseEntity<Response> advanceStato(
-            @RequestParam(required = true) Integer ordineId,
-            @RequestParam(required = true) Integer statoId) {
-        Response r = new Response();
+    @GetMapping("/get_next_allowed_states")
+    public ResponseEntity<Object> getNextAllowedStates(@RequestParam(required = true) Integer idOrdine, Authentication auth, Principal principal) {
+        Object r = new Object();
         HttpStatus status = HttpStatus.OK;
+
+        if (!isAdmin(auth)) {
+            Account loggedAcc = getLoggedAccount(principal);
+            if (loggedAcc == null || !ordS.isOrdineOwnedByAccount(idOrdine, loggedAcc.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msgS.get("!owned_ord"));
+            }
+        }
+
         try {
-            ordS.advanceStatoOrdine(ordineId, statoId);
-            r.setMsg(msgS.get("rest_updated"));
+            r = ordS.getNextAllowedStates(idOrdine);
         } catch (Exception e) {
-            r.setMsg(msgS.get(e.getMessage()));
+            r = msgS.get(e.getMessage());
             status = HttpStatus.BAD_REQUEST;
         }
         return ResponseEntity.status(status).body(r);
     }
+
+    @PostMapping("/create_ordine_from_carrello")
+    public ResponseEntity<Response> createOrdineFromCarrello(
+    		@RequestParam(required = true) Integer carrelloId,
+    		@RequestParam(required = true) Integer anagraficaId,
+    		@RequestParam(required = true) Integer tipoPagamentoId,
+    		@RequestParam(required = true) Integer tipoSpedizioneId,
+            Authentication auth, Principal principal 
+    		) {
+        Response r = new Response();
+        HttpStatus status = HttpStatus.OK;
+        if (!isAdmin(auth)) {
+            Account loggedAcc = getLoggedAccount(principal);
+            Optional<Carrello> carr = carrelloRepository.findById(carrelloId);
+            if (carr.isEmpty()) {
+            	r.setMsg(msgS.get("!exists_carr"));
+            	return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+            }
+            
+            Integer accCarrelloId = carr.get().getAccount().getId();
+            if (loggedAcc == null || !accCarrelloId.equals(loggedAcc.getId())) {
+            	r.setMsg(msgS.get("!owned_carr"));
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+            }
+        }
+        
+        try {
+        	ordS.createOrdineFromCarrello(carrelloId, anagraficaId, tipoPagamentoId, tipoSpedizioneId);
+        	r.setMsg(msgS.get("rest_created"));
+
+        } catch (MangaException e){
+        	r.setMsg(msgS.get(e.getMessage()));
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(r);
+    }
+
     
+    // ENDPOINT SOLO ADMIN 
+ 	
+
  	// Solo l'admin dovrebbe poter cancellare fisicamente un ordine dal DB
     @PreAuthorize("hasAuthority('ADMIN')")
  	@DeleteMapping("/delete/{id}")
@@ -188,6 +234,7 @@ public class OrdineController {
          return ResponseEntity.status(status).body(r);
      }
  	
+    // inizio reso da fattua controller, qui solo admin
  	@PutMapping("/avanza_stato_ordine")
      public ResponseEntity<Response> avanzaStatoOrdine (
     		 @RequestParam(required = true) Integer ordineId, 

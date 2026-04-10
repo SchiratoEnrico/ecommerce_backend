@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class MailImplementation implements IMailServices{
 	
-	@Value("${mail.sender}")
+	@Value("${spring.mail.username}")
 	private String from;
 	
 	

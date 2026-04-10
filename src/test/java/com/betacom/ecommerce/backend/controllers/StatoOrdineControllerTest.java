@@ -22,12 +22,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.dto.inputs.StatoOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.security.JwtService;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,6 +58,9 @@ public class StatoOrdineControllerTest {
 
 	@Autowired
 	private StatoOrdineController statC;
+
+    @MockitoSpyBean
+    private IMailServices mailSender;
 
     private String getBearerToken(String username) {
         UserDetails user = userDetailsService.loadUserByUsername(username);

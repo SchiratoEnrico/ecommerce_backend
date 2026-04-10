@@ -29,4 +29,6 @@ public interface IOrdineServices {
 
 	Boolean isOrdineOwnedByAccount(Integer ordineId, Integer accountId);
 	void advanceStatoOrdine(Integer ordineId, Integer statoId) throws MangaException;
+	List<StatoOrdineDTO> getNextAllowedStates(Integer ordineId) throws MangaException;
+	public void createOrdineFromCarrello(Integer carrelloId, Integer anagraficaId, Integer tipoPagamentoId, Integer tipoSpedizioneId) throws MangaException;
 }

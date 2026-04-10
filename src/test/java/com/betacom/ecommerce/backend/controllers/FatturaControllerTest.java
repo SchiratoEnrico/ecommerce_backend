@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.betacom.ecommerce.backend.dto.inputs.FatturaRequest;
+import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
+import com.betacom.ecommerce.backend.exceptions.MangaException;
+import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
+import com.betacom.ecommerce.backend.utilities.DtoBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -47,6 +53,9 @@ public class FatturaControllerTest {
     @Autowired
     private IMessagesServices msgS;
 
+    @Autowired
+    private IStatoOrdineRepository statR;
+
     // @MockitoSpyBean sostituisce classe reale con uno spy no-op
     @MockitoSpyBean
     private IFatturaServices fatS;
@@ -57,6 +66,9 @@ public class FatturaControllerTest {
 
 	@Autowired
 	private UserDetailsService userDetailsService;
+
+    @MockitoSpyBean
+    private IMailServices mailSender;
 
 	private final ObjectMapper objectMapper = new ObjectMapper()
     .registerModule(new JavaTimeModule())
@@ -139,6 +151,63 @@ public class FatturaControllerTest {
                 .build();
     }
 
+	// mappa di transizion possibili
+	private static final Map<String, List<String>> ALLOWED_TRANSITIONS = Map.of(
+			"CREATO",          List.of("PAGATO", "ANNULLATA"),
+			"PAGATO",          List.of("LAVORAZIONE", "ANNULLATA"),
+			"LAVORAZIONE",     List.of("SPEDITO"),
+			"SPEDITO",         List.of("CONSEGNATO"),
+			"CONSEGNATO",      List.of("RICHIESTA_RESO"),
+			"RICHIESTA_RESO",  List.of("RESTITUITO", "RIFIUTATO"),
+			"RESTITUITO",      List.of("RIMBORSATO"),
+			"RIMBORSATO",       List.of(),
+			"RIFIUTATO",       List.of(),
+			"ANNULLATA",       List.of()
+		);
+
+    /// DTO builder per check get_next_allowed_states
+    private List<StatoOrdineDTO> getNextStates(String statoOrdine) {
+    	log.debug("Stato ordine input: {}", statoOrdine);
+    	List<String> allowed = ALLOWED_TRANSITIONS.getOrDefault(statoOrdine, List.of());
+    	log.debug("Stati ordine permessi:");
+    	for (String s: allowed) {
+        	log.debug("\t{}", s);
+    	}
+    	log.debug("Stati ordine permessi:", allowed);
+    	List<StatoOrdineDTO> lS = allowed.stream()
+                .map(s -> s.equals("ANNULLATA")?
+						statR.findByStatoOrdine("CANCELLATO")
+							.orElseThrow(() -> new MangaException())
+						:
+						statR.findByStatoOrdine(s)
+							.orElseThrow(() -> new MangaException())
+                		)
+    			.map(s -> DtoBuilders.buildStatoOrdineDTO(s))
+    			.toList();
+    	for (StatoOrdineDTO s: lS) {
+        	log.debug("\tstato concesso: {}", s);
+    	}
+    	return lS;
+    }
+    
+    private void assertNextStates(String token, String fatturaId, String currentState) throws Exception {
+        List<StatoOrdineDTO> expected = getNextStates(currentState);
+
+        var result = mockMvc.perform(get("/rest/fattura/get_next_allowed_states")
+                .param("idFattura", fatturaId)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(expected.size()));
+
+        for (int i = 0; i < expected.size(); i++) {
+            result.andExpect(jsonPath("$[" + i + "].id").value(expected.get(i).getId()))
+                  .andExpect(jsonPath("$[" + i + "].statoOrdine").value(expected.get(i).getStatoOrdine()));
+        }
+    }
+
+    
+	// qui testo anche getNextAllowedStates
     public void resoPipeline() throws Exception {
         log.debug("Begin reso pipeline Fattura Test");
         String token = getBearerToken("AdminUser");
@@ -174,7 +243,7 @@ public class FatturaControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
-        // invalid: rimborsa on fattura not in RESTITUITO
+        // invalid: rimborsa fattura con stato != RESTITUITO
         mockMvc.perform(put("/rest/fattura/reso/rimborso").with(csrf())
                 .param("fatturaId", "1")
                 .param("ripristinaCopie", "false")
@@ -199,6 +268,10 @@ public class FatturaControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
+        String curState = "CONSEGNATO";
+        String fatturaId = ((Integer) 1).toString();
+        assertNextStates(ownerToken, fatturaId, curState);
+
         // inizia reso
         msg = "reso_start";
         mockMvc.perform(post("/rest/fattura/reso/inizia").with(csrf())
@@ -209,6 +282,9 @@ public class FatturaControllerTest {
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
 
+        curState = "RICHIESTA_RESO";
+        assertNextStates(ownerToken, fatturaId, curState);
+
         // conferma: RICHIESTA_RESO → RESTITUITO
         msg = "reso_conf";
         mockMvc.perform(put("/rest/fattura/reso/conferma").with(csrf())
@@ -216,6 +292,10 @@ public class FatturaControllerTest {
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        curState = "RESTITUITO";
+        assertNextStates(token, fatturaId, curState);
+
 
         // rimborsa: RESTITUITO → RIMBORSATO (with copy restore)
         msg = "refunded";
@@ -225,7 +305,9 @@ public class FatturaControllerTest {
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+        
     }
+    
 
     private void assertCreateError(String msg, FatturaRequest req, String token) throws Exception {
 	    mockMvc.perform(post("/rest/fattura/create").with(csrf())

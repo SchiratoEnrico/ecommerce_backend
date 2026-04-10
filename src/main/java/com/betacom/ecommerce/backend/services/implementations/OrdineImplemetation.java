@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,12 +19,15 @@ import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Anagrafica;
+import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.Ordine;
+import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
 import com.betacom.ecommerce.backend.models.TipoSpedizione;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.IAnagraficaRepository;
+import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IRigaOrdineRepository;
@@ -55,7 +59,8 @@ public class OrdineImplemetation implements IOrdineServices{
 	private final IFatturaServices fattS;
 	private final IAnagraficaRepository anaR;
 	private final IMangaServices mangaS;
-	
+	private final ICarrelloRepository carrR;
+
 
 	/// operazioni CRUD e helpers
 	
@@ -67,58 +72,6 @@ public class OrdineImplemetation implements IOrdineServices{
 		    throw new MangaException("wrong_acc_ana");
 		}
 		return ana;
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public void advanceStatoOrdine(Integer ordineId, Integer statoId) throws MangaException {
-		log.debug("advanceStatoOrdine ordineId={}, statoId={}", ordineId, statoId);
- 
-		if (ordineId == null)
-			throw new MangaException("null_ord");
-		if (statoId == null)
-			throw new MangaException("null_sta");
- 
-		Ordine o = ordeR.findById(ordineId)
-			.orElseThrow(() -> new MangaException("!exists_ord"));
-
-		StatoOrdine nuovoStato = statR.findById(statoId)
-			.orElseThrow(() -> new MangaException("!exists_sta"));
-		log.debug("stato ordine attuale={}, nuovo stato={}", o.getStato().getStatoOrdine(), nuovoStato.getStatoOrdine());
-
-		String current = o.getStato().getStatoOrdine();
-		String target = nuovoStato.getStatoOrdine();
- 
-		// Controllo target stato permesso
-		validateOrdineTransition(current, target);
- 
-		// aggiorno fattura in base a nuovo stato
-		switch (target) {
-			case "PAGATO", "LAVORAZIONE", "SPEDITO", "CONSEGNATO" ->
-				// copia statoordine su fattura, no cambio copie
-				fattS.updateFromOrdine(o, target, false);
- 
-			case "CANCELLATO" ->
-				// ANNULLATA su fattura + ripristino copie 
-				// settabile solo se stato CREATO/PAGATO
-				fattS.updateFromOrdine(o, "CANCELLATO", true);
- 
-			case "RICHIESTA_RESO" -> {
-				// Passa a fattura reso
-				fattS.iniziaReso(
-					fattR.findByOrdineId(o.getId())
-						.orElseThrow(() -> new MangaException("!exists_fat"))
-						.getId(),
-					o.getAccount().getId()
-				);
-			}
- 
-			default -> throw new MangaException("ord_transition_invalid");
-		}
- 
-		// Aggiorno stato ordine dopo sincronizzazione con fattura
-		o.setStato(nuovoStato);
-		ordeR.save(o);
 	}
 
 	@Override
@@ -357,5 +310,109 @@ public class OrdineImplemetation implements IOrdineServices{
 	    
 	    // Confronto tra l'ID dell'account dell'ordine e l'ID fornito
 	    return ordineOpt.get().getAccount().getId().equals(accountId);
+	}
+	
+	private RigaOrdineRequest rigaOrdineFromRigaCarrello(RigaCarrello rc) {
+		return RigaOrdineRequest.builder()
+				.manga(rc.getManga().getIsbn())
+				.numeroCopie(rc.getNumeroCopie())
+				.build();				
+	}
+	
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void advanceStatoOrdine(Integer ordineId, Integer statoId) throws MangaException {
+		log.debug("advanceStatoOrdine ordineId={}, statoId={}", ordineId, statoId);
+ 
+		if (ordineId == null)
+			throw new MangaException("null_ord");
+		if (statoId == null)
+			throw new MangaException("null_sta");
+ 
+		Ordine o = ordeR.findById(ordineId)
+			.orElseThrow(() -> new MangaException("!exists_ord"));
+
+		StatoOrdine nuovoStato = statR.findById(statoId)
+			.orElseThrow(() -> new MangaException("!exists_sta"));
+		log.debug("stato ordine attuale={}, nuovo stato={}", o.getStato().getStatoOrdine(), nuovoStato.getStatoOrdine());
+
+		String current = o.getStato().getStatoOrdine();
+		String target = nuovoStato.getStatoOrdine();
+ 
+		// Controllo target stato permesso
+		validateOrdineTransition(current, target);
+ 
+		// aggiorno fattura in base a nuovo stato
+		switch (target) {
+			case "PAGATO", "LAVORAZIONE", "SPEDITO", "CONSEGNATO" ->
+				// copia statoordine su fattura, no cambio copie
+				fattS.updateFromOrdine(o, target, false);
+ 
+			case "CANCELLATO" ->
+				// ANNULLATA su fattura + ripristino copie 
+				// settabile solo se stato CREATO/PAGATO
+				fattS.updateFromOrdine(o, "CANCELLATO", true);
+ 
+			case "RICHIESTA_RESO" -> {
+				// Passa a fattura reso
+				fattS.iniziaReso(
+					fattR.findByOrdineId(o.getId())
+						.orElseThrow(() -> new MangaException("!exists_fat"))
+						.getId(),
+					o.getAccount().getId()
+				);
+			}
+ 
+			default -> throw new MangaException("ord_transition_invalid");
+		}
+ 
+		// Aggiorno stato ordine dopo sincronizzazione con fattura
+		o.setStato(nuovoStato);
+		ordeR.save(o);
+	}
+
+	// Helpers per frontend
+	// Creazione di ordine da carrello
+	@Transactional(rollbackFor = Exception.class)
+	public void createOrdineFromCarrello(Integer carrelloId, Integer anagraficaId, Integer tipoPagamentoId, Integer tipoSpedizioneId) throws MangaException {
+		log.debug("createOrdineFromCarrello: carrelloId {}, anagraficaId {}, tipoPagamentoId {}, tipoSpedizioneId {}", carrelloId, anagraficaId, tipoPagamentoId, tipoSpedizioneId);
+		OrdineRequest ord = new OrdineRequest();
+		
+		Carrello carr = carrR.findById(carrelloId).orElseThrow(()->
+							new MangaException("!exists_carr"));
+		ord.setAnagrafica(anagraficaId);
+		ord.setSpedizioneId(tipoSpedizioneId);
+		ord.setPagamentoId(tipoPagamentoId);	
+		Account acc = carr.getAccount();
+		ord.setAccount(acc.getId());
+		List<RigaOrdineRequest> lR = carr.getRigheCarrello()
+				.stream()
+				.map(rc -> rigaOrdineFromRigaCarrello(rc))
+				.collect(Collectors.toList());
+		ord.setRigheOrdineRequest(lR);
+		ord.setData(LocalDate.now());
+		create(ord);
+	}
+	
+	// ottieni prossimi stati possibili
+	public List<StatoOrdineDTO> getNextAllowedStates(Integer ordineId) throws MangaException {
+		log.debug("Start getNextAllowedStates, id ordine: {}", ordineId.toString());
+		Ordine o = ordeR.findById(ordineId)
+				.orElseThrow(() -> new MangaException("!exists_ord"));
+		String sta = o.getStato().getStatoOrdine();
+		
+    	List<String> allowed = ALLOWED_ORDINE.getOrDefault(sta, List.of());
+    	List<StatoOrdineDTO> lS = allowed.stream()
+                .map(s -> statR.findByStatoOrdine(s))
+                .filter(s -> s.isPresent())
+    			.map(s -> DtoBuilders.buildStatoOrdineDTO(s.get()))
+    			.toList();
+    	log.debug("Stato ordine input: {}", sta);
+    	for (StatoOrdineDTO s: lS) {
+        	log.debug("\tstato concesso: {}", s);
+    	}
+
+    	return lS;
 	}
 }

@@ -147,6 +147,9 @@ INSERT INTO stati_ordine (stato_ordine) VALUES ('SPEDITO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('CONSEGNATO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('CANCELLATO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('RICHIESTA_RESO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('RESTITUITO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('RIFIUTATO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('RIMBORSATO');
 
 INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('PAYPAL');
 INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('CARTA DI CREDITO');
