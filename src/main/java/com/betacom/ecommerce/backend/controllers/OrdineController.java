@@ -23,6 +23,7 @@ import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
+import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Carrello;
@@ -55,6 +56,18 @@ public class OrdineController {
     private Account getLoggedAccount(Principal principal) {
         return accountRepository.findByUsername(principal.getName()).orElse(null);
     }
+    
+    @GetMapping("/last_created")
+    public ResponseEntity<Object> getLastCreated(Authentication auth, Principal principal) {
+        try {
+            Account loggedAcc = getLoggedAccount(principal);
+            if (loggedAcc == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            
+            return ResponseEntity.ok(ordS.getUltimoPendente(loggedAcc.getId()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msgS.get(e.getMessage()));
+        }
+    }
 
     // --- ENDPOINT CREAZIONE ---
     // endpoints condivisi admin/account owner
@@ -82,7 +95,6 @@ public class OrdineController {
         }
         return ResponseEntity.status(status).body(r);
     }
-
 
     @GetMapping("/list")
     public ResponseEntity<Object> list(
@@ -118,7 +130,6 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
     
-
     @GetMapping("/findById")
     public ResponseEntity<Object> findById(@RequestParam(required = true) Integer idOrdine, Authentication auth, Principal principal) {
         Object r = new Object();
@@ -196,11 +207,9 @@ public class OrdineController {
         }
         return ResponseEntity.status(status).body(r);
     }
-
     
     // ENDPOINT SOLO ADMIN 
  	
-
  	// Solo l'admin dovrebbe poter cancellare fisicamente un ordine dal DB
     @PreAuthorize("hasAuthority('ADMIN')")
  	@DeleteMapping("/delete/{id}")
@@ -268,7 +277,5 @@ public class OrdineController {
         }
 
         return ResponseEntity.status(status).body(r);
-
     }
-
 }

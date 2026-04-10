@@ -18,7 +18,6 @@ import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
-import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
@@ -37,7 +36,6 @@ public class CarrelloImplementation implements ICarrelloServices{
 	private final IMangaRepository manR;
 	private final IMessagesServices msgS;
 	private final IRigaCarrelloServices rcS;
-	private final IRigaCarrelloRepository rcR;
 	
 	@Transactional(rollbackFor=MangaException.class)
 	@Override
@@ -61,24 +59,29 @@ public class CarrelloImplementation implements ICarrelloServices{
 				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
 		
 		Optional<Manga> man = manR.findById(isbn);
-		if (man.isEmpty()) {
-				throw new MangaException("manga_ntfnd");
-		}
+		if (man.isEmpty())
+			throw new MangaException("manga_ntfnd");
 		
 		RigaCarrelloRequest req = new RigaCarrelloRequest();
+		
+		for(RigaCarrello row : car.getRigheCarrello()) {
+			if(row.getManga().getIsbn().equals(isbn)) {
+				req.setId(row.getId());
+				req.setManga(isbn);
+				req.setNumeroCopie(row.getNumeroCopie() + nCopie);
+				
+				rcS.update(req);
+				
+				return;
+			}
+		}
+		
+		
 		req.setCarrelloId(chartId);
 		req.setManga(isbn);
 		req.setNumeroCopie(nCopie);
 		
-		Integer id = rcS.create(req);
-		
-		RigaCarrello rc = rcR.findById(id)
-				.orElseThrow(() -> new MangaException("riga_carrello_ntfnd"));
-		
-		List<RigaCarrello> lrC = car.getRigheCarrello();
-		lrC.add(rc);
-		
-		carR.save(car);
+		rcS.create(req);
 	}
 	
 	@Override

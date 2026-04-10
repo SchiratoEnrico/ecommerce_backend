@@ -68,7 +68,11 @@ public class SecurityConfig {
                         
                         // Saghe (se hai il controller per le saghe)
                         "/rest/saga/list",
-                        "/rest/saga/findById"
+                        "/rest/saga/findById",
+                        
+                        // Caricamento dati per la home
+                        "/rest/manga/latestArrives",
+                        "/rest/manga/bestSellers"
                 ).permitAll()
                 // Tutto il resto richiede di essere loggati
                 .anyRequest().authenticated()

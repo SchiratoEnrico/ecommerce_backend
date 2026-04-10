@@ -73,6 +73,13 @@ public class OrdineImplemetation implements IOrdineServices{
 		}
 		return ana;
 	}
+	
+	public Ordine getUltimoPendente(Integer accountId) throws MangaException {
+	    // Supponendo che tu abbia un OrdineRepository
+	    // Cerchiamo l'ordine in stato "CREATO" per l'account specifico, ordinato per ID desc
+		return ordeR.findFirstByAccount_IdAndStato_StatoOrdineOrderByIdDesc(accountId, "CREATO")
+				.orElseThrow(() -> new MangaException("pending_order_ntfnd"));
+	}
 
 	@Override
 	@Transactional (rollbackFor = Exception.class)

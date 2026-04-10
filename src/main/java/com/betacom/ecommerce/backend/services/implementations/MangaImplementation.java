@@ -16,13 +16,16 @@ import com.betacom.ecommerce.backend.dto.inputs.MangaRequest;
 import com.betacom.ecommerce.backend.dto.outputs.MangaDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Autore;
+import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.CasaEditrice;
 import com.betacom.ecommerce.backend.models.Fattura;
 import com.betacom.ecommerce.backend.models.Genere;
 import com.betacom.ecommerce.backend.models.Manga;
 import com.betacom.ecommerce.backend.models.Ordine;
+import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.models.Saga;
 import com.betacom.ecommerce.backend.repositories.IAutoreRepository;
+import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.ICasaEditriceRepository;
 import com.betacom.ecommerce.backend.repositories.IFatturaRepository;
 import com.betacom.ecommerce.backend.repositories.IGenereRepository;
@@ -56,6 +59,7 @@ public class MangaImplementation implements IMangaServices{
 	private final ImageDtoBuilders imgB;
 	private final IUploadServices uplS;
 	private final IFatturaRepository fatR;
+	private final ICarrelloRepository carR;
 	
 	@Override
 	@Transactional
@@ -322,27 +326,51 @@ public class MangaImplementation implements IMangaServices{
 	public List<MangaDTO> getAdvices(Integer accountId) throws MangaException {
 		log.debug("Inizio getAdvices per account: {}", accountId);
 		
-		// 1. Controllo sicurezza (kaboom)
+		// 1. Controllo sicurezza
 		if (accountId == null) {
 			throw new MangaException("Utente non loggato: impossibile generare consigli.");
 		}
 		
-		// 2. Chiediamo alla repository di ordine i 3 generi più comprati da questo utente
-		Pageable topThree = PageRequest.of(0, 3);
-		List<Integer> generiPreferiti = fatR.findTopGeneriByAccount(accountId, topThree);
+		// Inizializziamo i Set per contenere i dati uniti (evitano i doppioni in automatico)
+		Set<Integer> tuttiGeneriPreferiti = new HashSet<>();
+		Set<String> tuttiIsbnDaEscludere = new HashSet<>();
 		
-		// Se la lista è vuota significa che non ha mai comprato nulla
-		if (generiPreferiti == null || generiPreferiti.isEmpty()) {
-			return new ArrayList<>();
+		// 2. RECUPERO DATI DALLE FATTURE / ORDINI PASSATI
+		Pageable topThree = PageRequest.of(0, 3);
+		List<Integer> generiAcquistati = fatR.findTopGeneriByAccount(accountId, topThree);
+		List<String> isbnAcquistati = fatR.findIsbnCompratiByAccount(accountId);
+		
+		if (generiAcquistati != null) tuttiGeneriPreferiti.addAll(generiAcquistati);
+		if (isbnAcquistati != null) tuttiIsbnDaEscludere.addAll(isbnAcquistati);
+
+		// 3. RECUPERO DATI DAL CARRELLO ATTUALE
+		Optional<Carrello> carrelloOpt = carR.findByAccountId(accountId); 
+		
+		if (carrelloOpt.isPresent()) {
+			Carrello car = carrelloOpt.get();
+			for (RigaCarrello riga : car.getRigheCarrello()) {
+				Manga m = riga.getManga();
+				
+				// Aggiungiamo l'ISBN da escludere (non gli suggeriamo roba che sta già comprando)
+				tuttiIsbnDaEscludere.add(m.getIsbn()); 
+				
+				// Aggiungiamo i generi di questo manga ai preferiti
+				m.getGeneri().forEach(g -> tuttiGeneriPreferiti.add(g.getId()));
+			}
 		}
 		
-		// 3. Chiediamo a OrdineRepo gli ISBN dei Managa che ha già letto
-		List<String> mangaGiaComprati = fatR.findIsbnCompratiByAccount(accountId);
+		// 4. Controllo finale: se non ha né acquisti passati né roba nel carrello
+		if (tuttiGeneriPreferiti.isEmpty()) {
+			return new ArrayList<>(); // Restituiamo lista vuota, niente consigli
+		}
 		
-		// 4. Creiamo la Specification passandogli i dati
-		Specification<Manga> spec = MangaSpecifications.consigliatiSpec(generiPreferiti, mangaGiaComprati);
+		// 5. Creiamo la Specification convertendo i Set in List
+		Specification<Manga> spec = MangaSpecifications.consigliatiSpec(
+				new ArrayList<>(tuttiGeneriPreferiti), 
+				new ArrayList<>(tuttiIsbnDaEscludere)
+		);
 		
-		// 5. Interroghiamo la repository di Manga, vogliamo massimo 10 consigli
+		// 6. Interroghiamo la repository, vogliamo massimo 10 consigli
 		Pageable topTen = PageRequest.of(0, 10);
 		List<Manga> mangaConsigliati = mangaRepo.findAll(spec, topTen).getContent();
 		

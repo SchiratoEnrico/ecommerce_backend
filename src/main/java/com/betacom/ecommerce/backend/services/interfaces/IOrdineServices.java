@@ -9,11 +9,14 @@ import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
+import com.betacom.ecommerce.backend.models.Ordine;
 
 public interface IOrdineServices {
 	Integer create(OrdineRequest req) throws MangaException; 
 	void update(OrdineRequest req) throws MangaException; 
 	void delete(Integer id, Boolean ripristinaCopie) throws MangaException; 
+	
+	public Ordine getUltimoPendente(Integer accountId) throws MangaException;
 	
 	List<OrdineDTO> list(
 		    AccountDTO account,

@@ -60,8 +60,6 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 		List<RigaCarrello> rC = car.getRigheCarrello();
 		rC.add(rc);
 		
-		carR.save(car); //Testare se viene creata doppia, in caso levare questa
-		
 		return rcR.save(rc).getId();
 	}
 

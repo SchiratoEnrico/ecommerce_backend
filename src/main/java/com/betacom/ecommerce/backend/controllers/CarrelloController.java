@@ -139,6 +139,7 @@ public class CarrelloController {
 		try {
 			carS.addRow(chartId, isbn, nCopie);
 			r.setMsg(msgS.get("rest_updated"));
+			
 		} catch (Exception e) {
 			r.setMsg(msgS.get(e.getMessage()));
 			status = HttpStatus.BAD_REQUEST;
