@@ -21,6 +21,7 @@ import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
 import com.betacom.ecommerce.backend.specification.RigaCarrelloSpecifications;
+import com.betacom.ecommerce.backend.utilities.Utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,19 +48,30 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 		if(req.getNumeroCopie()==null || req.getNumeroCopie()<=0)
 			throw new MangaException("null_qua");
 		
-		RigaCarrello rc = new RigaCarrello();
 		Carrello car = carR.findById(req.getCarrelloId())
 				.orElseThrow(() -> new MangaException(msgS.get("!exists_car")));
 		
-		rc.setCarrello(car);
-		Manga m = manR.findByIsbn(req.getManga()).orElseThrow(
+		Manga m = manR.findByIsbn(Utils.normalize(req.getManga())).orElseThrow(
 				() -> new MangaException("!exists_man"));
+		
+		Optional<RigaCarrello> existing = car.getRigheCarrello().stream()
+		        .filter(rc -> rc.getManga().getIsbn().equals(m.getIsbn()))
+		        .findFirst();
+
+		if (existing.isPresent()) {
+		    RigaCarrello rc = existing.get();
+		    req.setId(rc.getId());
+		    req.setNumeroCopie(rc.getNumeroCopie() + req.getNumeroCopie());
+		    update(req);
+		    return rc.getId();
+		}
+		
+		RigaCarrello rc = new RigaCarrello();
+		rc.setCarrello(car);
 		rc.setManga(m);
 		rc.setNumeroCopie(req.getNumeroCopie());
 		
-		List<RigaCarrello> rC = car.getRigheCarrello();
-		rC.add(rc);
-		
+		car.getRigheCarrello().add(rc);
 		return rcR.save(rc).getId();
 	}
 
@@ -67,17 +79,32 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 	public void update(RigaCarrelloRequest req) throws MangaException {
 		RigaCarrello rc = rcR.findById(req.getId())
 				.orElseThrow(() -> new MangaException(msgS.get("!exists_rcr")));
+		Carrello car = rc.getCarrello();
 		
-		if(req.getCarrelloId()!=null)
+		if(req.getCarrelloId()!=null && !req.getCarrelloId().equals(car.getId()))
 			throw new MangaException("id_chng");
-		if(req.getManga()!=null) {
-			Manga m = manR.findByIsbn(req.getManga()).orElseThrow(
-					() -> new MangaException("!exists_man"));
-			rc.setManga(m);
+		
+		if (req.getManga() != null) {
+		    Manga m = manR.findByIsbn(Utils.normalize(req.getManga()))
+		            .orElseThrow(() -> new MangaException("!exists_man"));
+
+		    // Check per duplicati se si cambia ad altro manga
+		    if (!rc.getManga().getIsbn().equals(m.getIsbn())) {
+		    	// true se id row != rc.getId() e stesso ISBN
+		        boolean duplicate = car.getRigheCarrello().stream()
+		                .anyMatch(r -> !r.getId().equals(rc.getId()) && r.getManga().getIsbn().equals(m.getIsbn()));
+		        if (duplicate)
+		            throw new MangaException("exists_rca");
+		    }
+
+		    rc.setManga(m);
 		}
+		
 		if(req.getNumeroCopie()!=null) {
 			if(req.getNumeroCopie()<=0) {
-				rcR.delete(rc);
+				// faccio fare delete a orphanremoval
+	            car.getRigheCarrello().remove(rc);
+	            carR.save(car);
 				return;
 			}
 			else
@@ -91,7 +118,10 @@ public class RigaCarrelloImplementation implements IRigaCarrelloServices {
 	public void delete(Integer id) throws MangaException {
 		RigaCarrello rc = rcR.findById(id)
 				.orElseThrow(() -> new MangaException(msgS.get("!exists_rcr")));
-		rcR.delete(rc);
+	    Carrello car = rc.getCarrello();
+	    car.getRigheCarrello().remove(rc); // uso orphanRemoval
+	    carR.save(car);
+
 	}
 	
 	private RigaCarrelloDTO builderCall(RigaCarrello rc) {

@@ -18,6 +18,7 @@ import com.betacom.ecommerce.backend.models.RigaCarrello;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.ICarrelloRepository;
 import com.betacom.ecommerce.backend.repositories.IMangaRepository;
+import com.betacom.ecommerce.backend.repositories.IRigaCarrelloRepository;
 import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaCarrelloServices;
@@ -36,6 +37,7 @@ public class CarrelloImplementation implements ICarrelloServices{
 	private final IMangaRepository manR;
 	private final IMessagesServices msgS;
 	private final IRigaCarrelloServices rcS;
+	private final IRigaCarrelloRepository rcR;
 	
 	@Transactional(rollbackFor=MangaException.class)
 	@Override
@@ -43,7 +45,9 @@ public class CarrelloImplementation implements ICarrelloServices{
 		Carrello car = new Carrello();
 		Account acc = accR.findById(req.getId_account())
 				.orElseThrow(() -> new MangaException("account_ntfnd"));
-		
+		if (carR.findByAccountId(acc.getId()).isPresent()) {
+			throw new MangaException("exists_car");
+		}
 		acc.setCarrello(car);
 		car.setAccount(acc);
 		
@@ -55,6 +59,7 @@ public class CarrelloImplementation implements ICarrelloServices{
 	@Transactional(rollbackFor=MangaException.class)
 	@Override
 	public void addRow(Integer chartId, String isbn, Integer nCopie) throws MangaException {
+		log.debug("Addong to chart {} row for isbn {} and number copies {}", chartId, isbn, nCopie);
 		Carrello car = carR.findById(chartId)
 				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
 		
@@ -63,25 +68,41 @@ public class CarrelloImplementation implements ICarrelloServices{
 			throw new MangaException("manga_ntfnd");
 		
 		RigaCarrelloRequest req = new RigaCarrelloRequest();
-		
+				
 		for(RigaCarrello row : car.getRigheCarrello()) {
 			if(row.getManga().getIsbn().equals(isbn)) {
+	            Integer nuovoNCopie = row.getNumeroCopie() + nCopie;
+
+	            // se tot < 0
+	            if (nuovoNCopie <= 0) {
+	                car.getRigheCarrello().remove(row); // orphanRemoval rimuove riga
+	                carR.save(car);
+	                return;
+	            }
+
 				req.setId(row.getId());
 				req.setManga(isbn);
-				req.setNumeroCopie(row.getNumeroCopie() + nCopie);
-				
+				req.setNumeroCopie(nuovoNCopie);
 				rcS.update(req);
 				
 				return;
 			}
 		}
 		
-		
+		// se isbn non è già in carrello e ncopie < 0 errore
+	    if (nCopie <= 0)
+	        throw new MangaException("!exists_qua");
+
 		req.setCarrelloId(chartId);
 		req.setManga(isbn);
 		req.setNumeroCopie(nCopie);
 		
 		rcS.create(req);
+		
+		List<RigaCarrello> lRC = rcR.findAllByCarrelloId(car.getId());
+		car.getRigheCarrello().clear();
+		car.getRigheCarrello().addAll(lRC);
+		carR.save(car);
 	}
 	
 	@Override
@@ -93,19 +114,25 @@ public class CarrelloImplementation implements ICarrelloServices{
 		if (man.isEmpty()) {
 				throw new MangaException("manga_ntfnd");
 		}		
-		List<RigaCarrello> lrC = car.getRigheCarrello();
 		
-		lrC.forEach(c -> {
-			if(c.getId()==rowId) {
-				RigaCarrelloRequest req = new RigaCarrelloRequest();
-				req.setId(rowId);
-				req.setManga(isbn);
-				req.setNumeroCopie(nCopie);
-				rcS.update(req);
-				return;
-			}
-		});
+		RigaCarrello target = car.getRigheCarrello().stream()
+	            .filter(c -> c.getId().equals(rowId))
+	            .findFirst()
+	            .orElseThrow(() -> new MangaException("!exists_rcr"));
 		
+	    if (nCopie <= 0) {
+	        car.getRigheCarrello().remove(target); // orphanRemoval
+	        carR.save(car);
+	        return;
+	    }
+
+	    RigaCarrelloRequest req = new RigaCarrelloRequest();
+	    req.setId(target.getId());
+		req.setManga(man.get().getIsbn());
+		req.setNumeroCopie(nCopie);
+		rcS.update(req);
+		return;
+
 	}
 
 	@Transactional (rollbackFor = MangaException.class)
@@ -114,39 +141,39 @@ public class CarrelloImplementation implements ICarrelloServices{
 		Carrello car = carR.findById(chartId)
 				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
 		
-		car.getRigheCarrello().removeIf(r -> r.getId().equals(rowId)); // orphanremoval true
-		carR.save(car);
+		RigaCarrello rc = rcR.findById(rowId).orElseThrow(() ->
+				new MangaException("!exists_rca"));
+		if (!car.getRigheCarrello().remove(rc)) throw new MangaException("rca_notin_ca"); // orphanremoval true
 		
-//		
-//		List<RigaCarrello> lrC = car.getRigheCarrello();
-//		
-//		lrC.forEach(c -> {
-//			if(c.getId()==rowId) {
-//				rcS.delete(rowId);
-//				return;
-//			}
-//		});
+		carR.save(car);
 	}
 	
 	@Transactional (rollbackFor = MangaException.class)
 	@Override
-	public void delete(Integer id) throws MangaException {		
+	public void delete(Integer id) throws MangaException {
 		Carrello car = carR.findById(id)
 				.orElseThrow(() -> new MangaException("carrello_ntfnd")); 
 		
-		Account acc = accR.findById(car.getAccount().getId())
-				.orElseThrow();
-		
-		acc.setCarrello(null);
-		car.setAccount(null);
-		car.getRigheCarrello().clear(); 
-		
-		carR.delete(car);
-		carR.flush(); // forza la delete nel db subito
-		
-		Carrello nuovoCarrello = new Carrello();
-		nuovoCarrello.setAccount(acc);
-		carR.save(nuovoCarrello);
+		// NW INVECE DI DELETE CARRELLO	+ RICREO VUOTO
+		// MOLTO PIÙ SEMPLICEMENTE SVUOTO CARRELLO
+		// RISCHIOSO PER MECCANICHE ORPHANREMOVAL CON ACCOUNT
+
+	    car.getRigheCarrello().clear();
+	    carR.save(car);
+
+//		Account acc = accR.findById(car.getAccount().getId())
+//				.orElseThrow();
+//
+//		acc.setCarrello(null);
+//		car.setAccount(null);
+//		car.getRigheCarrello().clear(); 
+//		
+//		carR.delete(car);
+//		carR.flush(); // forza la delete nel db subito
+//		
+//		Carrello nuovoCarrello = new Carrello();
+//		nuovoCarrello.setAccount(acc);
+//		carR.save(nuovoCarrello);
 	}
 	 
 	@Override
