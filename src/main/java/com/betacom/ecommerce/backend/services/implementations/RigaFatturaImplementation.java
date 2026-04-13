@@ -92,7 +92,7 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
 	@Transactional (rollbackFor = Exception.class)
 	public void update(RigaFatturaRequest req) throws MangaException {
 		log.debug("updating RigaFattura {}", req);
-
+ 
         if (req.getId() == null)
             throw new MangaException("null_rig");
         RigaFattura r = rigR.findById(req.getId()).orElseThrow(() ->
@@ -118,7 +118,7 @@ public class RigaFatturaImplementation implements IRigaFatturaServices{
 
         if (req.getNumeroCopie() != null && req.getNumeroCopie() >= 1) {
         	if (req.getNumeroCopie() != r.getNumeroCopie()) {
-        		Manga m = mangaR.findByIsbn(Utils.normalize(req.getIsbn())).orElseThrow(() ->
+        		Manga m = mangaR.findByIsbn(Utils.normalize(r.getIsbn())).orElseThrow(() ->
 						new MangaException("!exists_man"));
         		Integer d = req.getNumeroCopie() - r.getNumeroCopie();
         		Integer left = m.getNumeroCopie() - d;
