@@ -71,7 +71,7 @@ public class RigaOrdineControllerTest {
     // ==========================================
     private RigaOrdineRequest buildRigaOrdineRequest() {
         return RigaOrdineRequest.builder()
-                .idOrdine(1)
+                .idOrdine(2)
                 .manga("ISBN002")
                 .numeroCopie(1)
                 .build();
@@ -187,29 +187,34 @@ public class RigaOrdineControllerTest {
 
         // Normal workflow
         RigaOrdineRequest req = buildRigaOrdineRequest();
-        req.setId(1);
+        req.setId(3);
         mockMvc.perform(put("/rest/riga_ordine/update").with(csrf())
                 .header("Authorization", token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get("rest_updated")));
+        
+        req = buildRigaOrdineRequest();
+        req.setId(2);
+        String msg = "exists_ro";
+        assertUpdateError(token, msg, req);
 
         // !exists_row
-        req = new RigaOrdineRequest();
+        msg = "!exists_ro";
+        req = buildRigaOrdineRequest();
         req.setId(100);
-        String msg = "!exists_row";
         assertUpdateError(token, msg, req);
 
         // !exists_ord
-        req = new RigaOrdineRequest();
+        req = buildRigaOrdineRequest();
         req.setId(1);
         req.setIdOrdine(100);
         msg = "!exists_ord";
         assertUpdateError(token, msg, req);
 
         // !exists_man
-        req = new RigaOrdineRequest();
+        req = buildRigaOrdineRequest();
         req.setId(1);
         req.setManga("WEWEWEW");
         msg = "!exists_man";

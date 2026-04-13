@@ -193,6 +193,7 @@ public class OrdineControllerTest {
         		.param("carrelloId", carrelloId.toString())
         		.param("anagraficaId", anagraficaId.toString())
         		.param("tipoPagamentoId", tipoPagamentoId.toString())
+        		.param("data", LocalDate.now().toString())
         		.param("tipoSpedizioneId", tipoSpedizioneId.toString())
         		)
         .andExpect(status().isForbidden())
@@ -206,6 +207,7 @@ public class OrdineControllerTest {
         		.param("anagraficaId", anagraficaId.toString())
         		.param("tipoPagamentoId", tipoPagamentoId.toString())
         		.param("tipoSpedizioneId", tipoSpedizioneId.toString())
+        		.param("data", LocalDate.now().toString())
         		)
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
