@@ -119,8 +119,8 @@ public class FatturaImplementation implements IFatturaServices {
 		    Map.entry("SPEDITO",         List.of("CONSEGNATO")),
 		    Map.entry("CONSEGNATO",      List.of("CONFERMATO", "RICHIESTA_RESO")),
 		    Map.entry("CONFERMATO",      List.of()),
-		    Map.entry("RICHIESTA_RESO",  List.of("RICONSEGNATO", "RIFIUTATO")),
-		    Map.entry("RICONSEGNATO",    List.of("RIMBORSATO")),
+		    Map.entry("RICHIESTA_RESO",  List.of("RESTITUITO", "RIFIUTATO")),
+		    Map.entry("RESTITUITO",      List.of("RIMBORSATO")),
 		    Map.entry("RIMBORSATO",      List.of()),
 		    Map.entry("RIFIUTATO",       List.of()),
 		    Map.entry("ANNULLATA",       List.of())
@@ -265,7 +265,7 @@ public class FatturaImplementation implements IFatturaServices {
  
 	// Admin: manga restituito (ancora da valutare condizioni ripristino copia/rimborso)
 	public void confermaRiconsegna(Integer fatturaId) {
-		advanceStatoFattura(fatturaId, "RICONSEGNATO");
+		advanceStatoFattura(fatturaId, "RESTITUITO");
 	}
  
 	// Admin: Rimborso (Boolean ripristina: manga rivendibile, copie ripristinate)
