@@ -556,7 +556,7 @@ public class FatturaImplementation implements IFatturaServices {
  
 		Specification<Fattura> spec = Specification
 			.where(FatturaSpecifications.dataEmissioneBetween(from, to))
-			.and(FatturaSpecifications.numeroFatturaLike(numeroFattura))
+			.and(FatturaSpecifications.numeroFatturaLike(numeroFattura)) 
 			.and(FatturaSpecifications.clienteNomeLike(clienteNome))
 			.and(FatturaSpecifications.clienteCognomeLike(clienteCognome))
 			.and(FatturaSpecifications.clienteEmailLike(clienteEmail))
