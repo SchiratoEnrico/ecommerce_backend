@@ -307,6 +307,7 @@ public class DtoBuilders {
 		return TipoSpedizioneDTO.builder()
 				.id(s.getId())
 				.tipoSpedizione(s.getTipoSpedizione())
+				.costoSpedizione(s.getCostoSpedizione())
 				.build();
 	}
 
