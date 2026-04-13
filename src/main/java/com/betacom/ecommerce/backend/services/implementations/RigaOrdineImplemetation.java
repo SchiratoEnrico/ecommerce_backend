@@ -78,7 +78,8 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		removeCopies(m, n);
 
 		// controllo per vedere se manga già presente nello stesso ordine		
-		if (o.getRigheOrdine().stream()
+		if (o.getRigheOrdine() != null &&
+			o.getRigheOrdine().stream()
 		        .filter(rc -> rc.getManga().getIsbn().equals(m.getIsbn()))
 		        .findFirst().isPresent()) {
 			throw new MangaException("exists_ro");
@@ -118,9 +119,9 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 			
 			// 1 - check duplicati
             boolean duplicate = r.getOrdine().getRigheOrdine().stream()
-                    .anyMatch(ro -> 
-                    	!ro.getId().equals(r.getId())
-                        && ro.getManga().getIsbn().equals(m.getIsbn())
+                    	.filter(ro -> ro.getId() != r.getId())
+                    	.anyMatch(ro -> 
+                    	ro.getManga().getIsbn().equals(m.getIsbn())
                         ); // ritorna true se almeno 1
                 
             if (duplicate) {
