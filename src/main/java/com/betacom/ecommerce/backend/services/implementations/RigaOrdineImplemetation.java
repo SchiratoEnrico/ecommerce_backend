@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,7 +91,14 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		r.setNumeroCopie(n);
 	    r.setManga(m);
 		r.setPrezzo(m.getPrezzo());
-		return righR.save(r).getId();
+		
+		Integer rid = righR.save(r).getId();
+		r.setId(rid);
+		List<RigaOrdine> lR = o.getRigheOrdine();
+
+		lR.add(r);
+		ordeR.save(o);
+		return rid;
 	}
 
 	@Transactional (rollbackFor = Exception.class)

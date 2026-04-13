@@ -1,6 +1,7 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import com.betacom.ecommerce.backend.models.Anagrafica;
 import com.betacom.ecommerce.backend.models.Carrello;
 import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.models.RigaCarrello;
+import com.betacom.ecommerce.backend.models.RigaOrdine;
 import com.betacom.ecommerce.backend.models.StatoOrdine;
 import com.betacom.ecommerce.backend.models.TipoPagamento;
 import com.betacom.ecommerce.backend.models.TipoSpedizione;
@@ -228,7 +230,7 @@ public class OrdineImplemetation implements IOrdineServices {
 		if (req.getAnagrafica() == null) throw new MangaException("null_ana");
 		Anagrafica ana = checkAnagrafica(req.getAnagrafica(), req.getAccount());
 		o.setAnagrafica(ana);
-
+		o.setRigheOrdine(new ArrayList<RigaOrdine>());
 		Ordine savedOrdine = ordeR.save(o);
 
 		// Crea righe ordine
@@ -285,7 +287,6 @@ public class OrdineImplemetation implements IOrdineServices {
 	// ================================================================
 	// UPDATE — SOLO DATI, NO STATO ORDINE (usa advanceStatoOrdine())
 	// Ovvero: Account, pagamento, spedizione, data e righe ordine
-	//
 	// ================================================================
 
 	@Transactional(rollbackFor = Exception.class)
@@ -329,6 +330,20 @@ public class OrdineImplemetation implements IOrdineServices {
 			Anagrafica ana = checkAnagrafica(req.getAnagrafica(), accId);
 			o.setAnagrafica(ana);
 		}
+		
+		List<RigaOrdineRequest> lR = req.getRigheOrdineRequest();
+		if (lR != null && !lR.isEmpty()) {
+			for (RigaOrdineRequest r : lR) {
+				r.setIdOrdine(o.getId());
+				if (r.getId() == null) {
+					rowS.create(r);
+				}
+				else {
+					rowS.update(r);
+				}
+			}
+		}
+		ordeR.save(o);
 		ordeR.save(o);
 	}
 
