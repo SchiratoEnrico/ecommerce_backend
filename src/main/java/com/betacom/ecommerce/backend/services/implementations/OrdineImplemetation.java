@@ -128,9 +128,11 @@ public class OrdineImplemetation implements IOrdineServices {
 			case "CANCELLATO" -> {
 				// Copie sempre ripristinate (raggiungibile solo se CREATO/PAGATO)
 				mangaS.ripristinaNumeroCopie(o);
-				// Annulla fattura se esiste (creata a PAGATO)
-				fattS.updateStatoFromOrdine(o, "CANCELLATO", false);
-			}
+				if (!current.equals("CREATO")) {
+					// Annulla fattura se esiste (creata a PAGATO)
+					fattS.updateStatoFromOrdine(o, "CANCELLATO", false);
+				}
+			}	
 
 			case "RICHIESTA_RESO" -> {
 				// chiama fattura reso pipeline (con 30-day check)
@@ -230,9 +232,6 @@ public class OrdineImplemetation implements IOrdineServices {
 
 		Integer myId = savedOrdine.getId();
 		savedOrdine.setRigheOrdine(rowR.findAllByOrdineId(myId));
-
-		// Blocca copie alla creazion dell ordiene
-		mangaS.decrementaNumeroCopie(savedOrdine);
 
 		return myId;
 	}

@@ -32,6 +32,19 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 	private final IOrdineRepository ordeR;
 	private final IMangaRepository mangR;
 
+	// helper per check e update copie rimanenti
+	@Transactional (rollbackFor = Exception.class)
+	private void removeCopies(Manga m, Integer request) {
+        Integer left = m.getNumeroCopie() - request;
+        if (left < 0) {
+        	throw new MangaException("insufficiente_copie");
+        } else {
+	        m.setNumeroCopie(left);
+	        mangR.save(m);
+        }
+	}
+	
+	// devo aggiungere check a stato ordine e agire conseguentemente
 	@Transactional (rollbackFor = Exception.class)
 	@Override
 	public Integer create(RigaOrdineRequest req) throws MangaException {
@@ -45,20 +58,37 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 						new MangaException("!exists_ord"));
 		
 		String myISBN = Utils.normalize(req.getManga());
-		Manga m = null;
-		if (myISBN != null && !myISBN.isBlank()) {
-			m = mangR.findById(myISBN).orElseThrow(()->
-				new MangaException("!exists_man"));
-		} else {
+		if (myISBN == null || myISBN.isBlank()) {
 			throw new MangaException("null_man");
 		}
 		
+		Optional<Manga> man = mangR.findById(myISBN);
+		if (man.isEmpty()) {
+			throw new MangaException("!exists_man");
+		} 
+		
+		Manga m = man.get();
+		
+		Integer n = req.getNumeroCopie();
+		if (n == null || n <= 0) {
+			throw new MangaException("!exists_qua");
+		}
+		
+		// controllo e rimuovo copie
+		removeCopies(m, n);
+
+		// controllo per vedere se manga già presente nello stesso ordine		
+		if (o.getRigheOrdine().stream()
+		        .filter(rc -> rc.getManga().getIsbn().equals(m.getIsbn()))
+		        .findFirst().isPresent()) {
+			throw new MangaException("exists_ro");
+		}
+
 		RigaOrdine r = new RigaOrdine();
 		r.setOrdine(o);
-		r.setManga(m);
-		r.setNumeroCopie(req.getNumeroCopie());
+		r.setNumeroCopie(n);
+	    r.setManga(m);
 		r.setPrezzo(m.getPrezzo());
-		
 		return righR.save(r).getId();
 	}
 
@@ -67,7 +97,7 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 	public void update(RigaOrdineRequest req) throws MangaException {
 		log.debug("updating RigheOrdine {}", req);
 		RigaOrdine r = righR.findById(req.getId()).orElseThrow(() ->
-						new MangaException("!exists_row"));
+						new MangaException("!exists_ro"));
 		
 		Integer myId = req.getIdOrdine();
 		if (myId != null) {
@@ -76,24 +106,48 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 			r.setOrdine(o);
 		}
 		
-		String myISBN = Utils.normalize(req.getManga());
-		Manga m = null;
-		if (myISBN != null && !myISBN.isBlank()) {
-			m = mangR.findById(myISBN).orElseThrow(()->
-				new MangaException("!exists_man"));
-			r.setManga(m);
+		Integer n = req.getNumeroCopie();
+		if (n <= 0) {
+			throw new MangaException("!exists_qua");
 		}
 		
-		if (req.getNumeroCopie() != null) {
-		    // update inventory delta: difference between old and new
-		    Integer toAdd = r.getNumeroCopie() - req.getNumeroCopie();
-		    m = r.getManga();
-		    Integer left = m.getNumeroCopie() - toAdd; // negative delta = more copies locked
-		    if (left < 0) throw new MangaException("insufficiente_copie");
-		    m.setNumeroCopie(left);
-		    mangR.save(m);
-		    r.setNumeroCopie(req.getNumeroCopie());
+		String myISBN = Utils.normalize(req.getManga());
+		if (myISBN != null && !myISBN.isBlank()) {
+			Manga m = mangR.findById(myISBN).orElseThrow(()->
+				new MangaException("!exists_man"));
+			
+			// 1 - check duplicati
+            boolean duplicate = r.getOrdine().getRigheOrdine().stream()
+                    .anyMatch(ro -> 
+                    	!ro.getId().equals(r.getId())
+                        && ro.getManga().getIsbn().equals(m.getIsbn())
+                        ); // ritorna true se almeno 1
+                
+            if (duplicate) {
+            	throw new MangaException("exists_ro");
+            }
+            
+            // 2 - resetto copie vecchio manga
+            Manga oldManga = r.getManga();
+            removeCopies(oldManga, - r.getNumeroCopie());
+
+            // 3 - check se n copie richiesto 
+            Integer copies = n == null? r.getNumeroCopie() : n;
+            removeCopies(m, copies);
+            // setto manga
+			r.setManga(m);		
+            
 		}
+		
+		if ((n != null) && (myISBN == null || myISBN.isBlank())) {			
+			// aggiorno con delta inventario
+		    Manga m = r.getManga();
+		    Integer delta = n - r.getNumeroCopie();
+		    
+		    removeCopies(m, delta);
+		    r.setNumeroCopie(n);
+		}
+		
 		righR.save(r);
 	}
 
@@ -106,6 +160,11 @@ public class RigaOrdineImplemetation implements IRigaOrdineServices{
 		
 		Ordine o = r.getOrdine();
 		o.getRigheOrdine().remove(r);
+		
+		Manga m = r.getManga();
+		Integer copie = r.getNumeroCopie();
+		removeCopies(m, -copie);
+
 		righR.delete(r);
 		ordeR.save(o);
 	}
