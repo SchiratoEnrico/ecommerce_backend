@@ -23,7 +23,6 @@ import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
 import com.betacom.ecommerce.backend.dto.outputs.StatoOrdineDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoPagamentoDTO;
 import com.betacom.ecommerce.backend.dto.outputs.TipoSpedizioneDTO;
-import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Carrello;
@@ -47,7 +46,6 @@ public class OrdineController {
     private final IAccountRepository accountRepository; // Necessario per recuperare l'ID dall'username del token
     private final ICarrelloRepository carrelloRepository; // Necessario per recuperare l'ID dall'username del token
     private final IStatoOrdineRepository statoR;
-    
     // --- METODI DI SUPPORTO ---
     private boolean isAdmin(Authentication auth) {
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
@@ -56,7 +54,8 @@ public class OrdineController {
     private Account getLoggedAccount(Principal principal) {
         return accountRepository.findByUsername(principal.getName()).orElse(null);
     }
-    
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     @GetMapping("/last_created")
     public ResponseEntity<Object> getLastCreated(Authentication auth, Principal principal) {
         try {
@@ -70,7 +69,8 @@ public class OrdineController {
     }
 
     // --- ENDPOINT CREAZIONE ---
-    // endpoints condivisi admin/account owner
+    // endpoints condivisi admin/account owner e verificato
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     @PostMapping("/create")
     public ResponseEntity<Response> create(@RequestBody(required = true) OrdineRequest req, Authentication auth, Principal principal) {
         Response r = new Response();
@@ -96,7 +96,9 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
 
+
     @GetMapping("/list")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     public ResponseEntity<Object> list(
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String tipoPagamento,
@@ -130,6 +132,8 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
     
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     @GetMapping("/findById")
     public ResponseEntity<Object> findById(@RequestParam(required = true) Integer idOrdine, Authentication auth, Principal principal) {
         Object r = new Object();
@@ -151,6 +155,7 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     @GetMapping("/get_next_allowed_states")
     public ResponseEntity<Object> getNextAllowedStates(@RequestParam(required = true) Integer idOrdine, Authentication auth, Principal principal) {
         Object r = new Object();
@@ -172,6 +177,7 @@ public class OrdineController {
         return ResponseEntity.status(status).body(r);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     @PostMapping("/create_ordine_from_carrello")
     public ResponseEntity<Response> createOrdineFromCarrello(
     		@RequestParam(required = true) Integer carrelloId,
@@ -207,9 +213,9 @@ public class OrdineController {
         }
         return ResponseEntity.status(status).body(r);
     }
+
     
     // ENDPOINT SOLO ADMIN 
- 	
  	// Solo l'admin dovrebbe poter cancellare fisicamente un ordine dal DB
     @PreAuthorize("hasAuthority('ADMIN')")
  	@DeleteMapping("/delete/{id}")
@@ -277,5 +283,7 @@ public class OrdineController {
         }
 
         return ResponseEntity.status(status).body(r);
+
     }
+
 }

@@ -34,7 +34,7 @@ public interface IFatturaServices {
 	List<FatturaDTO> listByAccountId(Integer accountId) throws Exception;
 	
 	// trigger automatico da cancellazione ordine
-	public void updateFromOrdine(Ordine o, String nuovoStatoOrdine, Boolean ripristinaCopie) throws MangaException;
+	public void updateStatoFromOrdine(Ordine o, String nuovoStatoOrdine, Boolean ripristinaCopie) throws MangaException;
 	
 
 	// helpers
@@ -44,7 +44,10 @@ public interface IFatturaServices {
 	// reso
 	public void iniziaReso(Integer fatturaId, Integer accountId) throws MangaException;
 	public void rifiutaReso(Integer fatturaId) throws MangaException;
-	public void confermaReso(Integer fatturaId);
+	public void confermaRiconsegna(Integer fatturaId);
 	public void rimborsa(Integer fatturaId, Boolean ripristinaCopie);
 	public void detachFromOrdine(Ordine o, String note);
+
+	// funzione per scadenza reso
+	void autoConfirmExpired();
 }

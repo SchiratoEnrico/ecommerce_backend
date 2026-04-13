@@ -17,6 +17,9 @@ JpaRepository<Fattura, Integer>, JpaSpecificationExecutor<Fattura>{
 	Optional<Fattura> findByNumeroFattura(String numeroFattura);
 	Optional<Fattura> findByOrdineId(Integer idOrdine);
 	
+	List<Fattura> findAllByStatoFattura(String statoFattura);
+
+	
 	@Query("SELECT f FROM Fattura f WHERE f.ordine.account.id = :accountId")
 	List<Fattura> findAllByAccountId(@Param("accountId") Integer accountId);
 	 
@@ -25,10 +28,10 @@ JpaRepository<Fattura, Integer>, JpaSpecificationExecutor<Fattura>{
 		       "WHERE r.isbn = m.isbn AND f.ordine.account.id = :accountId " +
 		       "GROUP BY g.id " +
 		       "ORDER BY COUNT(g.id) DESC")
-		List<Integer> findTopGeneriByAccount(@Param("accountId") Integer accountId, Pageable pageable);
-		 
-		@Query("SELECT DISTINCT r.isbn FROM Fattura f " +
+	List<Integer> findTopGeneriByAccount(@Param("accountId") Integer accountId, Pageable pageable);
+	 
+	@Query("SELECT DISTINCT r.isbn FROM Fattura f " +
 		       "JOIN f.righe r " +
 		       "WHERE f.ordine.account.id = :accountId")
-		List<String> findIsbnCompratiByAccount(@Param("accountId") Integer accountId);
+	List<String> findIsbnCompratiByAccount(@Param("accountId") Integer accountId);
 }

@@ -147,9 +147,10 @@ INSERT INTO stati_ordine (stato_ordine) VALUES ('SPEDITO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('CONSEGNATO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('CANCELLATO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('RICHIESTA_RESO');
-INSERT INTO stati_ordine (stato_ordine) VALUES ('RESTITUITO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('CONFERMATO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('RIFIUTATO');
 INSERT INTO stati_ordine (stato_ordine) VALUES ('RIMBORSATO');
+INSERT INTO stati_ordine (stato_ordine) VALUES ('RICONSEGNATO');
 
 INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('PAYPAL');
 INSERT INTO tipi_pagamento (tipo_pagamento) VALUES ('CARTA DI CREDITO');
@@ -184,13 +185,13 @@ VALUES ('Eiichiro', 'Oda', '1975-01-01', 'One Piece author');
 
 INSERT INTO accounts (username, password, email, data_creazione, ruolo)
 VALUES ('MarioRossi', '$2a$10$dummyhashfortest000000000000000000000000000000000000000',
-        'mario.rossi@email.com', CURRENT_TIMESTAMP, 'USER');
+        'mario.rossi@email.com', CURRENT_TIMESTAMP, 'VERIFIED_USER');
 
 INSERT INTO accounts (username, password, email, data_creazione, ruolo)
 VALUES ('AdminUser', '$2a$10$dummyhashfortest000000000000000000000000000000000000000',
         'admin@email.com', CURRENT_TIMESTAMP, 'ADMIN'), 
         ('UserUser', '$2a$10$dummyhashdebolest000000000000000000000000000000000000000',
-        'user@email.com', CURRENT_TIMESTAMP, 'USER');
+        'user@email.com', CURRENT_TIMESTAMP, 'VERIFIED_USER');
 
 INSERT INTO anagrafiche (id_account, predefinito, nome, cognome, via, citta, provincia, cap, stato)
 VALUES (1, TRUE, 'Mario', 'Rossi', 'Via Roma 1', 'Roma', 'RM', '00100', 'Italia')

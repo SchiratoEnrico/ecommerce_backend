@@ -153,16 +153,16 @@ public class FatturaControllerTest {
 
 	// mappa di transizion possibili
 	private static final Map<String, List<String>> ALLOWED_TRANSITIONS = Map.of(
-			"CREATO",          List.of("PAGATO", "ANNULLATA"),
 			"PAGATO",          List.of("LAVORAZIONE", "ANNULLATA"),
 			"LAVORAZIONE",     List.of("SPEDITO"),
 			"SPEDITO",         List.of("CONSEGNATO"),
-			"CONSEGNATO",      List.of("RICHIESTA_RESO"),
-			"RICHIESTA_RESO",  List.of("RESTITUITO", "RIFIUTATO"),
-			"RESTITUITO",      List.of("RIMBORSATO"),
-			"RIMBORSATO",       List.of(),
-			"RIFIUTATO",       List.of(),
-			"ANNULLATA",       List.of()
+			"CONSEGNATO",      List.of("CONFERMATO", "RICHIESTA_RESO"),
+			"CONFERMATO",      List.of(),                                  // terminale: possibilità reso scaduto
+			"RICHIESTA_RESO",  List.of("RICONSEGNATO", "RIFIUTATO"),
+			"RICONSEGNATO",    List.of("RIMBORSATO"),                      // manga restituito fisicamente
+			"RIMBORSATO",      List.of(),                                  // terminale
+			"RIFIUTATO",       List.of(),                                  // terminale: reso respinto
+			"ANNULLATA",       List.of()                                   // terminale: ordine cancellato
 		);
 
     /// DTO builder per check get_next_allowed_states
@@ -285,7 +285,7 @@ public class FatturaControllerTest {
         curState = "RICHIESTA_RESO";
         assertNextStates(ownerToken, fatturaId, curState);
 
-        // conferma: RICHIESTA_RESO → RESTITUITO
+        // conferma: RICHIESTA_RESO → RICONSEGNATO
         msg = "reso_conf";
         mockMvc.perform(put("/rest/fattura/reso/conferma").with(csrf())
                 .param("fatturaId", "1")
@@ -293,12 +293,12 @@ public class FatturaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
 
-        curState = "RESTITUITO";
+        curState = "RICONSEGNATO";
         assertNextStates(token, fatturaId, curState);
 
 
-        // rimborsa: RESTITUITO → RIMBORSATO (with copy restore)
-        msg = "refunded";
+        // rimborsa: RICONSEGNATO → RIMBORSATO (copie ripristinate)
+        msg = "reso_rimb";
         mockMvc.perform(put("/rest/fattura/reso/rimborso").with(csrf())
                 .param("fatturaId", "1")
                 .param("ripristinaCopie", "true")
@@ -414,6 +414,8 @@ public class FatturaControllerTest {
 	public void update() throws Exception {
 	    String token = getBearerToken("UserUser");
 	    FatturaRequest req = buildFatturaRequest();
+	    req.setId(1);
+
 	    mockMvc.perform(put("/rest/fattura/update").with(csrf())
 				.header("Authorization", token)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -479,30 +481,102 @@ public class FatturaControllerTest {
     
         
     public void list() throws Exception{
+    	// nw in delete rimuovo 2
+    	// Forbidden
     	String token = getBearerToken("UserUser");
 	    mockMvc.perform(get("/rest/fattura/list").with(csrf())
 				.header("Authorization", token))
 				.andExpect(status().isForbidden());
 	    
-	    token = getBearerToken("AdminUser");
-	    
-		String numeroFattura = null;
-		LocalDate from = null;
-		LocalDate to = null;
-		String clienteNome = null;
-		String clienteCognome = null;
-		String clienteEmail = null;
-		String tipoPagamento = null;
-		String tipoSpedizione = null;
-		String statoFattura = null;
-		Integer idOrdine = null;
-		List<String> isbns = new ArrayList<String>();
 
+    	// no filtri
+	    token = getBearerToken("AdminUser");
 		mockMvc.perform(get("/rest/fattura/list").with(csrf())
 				.header("Authorization", token))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$").isArray());
     	
+
+	    
+		String numeroFattura = "FAT-1-A1B2C3D4";
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("numeroFattura", numeroFattura)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+		String from = LocalDate.now().minusDays(1).toString();
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("from", from)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+
+        String to = LocalDate.now().toString();
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("to", to)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+		String clienteNome = "Mario";
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("clienteNome", clienteNome)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+		String clienteCognome = "Rossi";
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("clienteCognome", clienteCognome)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+
+		String clienteEmail = "mario.rossi@email.com";
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("clienteEmail", clienteEmail)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+
+		String tipoPagamento = "PAYPAL";
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("tipoPagamento", tipoPagamento)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+		String tipoSpedizione = "STANDARD";
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("tipoSpedizione", tipoSpedizione)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        String statoFattura = "CONSEGNATO";
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("statoFattura", statoFattura)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        Integer idOrdine = 1;
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("idOrdine", idOrdine.toString())
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        mockMvc.perform(get("/rest/fattura/list")
+                .param("isbns", "ISBN001")
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
     }
     
 

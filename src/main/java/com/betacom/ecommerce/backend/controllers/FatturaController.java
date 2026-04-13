@@ -143,7 +143,7 @@ public class FatturaController {
 		Response r = new Response();
         HttpStatus status = HttpStatus.OK;
         try {
-            fattS.confermaReso(fatturaId);
+            fattS.confermaRiconsegna(fatturaId);
             r.setMsg(msgS.get("reso_conf"));
         } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
@@ -161,24 +161,7 @@ public class FatturaController {
         HttpStatus status = HttpStatus.OK;
         try {
             fattS.rimborsa(fatturaId, Boolean.TRUE.equals(ripristinaCopie));
-            r.setMsg("refunded");
-        } catch (Exception e) {
-        	r.setMsg(msgS.get(e.getMessage()));
-            status = HttpStatus.BAD_REQUEST;
-        }
-
-        return ResponseEntity.status(status).body(r);
-
-	}
-
-	@PreAuthorize("hasAuthority('ADMIN')")
-	@PutMapping("/reso/annulla")
-	public ResponseEntity<Response> annulla(@RequestParam(required = true) Integer fatturaId) {
-		Response r = new Response();
-        HttpStatus status = HttpStatus.OK;
-        try {
-            fattS.confermaReso(fatturaId);
-            r.setMsg("reso_annulla");
+            r.setMsg(msgS.get("reso_rimb"));
         } catch (Exception e) {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
@@ -240,7 +223,6 @@ public class FatturaController {
         return ResponseEntity.status(status).body(r);
     }
 
-	
     @GetMapping("/get_next_allowed_states")
     public ResponseEntity<Object> getNextAllowedStates(
     		@RequestParam(required = true) Integer idFattura, 

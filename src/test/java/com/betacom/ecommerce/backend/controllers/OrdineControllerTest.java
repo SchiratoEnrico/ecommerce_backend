@@ -343,48 +343,48 @@ public class OrdineControllerTest {
         log.debug("Begin list Ordine Test");
         String token = getBearerToken("AdminUser");
 
-        // no filters
+        // no filtri
         mockMvc.perform(get("/rest/ordine/list")
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        // username filter
+        // username
         mockMvc.perform(get("/rest/ordine/list")
                 .param("username", "Mario")
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        // tipoPagamento filter
+        // tipoPagamento
         mockMvc.perform(get("/rest/ordine/list")
                 .param("tipoPagamento", "PayPal")
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        // tipoSpedizione filter
+        // tipoSpedizione
         mockMvc.perform(get("/rest/ordine/list")
                 .param("tipoSpedizione", "Corriere")
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        // statoOrdine filter
+        // statoOrdine
         mockMvc.perform(get("/rest/ordine/list")
                 .param("statoOrdine", "Spedito")
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        // isbns filter
+        // isbns
         mockMvc.perform(get("/rest/ordine/list")
                 .param("isbns", "978-1234567890")
                 .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        // date filter
+        // data
         mockMvc.perform(get("/rest/ordine/list")
                 .param("anno", "2024")
                 .param("mese", "5")
