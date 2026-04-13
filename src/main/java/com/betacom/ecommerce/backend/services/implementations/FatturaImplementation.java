@@ -558,6 +558,7 @@ public class FatturaImplementation implements IFatturaServices {
 			.where(FatturaSpecifications.dataEmissioneBetween(from, to))
 			.or(FatturaSpecifications.numeroFatturaLike(numeroFattura))
 			.or(FatturaSpecifications.clienteNomeLike(clienteNome))
+			.or(FatturaSpecifications.clienteCognomeLike(clienteCognome))
 			.or(FatturaSpecifications.clienteEmailLike(clienteEmail))
 			.or(FatturaSpecifications.tipoPagamentoEquals(tipoPagamento))
 			.or(FatturaSpecifications.tipoSpedizioneEquals(tipoSpedizione))

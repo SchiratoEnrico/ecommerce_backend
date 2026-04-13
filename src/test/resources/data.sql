@@ -269,13 +269,13 @@ INSERT INTO fatture (
     'PAYPAL', 'STANDARD',
     'Mario', 'Rossi', 'mario.rossi@email.com',
     'Via Roma 1', 'Roma', 'RM', '00100', 'Italia',
-    'RICHIESTA_RESO', 1, 'Created from ordine'
+    'RICHIESTA_RESO', 2, 'Created from ordine'
 ),  (
     'FAT-3-A1B2C3D4', CURRENT_DATE, 12.86, 6.99,
     'PAYPAL', 'STANDARD',
     'Mario', 'Rossi', 'mario.rossi@email.com',
     'Via Roma 1', 'Roma', 'RM', '00100', 'Italia',
-    'CREATO', 1, 'Created from ordine'
+    'CREATO', 3, 'Created from ordine'
 );
 
 INSERT INTO righe_fattura (id_fattura, isbn, titolo, prezzo_unitario, numero_copie, totale_riga)

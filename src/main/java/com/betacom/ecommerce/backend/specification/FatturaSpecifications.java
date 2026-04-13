@@ -6,8 +6,6 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.betacom.ecommerce.backend.models.Fattura;
-import com.betacom.ecommerce.backend.models.TipoPagamento;
-import com.betacom.ecommerce.backend.models.TipoSpedizione;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -17,28 +15,35 @@ public class FatturaSpecifications {
 	public static Specification<Fattura> numeroFatturaLike(String numeroFattura) {
 		return (root, query, cb) -> (numeroFattura == null || numeroFattura.isBlank())
             ? cb.conjunction()
-            : cb.like(cb.lower(root.get("numeroFattura")), "%" + numeroFattura.toLowerCase() + "%");
+            : cb.like(cb.lower(root.get("numeroFattura")), "%" + 
+            			numeroFattura.toLowerCase() + "%");
 	}
 
 	public static Specification<Fattura> clienteNomeLike(String clienteNome) {
 		return (root, query, cb) -> (clienteNome == null || clienteNome.isBlank())
             ? cb.conjunction()
-            : cb.like(cb.lower(root.get("clienteNome")), "%" + clienteNome.toLowerCase() + "%");
+            : cb.like(cb.lower(root.get("clienteNome")), 
+            			"%" + clienteNome.toLowerCase() + "%");
 	}
 
 	public static Specification<Fattura> clienteCognomeLike(String clienteCognome) {
 		return (root, query, cb) -> (clienteCognome == null || clienteCognome.isBlank())
             ? cb.conjunction()
-            : cb.like(cb.lower(root.get("clienteCognome")), "%" + clienteCognome.toLowerCase() + "%");
+            : cb.like(cb.lower(root.get("clienteCognome")), 
+            		"%" + clienteCognome.toLowerCase() + "%");
 	}
 	
 	public static Specification<Fattura> clienteEmailLike(String clienteEmail) {
 		return (root, query, cb) -> (clienteEmail == null || clienteEmail.isBlank())
             ? cb.conjunction()
-            : cb.like(cb.lower(root.get("clienteEmail")), "%" + clienteEmail.toLowerCase() + "%");
+            : cb.like(cb.lower(root.get("clienteEmail")), 
+            		"%" + clienteEmail.toLowerCase() + "%");
 	}
 	
-	public static Specification<Fattura> dataEmissioneBetween(LocalDate from, LocalDate to) {
+	public static Specification<Fattura> dataEmissioneBetween(
+								LocalDate from, 
+								LocalDate to) 
+	{
 	    return (root, query, cb) -> {
 	        if (from == null && to == null) {
 	            return cb.conjunction();
@@ -57,10 +62,7 @@ public class FatturaSpecifications {
 			if (tipoPagamento == null || tipoPagamento.isBlank()) {
 				return cb.conjunction();
 			}
-
-    		Join<Fattura, TipoPagamento> pagamentoJoin= 
-    				root.join("tipoPagamento", JoinType.LEFT); // qui nome in entity
-            return cb.equal(cb.lower(pagamentoJoin.get("tipoPagamento")), tipoPagamento.toLowerCase());
+            return cb.equal(cb.lower(root.get("tipoPagamento")), tipoPagamento.toLowerCase());
 		};
 	}
 
@@ -70,22 +72,20 @@ public class FatturaSpecifications {
 				return cb.conjunction();
 			}
 
-    		Join<Fattura, TipoSpedizione> spedizioneJoin = 
-    				root.join("tipoSpedizione", JoinType.INNER); // qui nome in entity
-            return cb.equal(cb.lower(spedizioneJoin.get("tipoSpedizione")), tipoSpedizione.toLowerCase());
+            return cb.equal(cb.lower(root.get("tipoSpedizione")), tipoSpedizione.toLowerCase());
 		};
 	}
 
 	public static Specification<Fattura> statoFatturaEquals(String statoFattura) {
 		return (root, query, cb) -> (statoFattura == null || statoFattura.isBlank())
 	            ? cb.conjunction()
-	            : cb.equal(cb.lower(root.get("numeroFattura")), "%" + statoFattura.toLowerCase() + "%");
+	            : cb.equal(cb.lower(root.get("statoFattura")), statoFattura.toLowerCase());
 	}
 	
 	public static Specification<Fattura> idOrdineEquals(Integer idOrdine) {
-		return (root, query, cb) -> (idOrdine == null)
+		return (root, query, cb) -> idOrdine == null
 	            ? cb.conjunction()
-	            : cb.equal(cb.lower(root.get("idOrdine")), idOrdine);
+	            : cb.equal(root.get("ordine").get("id"), idOrdine);
 	}
 	
 	public static Specification<Fattura> anyMangaIsbns(List<String> isbns){
@@ -93,7 +93,7 @@ public class FatturaSpecifications {
 			if(isbns == null || isbns.isEmpty())
 				return cb.conjunction();
 			
-			Join<Object, Object> joinRighe = root.join("righeFattura", JoinType.INNER);
+			Join<Object, Object> joinRighe = root.join("righe", JoinType.INNER);
 			query.distinct(true);
 			return joinRighe.get("isbn").in(isbns);
 		};

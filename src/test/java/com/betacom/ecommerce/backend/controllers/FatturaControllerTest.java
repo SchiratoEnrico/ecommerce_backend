@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -296,7 +295,6 @@ public class FatturaControllerTest {
         curState = "RICONSEGNATO";
         assertNextStates(token, fatturaId, curState);
 
-
         // rimborsa: RICONSEGNATO → RIMBORSATO (copie ripristinate)
         msg = "reso_rimb";
         mockMvc.perform(put("/rest/fattura/reso/rimborso").with(csrf())
@@ -306,6 +304,77 @@ public class FatturaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
         
+        
+        
+        // su fattura 3 test per respingere reso:
+        // porto fattura 3 in stati consegnato:
+        // agisco su ordine id = 3 e lo porto fino a consegnato
+        msg = "ord_adv";
+        fatturaId = ((Integer) 3).toString();
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "2") // PAGATO
+                .header("Authorization", ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        curState = "PAGATO";
+        assertNextStates(token, fatturaId, curState);
+
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "3") // LAVORAZIONE
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        curState = "LAVORAZIONE";
+        assertNextStates(token, fatturaId, curState);
+
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "4") // SPEDITO
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+        curState = "SPEDITO";
+        assertNextStates(token, fatturaId, curState);
+
+        mockMvc.perform(put("/rest/ordine/avanza_stato_ordine").with(csrf())
+                .param("ordineId", "3")
+                .param("statoId", "5") // CONSEGNATO
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+        
+        curState = "CONSEGNATO";
+        assertNextStates(token, fatturaId, curState);
+
+        // inizia reso
+        msg = "reso_start";
+        mockMvc.perform(post("/rest/fattura/reso/inizia").with(csrf())
+                .param("fatturaId", fatturaId)
+                .param("accountId", "1")
+                .header("Authorization", ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+
+        curState = "RICHIESTA_RESO";
+        assertNextStates(ownerToken, fatturaId, curState);
+
+        msg = "reso_ref";
+        mockMvc.perform(put("/rest/fattura/reso/rifiuta").with(csrf())
+                .param("fatturaId", fatturaId)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value(msgS.get(msg)));
+
+
+        curState = "RIFIUTATO";
+        assertNextStates(ownerToken, fatturaId, curState);
+
     }
     
 

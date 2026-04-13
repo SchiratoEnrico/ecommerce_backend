@@ -150,7 +150,7 @@ public class AccountControllerTest {
 				.username("MarioRossi") 
 				.password("Aaa.012!")
 				.email("user.nuova@test.com")
-				.ruolo("USER")
+				.ruolo("VERIFIED_USER")
 				.build();
 
 		mockMvc.perform(put("/rest/account/update").with(csrf())

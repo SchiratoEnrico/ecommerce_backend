@@ -118,7 +118,7 @@ public class FatturaController {
         return ResponseEntity.status(status).body(r);
 	}
 		
-	//ENDPOINT SOLO ADMIN
+	//RESO: ENDPOINT SOLO ADMIN
 
 	@PreAuthorize("hasAuthority('ADMIN')")
 	@PutMapping("/reso/rifiuta")
@@ -132,9 +132,7 @@ public class FatturaController {
         	r.setMsg(msgS.get(e.getMessage()));
             status = HttpStatus.BAD_REQUEST;
         }
-
         return ResponseEntity.status(status).body(r);
-
 	}
 
 	@PreAuthorize("hasAuthority('ADMIN')")
@@ -175,6 +173,7 @@ public class FatturaController {
 	// NW CONTROLLO CHE ID ACCOUNT LEGATO A FATTURA 
 	// E ID ACCOUNT RICHIESTA COINCIDANO
 	@PostMapping("/reso/inizia")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     public ResponseEntity<Response> iniziaReso(
     		@RequestParam(required = true) Integer fatturaId,
     		@RequestParam(required = true) Integer accountId, 
@@ -200,6 +199,7 @@ public class FatturaController {
     }
 	
 	@GetMapping("/findById")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     public ResponseEntity<Object> findById(
     		@RequestParam(required = true) Integer idFattura,
     		Authentication auth) {
@@ -224,6 +224,7 @@ public class FatturaController {
     }
 
     @GetMapping("/get_next_allowed_states")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     public ResponseEntity<Object> getNextAllowedStates(
     		@RequestParam(required = true) Integer idFattura, 
     		Authentication auth) {

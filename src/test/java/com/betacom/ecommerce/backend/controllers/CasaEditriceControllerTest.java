@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.ecommerce.backend.security.JwtService;
 import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
+import com.betacom.ecommerce.backend.services.interfaces.IMessagesServices;
 import com.betacom.ecommerce.backend.dto.inputs.CasaEditriceRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,6 +44,9 @@ public class CasaEditriceControllerTest {
 
 	@Autowired
 	private UserDetailsService userDetailsService;
+
+	@Autowired
+	private IMessagesServices msgS;
 
     @MockitoSpyBean
     private IMailServices mailSender;
@@ -120,14 +124,25 @@ public class CasaEditriceControllerTest {
 				.content(objectMapper.writeValueAsString(reqDup)))
 				.andExpect(status().isOk());
 
-		// Proviamo a inserirne una con lo stesso nome ma case diverso (il service usa ignoreCase)
-		reqDup.setNome("edizioni TEST"); 
+		// email duplicata
 		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
 				.header("Authorization", token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(reqDup)))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.msg").value("Casa editrice già presente")); 
+				.andExpect(jsonPath("$.msg").value(msgS.get("exists_ema"))); 
+
+		// nome duplicato
+		reqDup.setNome("edizioni TEST"); 
+		reqDup.setEmail("mia.mail@mailmia.it"); 
+
+		mockMvc.perform(post("/rest/casa_editrice/create").with(csrf())
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(reqDup)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.msg").value(msgS.get("exists_ced"))); 
+
 	}
 
 
