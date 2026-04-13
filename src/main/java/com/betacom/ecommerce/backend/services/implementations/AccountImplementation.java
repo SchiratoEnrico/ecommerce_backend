@@ -226,7 +226,10 @@ public class AccountImplementation implements IAccountServices{
 		Account ut = repAcc.findByUsername(username)
 				.orElseThrow(() -> new MangaException("!exists_acc"));	
 		ut.setValidated(true);
-		ut.setRuolo(Ruoli.VERIFIED_USER);		
+		// se ruolo != admin, setto a verified_user
+		if (!Ruoli.ADMIN.equals(ut.getRuolo())) {
+			ut.setRuolo(Ruoli.VERIFIED_USER);
+		}
 		repAcc.save(ut);
 	}
 	
