@@ -13,6 +13,7 @@ public interface ICarrelloServices {
 	void addRow(Integer chartId, String isbn, Integer nCopie) throws MangaException;
 	void updateRow(Integer chartId, Integer rowId, String isbn, Integer nCopie) throws MangaException;
 	void deleteRow(Integer chartId, Integer rowId) throws MangaException;
+	void empty(Integer id) throws Exception;
 	
 	List<CarrelloDTO> list(List<String> isbns) throws Exception;
 	CarrelloDTO findById(Integer id) throws Exception;

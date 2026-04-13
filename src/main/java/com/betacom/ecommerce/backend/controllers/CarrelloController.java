@@ -216,6 +216,33 @@ public class CarrelloController {
 		return ResponseEntity.status(status).body(r);
 	}
 	
+	@DeleteMapping("/empty")
+	public ResponseEntity<Response> empty(@RequestParam(required=true) Integer id, Authentication auth, Principal principal){
+		Response r = new Response();
+		HttpStatus status = HttpStatus.OK;
+
+		// --- BLOCCO DI SICUREZZA ---
+		boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
+		
+		if (!isAdmin) {
+			Account loggedAccount = accountRepository.findByUsername(principal.getName()).orElse(null);
+			if (loggedAccount == null || !carS.isCartOwnedByAccount(id, loggedAccount.getId())) {
+				r.setMsg("Accesso negato: non puoi eliminare righe da questo carrello.");
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+			}
+		}
+
+		try {
+			carS.empty(id);
+			r.setMsg(msgS.get("rest_deleted"));
+		} catch (Exception e) {
+			r.setMsg(msgS.get(e.getMessage()));
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(r);
+		
+	}
+	
 	@PostMapping("/create")
 	public ResponseEntity<Response> create(@RequestBody(required=true) CarrelloRequest req,
 			Authentication auth, Principal principal){

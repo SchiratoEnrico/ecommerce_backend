@@ -208,21 +208,33 @@ public class UploadImplementation implements IUploadServices{
 	
 	@Override
 	public String buildUrl(String filename) {
-		
-		filename = getFileName(filename);
-		if (filename == null) {
-			return null;
-		}
+	    if (filename == null) {
+	        return null;
+	    }
+
+	    // 1. SCUDO DIFENSIVO: Se la stringa è già un URL web (indipendentemente da maiuscole/minuscole), ritornala così com'è!
+	    if (filename.toLowerCase().startsWith("http://") || filename.toLowerCase().startsWith("https://")) {
+	        return filename;
+	    }
+	    
+	    filename = getFileName(filename);
+	    if (filename == null) {
+	        return null;
+	    }
+	    
+	    // 2. Creazione percorso sul disco
 	    Path filePath = uploadPath.resolve(filename);
 
 	    if (!Files.isRegularFile(filePath)) {
-		    log.info("image file not found/valid: {}", filePath.toAbsolutePath());
+	        log.info("image file not found/valid: {}", filePath.toAbsolutePath());
 	        return null;
 	    }
-		return ServletUriComponentsBuilder.fromCurrentContextPath() // parte iniziale path: localhost ...
-				.path("uploads/")
-				.path(filename) // aggiunta filename
-				.toUriString();
+	    
+	    // 3. Creazione dell'URL dinamico
+	    return ServletUriComponentsBuilder.fromCurrentContextPath() 
+	            .path("/uploads/") // <-- Consiglio: aggiungi lo slash iniziale per sicurezza
+	            .path(filename) 
+	            .toUriString();
 	}
 
 }

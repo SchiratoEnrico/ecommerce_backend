@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -237,5 +238,18 @@ public class CarrelloImplementation implements ICarrelloServices{
 		
 		//Confrontiamo l'ID dell'account proprietario del carrello con l'ID dell'utente loggato
 		return carrello.getAccount().getId().equals(accountId);
+	}
+
+	@Override
+	public void empty(Integer id) throws Exception{
+		Carrello car = carR.findById(id)
+				.orElseThrow(() -> new MangaException("carrello_ntfnd"));
+		
+		List<RigaCarrello> rC = new ArrayList<>();
+		rC.addAll(car.getRigheCarrello());
+		
+		for(RigaCarrello r : rC) {
+			deleteRow(id, r.getId());
+		}
 	}
 }

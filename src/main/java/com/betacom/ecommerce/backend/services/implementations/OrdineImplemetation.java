@@ -164,10 +164,20 @@ public class OrdineImplemetation implements IOrdineServices {
 		return ana;
 	}
 
-	public Ordine getUltimoPendente(Integer accountId) throws MangaException {
-		return ordeR.findFirstByAccount_IdAndStato_StatoOrdineOrderByIdDesc(accountId, "CREATO")
-			.orElseThrow(() -> new MangaException("pending_order_ntfnd"));
-	}
+	public OrdineDTO getUltimoPendente(Integer accountId) throws MangaException {
+		Ordine ord = ordeR.findFirstByAccount_IdAndStato_StatoOrdineOrderByIdDesc(accountId, "CREATO")
+				.orElseThrow(() -> new MangaException("pending_order_ntfnd"));
+		
+		return DtoBuilders.buildOrdineDTO(
+	            ord, 
+	            Optional.empty(), 
+	            Optional.ofNullable(ord.getTipoPagamento()), 
+	            Optional.empty(), 
+	            Optional.ofNullable(ord.getTipoSpedizione()), 
+	            Optional.ofNullable(ord.getRigheOrdine()), 
+	            Optional.ofNullable(ord.getAnagrafica())
+	    );
+ 	}
 
 	private RigaOrdineRequest rigaOrdineFromRigaCarrello(RigaCarrello rc) {
 		return RigaOrdineRequest.builder()

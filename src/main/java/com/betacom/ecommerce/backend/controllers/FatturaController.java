@@ -243,4 +243,27 @@ public class FatturaController {
         }
         return ResponseEntity.status(status).body(r);
     }
+    
+    @GetMapping("/listByAccount")
+   	public ResponseEntity<Object> listByAccount(
+   			@RequestParam(required = true) Integer id,
+   			Authentication auth) {
+   		
+   		// BLOCCO DI SICUREZZA
+   		// Se non è admin e non è il proprietario dell'account, blocchiamo tutto
+   		if (!fattS.isAdminOrOwner(auth, id)) 
+   			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msgS.get("!auth_acc")); 
+
+   		Object r = new Object();
+   		HttpStatus status = HttpStatus.OK;
+
+   		try {
+   			r = fattS.listByAccountId(id);
+   		} catch (Exception e) {
+   			r = msgS.get(e.getMessage());
+   			status = HttpStatus.BAD_REQUEST;
+   		}
+   		
+   		return ResponseEntity.status(status).body(r);
+   	}
 }

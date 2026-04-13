@@ -16,7 +16,7 @@ public interface IOrdineServices {
 	void update(OrdineRequest req) throws MangaException; 
 	void delete(Integer id, Boolean ripristinaCopie) throws MangaException; 
 	
-	public Ordine getUltimoPendente(Integer accountId) throws MangaException;
+	public OrdineDTO getUltimoPendente(Integer accountId) throws MangaException;
 	
 	List<OrdineDTO> list(
 		    AccountDTO account,
