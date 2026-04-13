@@ -328,7 +328,7 @@ public class DtoBuilders {
                 .isbn(r.getIsbn())
                 .titolo(r.getTitolo())
                 .prezzoUnitario(r.getPrezzoUnitario())
-                .quantita(r.getNumeroCopie())
+                .numeroCopie(r.getNumeroCopie())
                 .totaleRiga(r.getTotaleRiga())
                 .build();
     }

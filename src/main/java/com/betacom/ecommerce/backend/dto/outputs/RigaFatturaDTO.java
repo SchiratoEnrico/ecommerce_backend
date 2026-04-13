@@ -22,7 +22,7 @@ public class RigaFatturaDTO {
     private String titolo;
     private String autore;
     private BigDecimal prezzoUnitario;
-    private Integer quantita;
+    private Integer numeroCopie;
     private BigDecimal totaleRiga;
 	
 }
