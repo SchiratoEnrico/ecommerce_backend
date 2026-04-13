@@ -556,15 +556,15 @@ public class FatturaImplementation implements IFatturaServices {
  
 		Specification<Fattura> spec = Specification
 			.where(FatturaSpecifications.dataEmissioneBetween(from, to))
-			.or(FatturaSpecifications.numeroFatturaLike(numeroFattura))
-			.or(FatturaSpecifications.clienteNomeLike(clienteNome))
-			.or(FatturaSpecifications.clienteCognomeLike(clienteCognome))
-			.or(FatturaSpecifications.clienteEmailLike(clienteEmail))
-			.or(FatturaSpecifications.tipoPagamentoEquals(tipoPagamento))
-			.or(FatturaSpecifications.tipoSpedizioneEquals(tipoSpedizione))
-			.or(FatturaSpecifications.statoFatturaEquals(statoFattura))
-			.or(FatturaSpecifications.idOrdineEquals(idOrdine))
-			.or(FatturaSpecifications.anyMangaIsbns(isbns));
+			.and(FatturaSpecifications.numeroFatturaLike(numeroFattura))
+			.and(FatturaSpecifications.clienteNomeLike(clienteNome))
+			.and(FatturaSpecifications.clienteCognomeLike(clienteCognome))
+			.and(FatturaSpecifications.clienteEmailLike(clienteEmail))
+			.and(FatturaSpecifications.tipoPagamentoEquals(tipoPagamento))
+			.and(FatturaSpecifications.tipoSpedizioneEquals(tipoSpedizione))
+			.and(FatturaSpecifications.statoFatturaEquals(statoFattura))
+			.and(FatturaSpecifications.idOrdineEquals(idOrdine))
+			.and(FatturaSpecifications.anyMangaIsbns(isbns));
 		List<Fattura> lF = fattR.findAll(spec);
 		return lF.stream()
 			.map(f -> DtoBuilders.buildFatturaDTO(f, Optional.empty(), Optional.empty()))
