@@ -78,6 +78,14 @@ public class FatturaImplementation implements IFatturaServices {
 		return loggedAccount != null && loggedAccount.getId().equals(targetAccountId);
 	}
  
+	public Boolean isAdminOrIdSameOfReq(Authentication auth, Integer targetAccountId) {
+		boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
+		if (isAdmin) return true;
+		
+		Account loggedAccount = accountRepository.findByUsername(auth.getName()).orElse(null);
+		return loggedAccount != null && loggedAccount.getId().equals(targetAccountId);
+    }
+
 	private String generateNumeroFattura(Integer idOrdine) {
 		Boolean exists = true;
 		String numFattura = "FAT-" + idOrdine;

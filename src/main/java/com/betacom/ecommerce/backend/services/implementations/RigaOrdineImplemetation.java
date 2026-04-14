@@ -1,6 +1,5 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

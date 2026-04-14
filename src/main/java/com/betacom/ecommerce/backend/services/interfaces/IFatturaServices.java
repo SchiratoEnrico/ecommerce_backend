@@ -39,6 +39,7 @@ public interface IFatturaServices {
 
 	// helpers
 	public Boolean isAdminOrOwner(Authentication auth, Integer targetFatturaId);
+	public Boolean isAdminOrIdSameOfReq(Authentication auth, Integer targetAccountId);
 	public List<StatoOrdineDTO> getNextAllowedStates(Integer fatturaId) throws MangaException;
 	
 	// reso

@@ -238,13 +238,15 @@ public class OrdineImplemetation implements IOrdineServices {
 			for (RigaOrdineRequest r : req.getRigheOrdineRequest()) {
 				r.setIdOrdine(savedOrdine.getId());
 				r.setNumeroCopie(r.getNumeroCopie() != null ? r.getNumeroCopie() : 1);
-				rowS.create(r);
+				Integer rowId = rowS.create(r);
+				RigaOrdine ro = rowR.findById(rowId).orElseThrow(()
+						-> new MangaException("!exists_ro"));
+				o.getRigheOrdine().add(ro);
 			}
 		}
 
 		Integer myId = savedOrdine.getId();
-		savedOrdine.setRigheOrdine(rowR.findAllByOrdineId(myId));
-
+		ordeR.save(savedOrdine);
 		return myId;
 	}
 

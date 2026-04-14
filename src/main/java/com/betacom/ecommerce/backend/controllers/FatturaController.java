@@ -251,7 +251,7 @@ public class FatturaController {
    		
    		// BLOCCO DI SICUREZZA
    		// Se non è admin e non è il proprietario dell'account, blocchiamo tutto
-   		if (!fattS.isAdminOrOwner(auth, id)) 
+   		if (!fattS.isAdminOrIdSameOfReq(auth, id)) 
    			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msgS.get("!auth_acc")); 
 
    		Object r = new Object();
@@ -263,7 +263,6 @@ public class FatturaController {
    			r = msgS.get(e.getMessage());
    			status = HttpStatus.BAD_REQUEST;
    		}
-   		
    		return ResponseEntity.status(status).body(r);
    	}
 }
