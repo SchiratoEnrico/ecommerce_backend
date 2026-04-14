@@ -142,7 +142,7 @@ public class AnagraficaController {
 		return ResponseEntity.status(status).body(r);
 	}
 
-	@GetMapping("/findByAccountId")
+	@GetMapping("/find_by_account_id")
 	public ResponseEntity<Object> findByAccountId(@RequestParam(required = true) Integer id, Authentication auth, Principal principal) {
 		Object r = new Object();
 		HttpStatus status = HttpStatus.OK;
