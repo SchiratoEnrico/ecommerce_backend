@@ -339,6 +339,7 @@ public class DtoBuilders {
         return FatturaDTO.builder()
                 .id(f.getId())
                 .numeroFattura(f.getNumeroFattura())
+                .dataEmissione(f.getDataEmissione())
                 // snapshot cliente
                 .clienteNome(f.getClienteNome())
                 .clienteCognome(f.getClienteCognome())
