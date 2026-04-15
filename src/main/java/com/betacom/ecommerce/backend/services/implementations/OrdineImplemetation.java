@@ -280,9 +280,6 @@ public class OrdineImplemetation implements IOrdineServices {
 		ord.setRigheOrdineRequest(lR);
 
 		create(ord);
-
-		// rimuovi oggetti da carrello dopo creazione oridne
-		carr.getRigheCarrello().clear();
 		carrR.save(carr);
 	}
 

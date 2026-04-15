@@ -217,20 +217,38 @@ public class OrdineController {
     
     // ENDPOINT SOLO ADMIN 
  	// Solo l'admin dovrebbe poter cancellare fisicamente un ordine dal DB
-    @PreAuthorize("hasAuthority('ADMIN')")
- 	@DeleteMapping("/delete/{id}")
-     public ResponseEntity<Response> delete(@PathVariable(required = true) Integer id, @RequestParam(required = false) Boolean ripristinaCopie) {
- 		Response r = new Response();
-         HttpStatus status = HttpStatus.OK;
-         try {
-             ordS.delete(id, Boolean.TRUE.equals(ripristinaCopie));
-             r.setMsg(msgS.get("rest_deleted"));
-         } catch (Exception e) {
-         	r.setMsg(msgS.get(e.getMessage()));
-             status = HttpStatus.BAD_REQUEST;
-         }
-         return ResponseEntity.status(status).body(r);
-     }
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')") // Permettiamo anche all'utente verificato
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Response> delete(
+            @PathVariable(required = true) Integer id, 
+            @RequestParam(required = false) Boolean ripristinaCopie,
+            Authentication auth, 
+            Principal principal) {
+        
+        Response r = new Response();
+        HttpStatus status = HttpStatus.OK;
+
+        try {
+            // --- CONTROLLO DI SICUREZZA ---
+            // Se non è admin, controlliamo se l'ordine appartiene all'utente loggato
+            if (!isAdmin(auth)) {
+                Account loggedAcc = getLoggedAccount(principal);
+                if (loggedAcc == null || !ordS.isOrdineOwnedByAccount(id, loggedAcc.getId())) {
+                    r.setMsg(msgS.get("!auth_acc")); // Messaggio di accesso negato
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+                }
+            }
+
+            // Se passiamo il controllo (o è Admin), procediamo
+            ordS.delete(id, Boolean.TRUE.equals(ripristinaCopie));
+            r.setMsg(msgS.get("rest_deleted"));
+            
+        } catch (Exception e) {
+            r.setMsg(msgS.get(e.getMessage()));
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(r);
+    }
 
  	// Solo l'admin dovrebbe poter aggiornare liberamente un ordine (es. per cambiare lo stato in SPEDITO)
  	@PreAuthorize("hasAuthority('ADMIN')")
