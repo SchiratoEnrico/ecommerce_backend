@@ -208,10 +208,12 @@ public class UploadImplementation implements IUploadServices{
 	
 	@Override
 	public String buildUrl(String filename) {
-	    if (filename == null) {
+		log.debug("input filename: {}", filename);
+	    filename = getFileName(filename);
+		log.debug("will use filename: {}", filename);
+		if (filename == null) {
 	        return null;
 	    }
-
 	    // 1. SCUDO DIFENSIVO: Se la stringa è già un URL web (indipendentemente da maiuscole/minuscole), ritornala così com'è!
 	    if (filename.toLowerCase().startsWith("http://") || filename.toLowerCase().startsWith("https://")) {
 	        return filename;
