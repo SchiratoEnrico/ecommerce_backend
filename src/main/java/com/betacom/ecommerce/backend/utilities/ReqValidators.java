@@ -157,7 +157,6 @@ public class ReqValidators {
 	    req.setDataPubblicazione(req.getDataPubblicazione());
 	    
 	    //trim e uppercase
-	    req.setImmagine(Utils.normalize(req.getImmagine()));
 	    req.setIsbn(Utils.normalize(req.getIsbn()));
 	    req.setTitolo(Utils.normalize(req.getTitolo()));
 	    
