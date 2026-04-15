@@ -29,7 +29,7 @@ public interface IMangaRepository extends
 
 	List<Manga> findAllBySagaId(Integer id);
 
-	boolean existsBySagaIdAndSagaVol(Integer sagaId, Integer sagaVol);
+	List<Manga> findAllBySagaIdAndSagaVol(Integer sagaId, Integer sagaVol);
 	
 	@Query("SELECT m FROM Fattura f " +
 		       "JOIN f.righe r, Manga m " +

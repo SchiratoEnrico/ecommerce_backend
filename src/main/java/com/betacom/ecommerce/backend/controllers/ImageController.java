@@ -102,7 +102,7 @@ public class ImageController {
 
 	}
 		
-	@DeleteMapping("/delete_image/{filename}")
+	@DeleteMapping("/delete_image")
 	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Response> removeImage(@RequestParam(required = true) String filename) {
 		Response r = new Response();

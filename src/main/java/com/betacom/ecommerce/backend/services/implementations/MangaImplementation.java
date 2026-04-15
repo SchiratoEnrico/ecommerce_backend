@@ -105,8 +105,10 @@ public class MangaImplementation implements IMangaServices{
 		// throws !exists_sag, exists_sagvol, null_sagvol
 		m = validateSagaVol(m, req.getSagaVol(), req.getSaga());
 
+		
+		
 		log.debug(m.toString());
-		mangaRepo.save(m);
+		String isbn = mangaRepo.save(m).getIsbn();		
 		log.debug("manga saved in db successfully");
 	}
 
@@ -263,7 +265,8 @@ public class MangaImplementation implements IMangaServices{
 			throw new MangaException("null_sagvol");
 		}
 		log.debug("checking validity of new volume saga insertion, vol {}", vol);
-		if (mangaRepo.existsBySagaIdAndSagaVol(sagaId, vol)) {
+		List<Manga> others = mangaRepo.findAllBySagaIdAndSagaVol(sagaId, vol);
+		if (others.size() > 1 || (others.size() == 1 && !others.get(0).getIsbn().equals(m.getIsbn()))) {
 			throw new MangaException("exists_sagvol");
 		}
 		

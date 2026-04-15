@@ -115,7 +115,7 @@ public class UploadImplementation implements IUploadServices{
 	
 	@Override
 	public String saveImage(MultipartFile file,  String isbn, Integer id) throws MangaException {
-		log.debug("saveImage req, id {}, isbn: {}", id, isbn);
+		log.debug("saveImage {}, id {}, isbn: {}", file.getName(), id, isbn);
 		if (id == null && (isbn == null || isbn.isBlank())) {
 			throw new MangaException("null_idxs");
 		}
