@@ -3,6 +3,7 @@ package com.betacom.ecommerce.backend.services.implementations;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +20,10 @@ import com.betacom.ecommerce.backend.enums.Ruoli;
 import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Ordine;
+import com.betacom.ecommerce.backend.models.PasswordResetToken;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
+import com.betacom.ecommerce.backend.repositories.IPasswordResetTokenRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
@@ -43,9 +46,13 @@ public class AccountImplementation implements IAccountServices{
 	private final IOrdineRepository ordeR;
 	private final IMailServices  mailS;
 	private final ICarrelloServices  carrS;
+	private final IPasswordResetTokenRepository tokenRepository;
 	
 	@Value("${mail.validation}")
 	private String validationURL;
+	
+	@Value("${mail.resetPassword}") 
+	private String resetPasswordUrl;
 	
 	
 	// CRUD operations
@@ -241,6 +248,91 @@ public class AccountImplementation implements IAccountServices{
 				.orElseThrow(() -> new MangaException("!exists_acc"));
 
 		return Boolean.TRUE.equals(isValidated);
+	}
+	
+	
+	//per invio mail password dimenticata 
+	
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void requestPasswordReset(String email) throws MangaException {
+	    log.debug("Richiesta reset password per: {}", email);
+
+	    if (email == null || email.isBlank()) {
+	        throw new MangaException("null_ema"); //
+	    }
+
+	    // Cerchiamo l'utente. Se non esiste, non lanciamo un'eccezione ma usciamo silenziosamente 
+	    // per evitare attacchi di "User Enumeration" (un hacker potrebbe scoprire quali mail sono registrate).
+	    Optional<Account> accOpt = repAcc.findByEmail(email.trim().toLowerCase()); //
+	    if (accOpt.isEmpty()) {
+	        return; 
+	    }
+	    Account acc = accOpt.get();
+
+	    // Eliminiamo eventuali token vecchi per questo account
+	    tokenRepository.findByAccount(acc).ifPresent(tokenRepository::delete);
+
+	    // Creiamo il nuovo token
+	    String token = UUID.randomUUID().toString();
+	    PasswordResetToken resetToken = new PasswordResetToken();
+	    resetToken.setToken(token);
+	    resetToken.setAccount(acc);
+	    resetToken.setDataScadenza(LocalDateTime.now().plusMinutes(15)); // Scade in 15 minuti
+	    
+	    tokenRepository.save(resetToken);
+
+	    // Inviamo la mail
+	    String link = resetPasswordUrl + token;
+	    String body = """
+	        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+	            <h2 style='color: #2c3e50; text-align: center;'>Reset Password</h2>
+	            <p style='font-size: 16px; color: #555;'>Ciao <b>%s</b>,</p>
+	            <p style='font-size: 16px; color: #555;'>Hai richiesto il reset della tua password. Clicca sul pulsante qui sotto per crearne una nuova. Il link è valido per 15 minuti.</p>
+	            
+	            <div style='text-align: center; margin: 30px 0;'>
+	                <a href='%s' style='background-color: #3498db; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;'>Reimposta Password</a>
+	            </div>
+	            
+	            <p style='font-size: 14px; color: #777;'>Se non hai richiesto tu il reset, ignora semplicemente questa email.</p>
+	        </div>
+	        """.formatted(acc.getUsername(), link);
+
+	    mailS.sendMail(MailRequest.builder() //
+	            .to(acc.getEmail())
+	            .oggetto("Richiesta di Reset Password - Mangas Store")
+	            .body(body)
+	            .build());
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void resetPassword(String token, String newPassword) throws MangaException {
+	    log.debug("Conferma reset password con token");
+
+	    if (token == null || token.isBlank()) throw new MangaException("null_token");
+	    if (newPassword == null || newPassword.isBlank()) throw new MangaException("null_pwd");
+
+	    // Cerchiamo il token nel DB
+	    PasswordResetToken resetToken = tokenRepository.findByToken(token)
+	            .orElseThrow(() -> new MangaException("invalid_token")); //
+
+	    // Verifichiamo se è scaduto
+	    if (resetToken.getDataScadenza().isBefore(LocalDateTime.now())) {
+	        tokenRepository.delete(resetToken); // Lo eliminiamo perché è inutile
+	        throw new MangaException("expired_token"); //
+	    }
+
+	    // Validiamo la nuova password 
+	    ReqValidators.validatePassword(newPassword);
+
+	    // Aggiorniamo l'account
+	    Account acc = resetToken.getAccount();
+	    acc.setPassword(passwordEncoder.encode(newPassword.trim()));
+	    repAcc.save(acc);
+
+	    // Eliminiamo il token usato in modo che non possa essere riutilizzato
+	    tokenRepository.delete(resetToken);
 	}
 	
 	
