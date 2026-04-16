@@ -1,5 +1,6 @@
 package com.betacom.ecommerce.backend.services.implementations;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.betacom.ecommerce.backend.dto.inputs.MailRequest;
 import com.betacom.ecommerce.backend.dto.inputs.OrdineRequest;
 import com.betacom.ecommerce.backend.dto.inputs.RigaOrdineRequest;
 import com.betacom.ecommerce.backend.dto.outputs.AccountDTO;
@@ -37,6 +39,7 @@ import com.betacom.ecommerce.backend.repositories.IStatoOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoPagamentoRepository;
 import com.betacom.ecommerce.backend.repositories.ITipoSpedizioneRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
+import com.betacom.ecommerce.backend.services.interfaces.IMailServices;
 import com.betacom.ecommerce.backend.services.interfaces.IMangaServices;
 import com.betacom.ecommerce.backend.services.interfaces.IOrdineServices;
 import com.betacom.ecommerce.backend.services.interfaces.IRigaOrdineServices;
@@ -62,6 +65,7 @@ public class OrdineImplemetation implements IOrdineServices {
 	private final IAnagraficaRepository anaR;
 	private final IMangaServices mangaS;
 	private final ICarrelloRepository carrR;
+	private final IMailServices mailS;
 
 	// ================================================================
 	// STATO ORDINE — MAPPA TRANSIZIONI PERMESSE
@@ -247,6 +251,10 @@ public class OrdineImplemetation implements IOrdineServices {
 
 		Integer myId = savedOrdine.getId();
 		ordeR.save(savedOrdine);
+		
+		//invio mail
+		sendMailRiepilogo(savedOrdine, acc);
+		
 		return myId;
 	}
 
@@ -464,5 +472,106 @@ public class OrdineImplemetation implements IOrdineServices {
 		log.debug("Stato ordine: {}", sta);
 		lS.forEach(s -> log.debug("\tpermesso: {}", s));
 		return lS;
+	}
+	
+	
+	//invio mail di riepilogo
+	private void sendMailRiepilogo(Ordine ordine, Account account) throws MangaException {
+	    
+	    // 1. Costruiamo l'indirizzo di spedizione usando i getter reali di Anagrafica
+	    Anagrafica ana = ordine.getAnagrafica();
+	    String indirizzoSpedizione = ana.getNome() + " " + ana.getCognome() + "<br>" + 
+	                                 ana.getVia() + "<br>" + 
+	                                 ana.getCap() + " " + ana.getCitta() + " (" + ana.getProvincia() + ")<br>" +
+	                                 ana.getStato();
+
+	    // 2. Calcoliamo il totale e creiamo le righe della tabella in HTML per i manga
+	    BigDecimal totaleOrdine = BigDecimal.ZERO;
+	    StringBuilder righeMangaHtml = new StringBuilder();
+
+	    if (ordine.getRigheOrdine() != null) {
+	        for (RigaOrdine riga : ordine.getRigheOrdine()) {
+	            
+	            String titoloManga = riga.getManga().getTitolo(); 
+	            int quantita = riga.getNumeroCopie();
+	            
+	            // Usiamo il prezzo storicizzato nella riga ordine se presente, altrimenti il prezzo del manga
+	            BigDecimal prezzoUnitario = riga.getPrezzo() != null ? riga.getPrezzo() : riga.getManga().getPrezzo(); 
+	            
+	            // Calcolo del subtotale della riga con BigDecimal
+	            BigDecimal subtotaleRiga = prezzoUnitario.multiply(BigDecimal.valueOf(quantita));
+	            totaleOrdine = totaleOrdine.add(subtotaleRiga);
+
+	            righeMangaHtml.append("<tr>")
+	                .append("<td style='padding: 10px; border-bottom: 1px solid #ddd;'>").append(titoloManga).append("</td>")
+	                .append("<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>").append(quantita).append("</td>")
+	                .append("<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>€ ").append(String.format("%.2f", prezzoUnitario)).append("</td>")
+	                .append("<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold;'>€ ").append(String.format("%.2f", subtotaleRiga)).append("</td>")
+	                .append("</tr>");
+	        }
+	    }
+
+	    // 3. Costruiamo il corpo della mail con i dati completi
+	    String body = """
+	        <div style='font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+	            <h2 style='color: #2c3e50; text-align: center;'>Conferma Ordine - Mangas Store 📚</h2>
+	            <p style='font-size: 16px; color: #555;'>Ciao <b>%s</b>,</p>
+	            <p style='font-size: 16px; color: #555;'>Grazie per il tuo acquisto! Il tuo ordine <b>#%d</b> è stato ricevuto ed è in fase di elaborazione.</p>
+	            
+	            <div style='background-color: #f4f6f7; padding: 15px; border-radius: 6px; margin: 25px 0;'>
+	                <h3 style='color: #2c3e50; margin-top: 0; font-size: 16px;'>Indirizzo di Spedizione:</h3>
+	                <p style='font-size: 15px; color: #444; margin: 0; line-height: 1.5;'>%s</p>
+	            </div>
+
+	            <h3 style='color: #2c3e50;'>Dettaglio Acquisti:</h3>
+	            <table style='width: 100%%; border-collapse: collapse; font-size: 15px; color: #555; margin-bottom: 20px;'>
+	                <thead>
+	                    <tr style='background-color: #ecf0f1;'>
+	                        <th style='padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;'>Manga</th>
+	                        <th style='padding: 10px; text-align: center; border-bottom: 2px solid #bdc3c7;'>Q.tà</th>
+	                        <th style='padding: 10px; text-align: right; border-bottom: 2px solid #bdc3c7;'>Prezzo Cad.</th>
+	                        <th style='padding: 10px; text-align: right; border-bottom: 2px solid #bdc3c7;'>Totale</th>
+	                    </tr>
+	                </thead>
+	                <tbody>
+	                    %s
+	                </tbody>
+	                <tfoot>
+	                    <tr>
+	                        <td colspan='3' style='padding: 15px 10px; text-align: right; font-weight: bold; font-size: 16px; border-top: 2px solid #bdc3c7;'>Totale Ordine:</td>
+	                        <td style='padding: 15px 10px; text-align: right; font-weight: bold; font-size: 16px; color: #e74c3c; border-top: 2px solid #bdc3c7;'>€ %s</td>
+	                    </tr>
+	                </tfoot>
+	            </table>
+	            
+	            <h3 style='color: #2c3e50; margin-top: 30px;'>Riepilogo:</h3>
+	            <ul style='font-size: 15px; color: #555; line-height: 1.6;'>
+	                <li><b>Data Ordine:</b> %s</li>
+	                <li><b>Metodo di Pagamento:</b> %s</li>
+	                <li><b>Spedizione:</b> %s</li>
+	            </ul>
+	            
+	            <p style='font-size: 14px; color: #777; margin-top: 30px; text-align: center;'>A breve riceverai aggiornamenti sullo stato della tua spedizione.</p>
+	            
+	            <hr style='border: none; border-top: 1px solid #eee; margin-top: 20px;' />
+	            <p style='font-size: 12px; color: #999; text-align: center;'>Il team di Mangas Store</p>
+	        </div>
+	        """.formatted(
+	            account.getUsername(),
+	            ordine.getId(),
+	            indirizzoSpedizione,
+	            righeMangaHtml.toString(),
+	            String.format("%.2f", totaleOrdine),
+	            ordine.getData().toString(),
+	            ordine.getTipoPagamento().getTipoPagamento(),
+	            ordine.getTipoSpedizione().getTipoSpedizione()
+	        );
+
+	    mailS.sendMail(MailRequest.builder()
+	            .to(account.getEmail())
+	            .oggetto("Conferma Ordine #" + ordine.getId() + " - Mangas Store")
+	            .body(body)
+	            .build()
+	    );
 	}
 }
