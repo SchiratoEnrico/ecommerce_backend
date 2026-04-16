@@ -27,4 +27,8 @@ public interface IAccountServices {
 	public void emailValidate(String username) throws MangaException;
 	
 	Boolean isAccountValidated(Integer accountId) throws MangaException;
+
+	
+	public void requestPasswordReset(String email) throws MangaException;
+	public void resetPassword(String token, String newPassword) throws MangaException;
 }

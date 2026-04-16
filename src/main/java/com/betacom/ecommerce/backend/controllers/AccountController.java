@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.ecommerce.backend.dto.inputs.AccountRequest;
+import com.betacom.ecommerce.backend.dto.inputs.PasswordResetRequest;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.response.Response;
@@ -86,6 +87,33 @@ public class AccountController {
 	        r.setMsg(msgS.get(e.getMessage()));
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
 	    }
+	}
+	
+	@PostMapping("/request-password-reset")
+	public ResponseEntity<Response> requestPasswordReset(@RequestBody(required = true) PasswordResetRequest req) {
+		Response r = new Response();
+		try {
+			accS.requestPasswordReset(req.getEmail());
+			// Restituiamo sempre un messaggio di successo generico
+			r.setMsg("Riceverai a breve un link per reimpostare la password.");
+			return ResponseEntity.ok(r);
+		} catch (Exception e) {
+			r.setMsg(msgS.get(e.getMessage()));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
+		}
+	}
+
+	@PostMapping("/reset-password")
+	public ResponseEntity<Response> resetPassword(@RequestBody(required = true) PasswordResetRequest req) {
+		Response r = new Response();
+		try {
+			accS.resetPassword(req.getToken(), req.getNewPassword());
+			r.setMsg("Password reimpostata con successo.");
+			return ResponseEntity.ok(r);
+		} catch (Exception e) {
+			r.setMsg(msgS.get(e.getMessage()));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
+		}
 	}
 
 	// ENDPOINT SOLO ADMIN 

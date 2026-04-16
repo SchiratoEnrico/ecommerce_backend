@@ -42,6 +42,8 @@ public class SecurityConfig {
                     "/auth/login", 
                     "/rest/account/create", 
                     "/rest/account/validateEmail",
+                    "/rest/account/request-password-reset",
+                    "/rest/account/reset-password",         
                     "/error",
                     "/v3/api-docs/**", 
                     "/swagger-ui/**", 
