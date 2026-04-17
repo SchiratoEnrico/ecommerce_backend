@@ -119,6 +119,23 @@ public class FatturaController {
 	}
 		
 	//RESO: ENDPOINT SOLO ADMIN
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@PutMapping("/avanza_stato")
+	public ResponseEntity<Response> avanzaStato(@RequestParam(required = true) Integer fatturaId, 
+			@RequestParam(required = true) String nuovoStato,
+			@RequestParam(required = true) Boolean ripristinaCopie
+			) {
+		Response r = new Response();
+        HttpStatus status = HttpStatus.OK;
+        try {
+        	fattS.advanceStatoFattura(fatturaId, nuovoStato, ripristinaCopie);
+            r.setMsg(msgS.get("sta_adv"));
+        } catch (Exception e) {
+        	r.setMsg(msgS.get(e.getMessage()));
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(r);
+	}
 
 	@PreAuthorize("hasAuthority('ADMIN')")
 	@PutMapping("/reso/rifiuta")
@@ -168,6 +185,21 @@ public class FatturaController {
         return ResponseEntity.status(status).body(r);
 	}
 
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@PutMapping("/all_stati")
+	public ResponseEntity<Object> allStati() {
+		Object r = new Object();
+		HttpStatus status = HttpStatus.OK;
+        try {
+            r = fattS.allStati();
+        } catch (Exception e) {
+            r = msgS.get(e.getMessage());
+            status = HttpStatus.BAD_REQUEST;
+        }
+
+        return ResponseEntity.status(status).body(r);
+	}
+
 	//ENDPOINT CONDIVISI (ADMIN + Account corrispondente)
 	
 	// NW CONTROLLO CHE ID ACCOUNT LEGATO A FATTURA 
@@ -198,6 +230,32 @@ public class FatturaController {
         return ResponseEntity.status(status).body(r);
     }
 	
+	@PutMapping("/cancella")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
+    public ResponseEntity<Response> annullaPagata(
+    		@RequestParam(required = true) Integer fatturaId,
+    		@RequestParam(required = true) Integer accountId, 
+    		Authentication auth) {
+		Response r = new Response();
+        HttpStatus status = HttpStatus.OK;
+
+       // BLOCCO DI SICUREZZA
+       //qui l'id che arriva dal frontend è l'id dell'account
+       //bisogna controllare che quindi questo id corrisponda all'id dell'utente loggato che sta facendo la richiesta
+       if (!fattS.isAdminOrOwner(auth, fatturaId)) {
+    	    r.setMsg(msgS.get("!owner"));
+       		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(r);
+       }
+       try {
+            fattS.annullaPagata(fatturaId, accountId);
+            r.setMsg(msgS.get("fatt_canc"));
+        } catch (Exception e) {
+        	r.setMsg(msgS.get(e.getMessage()));
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(r);
+    }
+
 	@GetMapping("/findById")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'VERIFIED_USER')")
     public ResponseEntity<Object> findById(

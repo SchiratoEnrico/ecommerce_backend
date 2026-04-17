@@ -65,13 +65,19 @@ public class FatturaImplementation implements IFatturaServices {
  
 	public Boolean isAdminOrOwner(Authentication auth, Integer targetFatturaId) {
 		boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
-		if (isAdmin) return true;
+		if (isAdmin) {
+			return true;
+		}
  
 		Fattura targetFattura = fattR.findById(targetFatturaId).orElse(null);
-		if (targetFattura == null) return false;
+		if (targetFattura == null) {
+			return false;
+		}
  
 		Ordine targetOrd = targetFattura.getOrdine();
-		if (targetOrd == null) return false;
+		if (targetOrd == null) {
+			return false;
+		}
  
 		Integer targetAccountId = targetOrd.getAccount().getId();
 		Account loggedAccount = accountRepository.findByUsername(auth.getName()).orElse(null);
@@ -146,7 +152,7 @@ public class FatturaImplementation implements IFatturaServices {
 	// ================================================================
  
 	@Transactional(rollbackFor = Exception.class)
-	public void advanceStatoFattura(Integer fatturaId, String nuovoStato, Boolean ripristinaCopie) {
+	public void advanceStatoFattura(Integer fatturaId, String nuovoStato, Boolean ripristinaCopie) throws MangaException {
 		Fattura fat = load(fatturaId);
 		String current = fat.getStatoFattura();
 		log.debug("advanceStatoFattura: {} → {}, ripristinaCopie={}", current, nuovoStato, ripristinaCopie);
@@ -242,18 +248,16 @@ public class FatturaImplementation implements IFatturaServices {
 	// RESO PIPELINE
 	// ================================================================
  
-	// Unico metodo User: inizia reso (entro 30 gg da CONSEGNATO)
-	// NW advanceStatoFattura chiama updateOrdineFromFattura
-	//    che fa mirroring stato su ordine quando necessrio
+	// Unici metodi User: 
+	// - inizia reso (entro 30 gg da CONSEGNATO)
+	//	  NW advanceStatoFattura chiama updateOrdineFromFattura
+	//     che fa mirroring stato su ordine quando necessrio
+	// - cancellaFattura (da pagato -> annullata)
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void iniziaReso(Integer fatturaId, Integer accountId) throws MangaException {
 		Fattura fat = load(fatturaId);
- 
-		// controllo fattura corrisponde ad account 
-		if (fat.getOrdine() == null || !fat.getOrdine().getAccount().getId().equals(accountId))
-			throw new MangaException("wrong_acc_ana");
  
 		// controllo se reso ancora possibile
 		long days = ChronoUnit.DAYS.between(fat.getDataEmissione(), LocalDate.now());
@@ -266,17 +270,32 @@ public class FatturaImplementation implements IFatturaServices {
 		advanceStatoFattura(fatturaId, "RICHIESTA_RESO");
 	}
  
+	@Transactional(rollbackFor = Exception.class)
+	public void annullaPagata(Integer fatturaId, Integer accountId) throws MangaException {
+		log.debug("Attempting to cancel ordine corresponding to fattura id: {}", fatturaId);
+		Fattura fat = load(fatturaId);
+ 
+		// controllo fattura corrisponde ad account 
+		if (fat.getOrdine() == null || !fat.getOrdine().getAccount().getId().equals(accountId))
+			throw new MangaException("wrong_acc_ana");
+  
+		advanceStatoFattura(fatturaId, "ANNULLATA");
+	}
+
 	// Admin: reso respinto — manga a cliente, totale e n copie invariato
+	@Transactional(rollbackFor = Exception.class)
 	public void rifiutaReso(Integer fatturaId) {
 		advanceStatoFattura(fatturaId, "RIFIUTATO");
 	}
  
 	// Admin: manga restituito (ancora da valutare condizioni ripristino copia/rimborso)
+	@Transactional(rollbackFor = Exception.class)
 	public void confermaRiconsegna(Integer fatturaId) {
 		advanceStatoFattura(fatturaId, "RESTITUITO");
 	}
  
 	// Admin: Rimborso (Boolean ripristina: manga rivendibile, copie ripristinate)
+	@Transactional(rollbackFor = Exception.class)
 	public void rimborsa(Integer fatturaId, Boolean ripristina) {
 		advanceStatoFattura(fatturaId, "RIMBORSATO", ripristina);
 	}
@@ -627,6 +646,13 @@ public class FatturaImplementation implements IFatturaServices {
 		log.debug("Stato Fattura input: {}", sta);
 		lS.forEach(s -> log.debug("\tpermessi: {}", s));
 		return lS;
+	}
+
+	@Override
+	public List<String> allStati() {
+		return ALLOWED_TRANSITIONS.entrySet().stream()
+				.map(e -> e.getKey())
+				.toList();
 	}
 }
  

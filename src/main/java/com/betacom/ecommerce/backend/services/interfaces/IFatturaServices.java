@@ -41,14 +41,17 @@ public interface IFatturaServices {
 	public Boolean isAdminOrOwner(Authentication auth, Integer targetFatturaId);
 	public Boolean isAdminOrIdSameOfReq(Authentication auth, Integer targetAccountId);
 	public List<StatoOrdineDTO> getNextAllowedStates(Integer fatturaId) throws MangaException;
+	public List<String> allStati();
 	
 	// reso
+	public void annullaPagata(Integer fatturaId, Integer accountId) throws MangaException;
 	public void iniziaReso(Integer fatturaId, Integer accountId) throws MangaException;
 	public void rifiutaReso(Integer fatturaId) throws MangaException;
 	public void confermaRiconsegna(Integer fatturaId);
 	public void rimborsa(Integer fatturaId, Boolean ripristinaCopie);
 	public void detachFromOrdine(Ordine o, String note);
-
+	public void advanceStatoFattura(Integer fatturaId, String nuovoStato, Boolean ripristinaCopie) throws MangaException;
+	
 	// funzione per scadenza reso
 	void autoConfirmExpired();
 }

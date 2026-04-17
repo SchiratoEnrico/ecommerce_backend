@@ -208,9 +208,9 @@ public class UploadImplementation implements IUploadServices{
 	
 	@Override
 	public String buildUrl(String filename) {
-		log.debug("input filename: {}", filename);
+		//log.debug("input filename: {}", filename);
 	    filename = getFileName(filename);
-		log.debug("will use filename: {}", filename);
+		//log.debug("will use filename: {}", filename);
 		if (filename == null) {
 	        return null;
 	    }
