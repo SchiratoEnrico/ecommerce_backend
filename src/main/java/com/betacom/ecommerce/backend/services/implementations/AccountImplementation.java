@@ -21,9 +21,11 @@ import com.betacom.ecommerce.backend.exceptions.MangaException;
 import com.betacom.ecommerce.backend.models.Account;
 import com.betacom.ecommerce.backend.models.Ordine;
 import com.betacom.ecommerce.backend.models.PasswordResetToken;
+import com.betacom.ecommerce.backend.models.VerificationToken;
 import com.betacom.ecommerce.backend.repositories.IAccountRepository;
 import com.betacom.ecommerce.backend.repositories.IOrdineRepository;
 import com.betacom.ecommerce.backend.repositories.IPasswordResetTokenRepository;
+import com.betacom.ecommerce.backend.repositories.IVerificationTokenRepository;
 import com.betacom.ecommerce.backend.services.interfaces.IAccountServices;
 import com.betacom.ecommerce.backend.services.interfaces.ICarrelloServices;
 import com.betacom.ecommerce.backend.services.interfaces.IFatturaServices;
@@ -40,13 +42,17 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class AccountImplementation implements IAccountServices{
+
 	private final IAccountRepository repAcc;
-	private final PasswordEncoder passwordEncoder;
-	private final IFatturaServices fattS;
 	private final IOrdineRepository ordeR;
+	private final IPasswordResetTokenRepository tokenRepository;
+	private final IVerificationTokenRepository verificationTokenRepo;
+		
 	private final IMailServices  mailS;
 	private final ICarrelloServices  carrS;
-	private final IPasswordResetTokenRepository tokenRepository;
+	private final IFatturaServices fattS;
+	
+	private final PasswordEncoder passwordEncoder;
 	
 	@Value("${mail.validation}")
 	private String validationURL;
@@ -217,27 +223,56 @@ public class AccountImplementation implements IAccountServices{
 
 	
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void sendValidation(String username) throws MangaException {
-		log.debug("sendValidation {}", username);
+	    log.debug("sendValidation {}", username);
 
-		Account ut = repAcc.findByUsername(username)
-				.orElseThrow(() -> new MangaException("!exists_acc"));
-		sendMailValidation(ut);
+	    Account ut = repAcc.findByUsername(username)
+	            .orElseThrow(() -> new MangaException("!exists_acc"));
+	            
+	    // Se c'è già un token di validazione, lo eliminiamo (tipo se l'utente si fa rimandare la mail)
+	    verificationTokenRepo.findByAccount(ut).ifPresent(verificationTokenRepo::delete);
+
+	    // Creiamo il nuovo token
+	    String token = UUID.randomUUID().toString();
+	    VerificationToken vToken = new VerificationToken();
+	    vToken.setToken(token);
+	    vToken.setAccount(ut);
+	    vToken.setDataScadenza(LocalDateTime.now().plusHours(24)); // Scade in 24 ore
+	    
+	    verificationTokenRepo.save(vToken);
+
+	    sendMailValidation(ut, token);
 	}
 
 	@Transactional (rollbackFor = Exception.class)
 	@Override
-	public void emailValidate(String username) throws MangaException {
-		log.debug("emailValidate {}", username);
-		
-		Account ut = repAcc.findByUsername(username)
-				.orElseThrow(() -> new MangaException("!exists_acc"));	
-		ut.setValidated(true);
-		// se ruolo != admin, setto a verified_user
-		if (!Ruoli.ADMIN.equals(ut.getRuolo())) {
-			ut.setRuolo(Ruoli.VERIFIED_USER);
-		}
-		repAcc.save(ut);
+	public void emailValidate(String token) throws MangaException {
+	    log.debug("emailValidate con token");
+	    
+	    if (token == null || token.isBlank()) throw new MangaException("null_token");
+	    
+	    VerificationToken vToken = verificationTokenRepo.findByToken(token)
+	            .orElseThrow(() -> new MangaException("invalid_token"));
+	            
+	    // Verifica scadenza
+	    if (vToken.getDataScadenza().isBefore(LocalDateTime.now())) {
+	        verificationTokenRepo.delete(vToken);
+	        throw new MangaException("expired_token");
+	    }
+
+	    Account ut = vToken.getAccount();
+	    ut.setValidated(true);
+	    
+	    if (!Ruoli.ADMIN.equals(ut.getRuolo())) {
+	        ut.setRuolo(Ruoli.VERIFIED_USER);
+	    }
+	    
+	    repAcc.save(ut);
+	    
+	    // Eliminiamo il token usato
+	    //un utente senza token è verificato
+	    verificationTokenRepo.delete(vToken);
 	}
 	
 	@Override
@@ -335,15 +370,16 @@ public class AccountImplementation implements IAccountServices{
 	    tokenRepository.delete(resetToken);
 	}
 	
-	
-	private void sendMailValidation(Account acc) throws MangaException {
-	    String validationLink = validationURL + acc.getUsername();
+	//invio mail validazione usando il token
+	private void sendMailValidation(Account acc, String token) throws MangaException {
+
+	    String validationLink = validationURL + token;
 	    
 	    String body = """
 	        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
 	            <h2 style='color: #2c3e50; text-align: center;'>Benvenuto su Mangas Store! 📚</h2>
 	            <p style='font-size: 16px; color: #555;'>Ciao <b>%s</b>,</p>
-	            <p style='font-size: 16px; color: #555;'>Grazie per esserti registrato! Conferma la tua email cliccando sul pulsante qui sotto:</p>
+	            <p style='font-size: 16px; color: #555;'>Grazie per esserti registrato! Conferma la tua email cliccando sul pulsante qui sotto. Il link è valido per 24 ore:</p>
 	            
 	            <div style='text-align: center; margin: 30px 0;'>
 	                <a href='%s' style='background-color: #e74c3c; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;'>Conferma la tua Email</a>

@@ -24,7 +24,7 @@ public interface IAccountServices {
     List<AccountDTO> findByFilters(AccountRequest req) throws MangaException;
 
     public void sendValidation(String username) throws MangaException;
-	public void emailValidate(String username) throws MangaException;
+	public void emailValidate(String token) throws MangaException;
 	
 	Boolean isAccountValidated(Integer accountId) throws MangaException;
 
